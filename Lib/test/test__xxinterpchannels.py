@@ -41,7 +41,7 @@ def _run_interp(id, source, shared, _mainns={}):
     if main == id:
         if interpreters.get_current() != main:
             raise RuntimeError
-        # XXX Run a func?
+        # XXX Run a func_?
         exec(source, _mainns)
     else:
         interpreters.run_string(id, source, shared)

@@ -11,14 +11,14 @@ def parameterize(names, value_groups):
     Modeled after pytest.parametrize.
     """
 
-    def decorator(func):
-        @functools.wraps(func)
+    def decorator(func_):
+        @functools.wraps(func_)
         def wrapped(self):
             for values in value_groups:
                 resolved = map(Invoked.eval, always_iterable(values))
                 params = dict(zip(always_iterable(names), resolved))
                 with self.subTest(**params):
-                    func(self, **params)
+                    func_(self, **params)
 
         return wrapped
 
@@ -31,9 +31,9 @@ class Invoked(types.SimpleNamespace):
     """
 
     @classmethod
-    def wrap(cls, func):
-        return cls(func=func)
+    def wrap(cls, func_):
+        return cls(func_=func_)
 
     @classmethod
     def eval(cls, cand):
-        return cand.func() if isinstance(cand, cls) else cand
+        return cand.func_() if isinstance(cand, cls) else cand

@@ -915,9 +915,9 @@ class TestTimeDelta(HarmlessMixedComparison, unittest.TestCase):
             ('sub', lambda d, t: d - t, DateSubclass(2018, 1, 4)),
         ]
 
-        for name, func, expected in tests:
+        for name, func_, expected in tests:
             with self.subTest(name):
-                act = func(d1, td)
+                act = func_(d1, td)
                 self.assertEqual(act, expected)
                 self.assertIsInstance(act, DateSubclass)
 
@@ -934,9 +934,9 @@ class TestTimeDelta(HarmlessMixedComparison, unittest.TestCase):
             ('sub', lambda d, t: d - t, DateTimeSubclass(2018, 1, 4, 12)),
         ]
 
-        for name, func, expected in tests:
+        for name, func_, expected in tests:
             with self.subTest(name):
-                act = func(d1, td)
+                act = func_(d1, td)
                 self.assertEqual(act, expected)
                 self.assertIsInstance(act, DateTimeSubclass)
 

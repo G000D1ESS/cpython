@@ -11,11 +11,11 @@ from test.test_contextlib import TestBaseExitStack
 
 support.requires_working_socket(module=True)
 
-def _async_test(func):
+def _async_test(func_):
     """Decorator to turn an async function into a test case."""
-    @functools.wraps(func)
+    @functools.wraps(func_)
     def wrapper(*args, **kwargs):
-        coro = func(*args, **kwargs)
+        coro = func_(*args, **kwargs)
         asyncio.run(coro)
     return wrapper
 
@@ -307,10 +307,10 @@ class AsyncContextManagerTestCase(unittest.TestCase):
 
     def _create_contextmanager_attribs(self):
         def attribs(**kw):
-            def decorate(func):
+            def decorate(func_):
                 for k,v in kw.items():
-                    setattr(func,k,v)
-                return func
+                    setattr(func_,k,v)
+                return func_
             return decorate
         @asynccontextmanager
         @attribs(foo='bar')
@@ -341,9 +341,9 @@ class AsyncContextManagerTestCase(unittest.TestCase):
     async def test_keywords(self):
         # Ensure no keyword arguments are inhibited
         @asynccontextmanager
-        async def woohoo(self, func, args, kwds):
-            yield (self, func, args, kwds)
-        async with woohoo(self=11, func=22, args=33, kwds=44) as target:
+        async def woohoo(self, func_, args, kwds):
+            yield (self, func_, args, kwds)
+        async with woohoo(self=11, func_=22, args=33, kwds=44) as target:
             self.assertEqual(target, (11, 22, 33, 44))
 
     @_async_test

@@ -1101,10 +1101,10 @@ class TestSSL(test_utils.TestCase):
                     outgoing = ssl.MemoryBIO()
                     sslobj = client_sslctx_2.wrap_bio(incoming, outgoing)
 
-                    def do(func, *args):
+                    def do(func_, *args):
                         while True:
                             try:
-                                rv = func(*args)
+                                rv = func_(*args)
                                 break
                             except ssl.SSLWantReadError:
                                 if outgoing.pending:

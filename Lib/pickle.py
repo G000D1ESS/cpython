@@ -612,19 +612,19 @@ class _Pickler:
                 raise PicklingError(
                     "persistent IDs in protocol 0 must be ASCII strings")
 
-    def save_reduce(self, func, args, state=None, listitems=None,
+    def save_reduce(self, func_, args, state=None, listitems=None,
                     dictitems=None, state_setter=None, *, obj=None):
         # This API is called by some subclasses
 
         if not isinstance(args, tuple):
             raise PicklingError("args from save_reduce() must be a tuple")
-        if not callable(func):
-            raise PicklingError("func from save_reduce() must be callable")
+        if not callable(func_):
+            raise PicklingError("func_ from save_reduce() must be callable")
 
         save = self.save
         write = self.write
 
-        func_name = getattr(func, "__name__", "")
+        func_name = getattr(func_, "__name__", "")
         if self.proto >= 2 and func_name == "__newobj_ex__":
             cls, args, kwargs = args
             if not hasattr(cls, "__new__"):
@@ -639,8 +639,8 @@ class _Pickler:
                 save(kwargs)
                 write(NEWOBJ_EX)
             else:
-                func = partial(cls.__new__, cls, *args, **kwargs)
-                save(func)
+                func_ = partial(cls.__new__, cls, *args, **kwargs)
+                save(func_)
                 save(())
                 write(REDUCE)
         elif self.proto >= 2 and func_name == "__newobj__":
@@ -682,7 +682,7 @@ class _Pickler:
             save(args)
             write(NEWOBJ)
         else:
-            save(func)
+            save(func_)
             save(args)
             write(REDUCE)
 
@@ -1578,8 +1578,8 @@ class _Unpickler:
     def load_reduce(self):
         stack = self.stack
         args = stack.pop()
-        func = stack[-1]
-        stack[-1] = func(*args)
+        func_ = stack[-1]
+        stack[-1] = func_(*args)
     dispatch[REDUCE[0]] = load_reduce
 
     def load_pop(self):

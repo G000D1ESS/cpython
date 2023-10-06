@@ -358,12 +358,12 @@ class RecursionLimitTest(unittest.TestCase):
 
     def test_fixdoc(self):
         # Put here until better place for miscellaneous test.
-        def func(): "docstring"
-        run.fixdoc(func, "more")
-        self.assertEqual(func.__doc__, "docstring\n\nmore")
-        func.__doc__ = None
-        run.fixdoc(func, "more")
-        self.assertEqual(func.__doc__, "more")
+        def func_(): "docstring"
+        run.fixdoc(func_, "more")
+        self.assertEqual(func_.__doc__, "docstring\n\nmore")
+        func_.__doc__ = None
+        run.fixdoc(func_, "more")
+        self.assertEqual(func_.__doc__, "more")
 
 
 class HandleErrorTest(unittest.TestCase):
@@ -372,7 +372,7 @@ class HandleErrorTest(unittest.TestCase):
         eq = self.assertEqual
         with captured_output('__stderr__') as err,\
              mock.patch('idlelib.run.thread.interrupt_main',
-                        new_callable=Func) as func:
+                        new_callable=Func) as func_:
             try:
                 raise EOFError
             except EOFError:
@@ -391,7 +391,7 @@ class HandleErrorTest(unittest.TestCase):
             self.assertIn('abc', msg)
             self.assertIn('123', msg)
             self.assertIn('IndexError', msg)
-            eq(func.called, 2)
+            eq(func_.called, 2)
 
 
 class ExecRuncodeTest(unittest.TestCase):

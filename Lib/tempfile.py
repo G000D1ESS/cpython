@@ -477,10 +477,10 @@ class _TemporaryFileWrapper:
         file = self.__dict__['file']
         a = getattr(file, name)
         if hasattr(a, '__call__'):
-            func = a
-            @_functools.wraps(func)
+            func_ = a
+            @_functools.wraps(func_)
             def func_wrapper(*args, **kwargs):
-                return func(*args, **kwargs)
+                return func_(*args, **kwargs)
             # Avoid closing the file as long as the wrapper is alive,
             # see issue #18879.
             func_wrapper._closer = self._closer
@@ -873,7 +873,7 @@ class TemporaryDirectory:
 
     @classmethod
     def _rmtree(cls, name, ignore_errors=False):
-        def onexc(func, path, exc):
+        def onexc(func_, path, exc):
             if isinstance(exc, PermissionError):
                 def resetperms(path):
                     try:

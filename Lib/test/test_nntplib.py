@@ -1200,41 +1200,41 @@ class NNTPv1v2TestsMixin:
         self.assertEqual(lines[-4], b'..Here is a dot-starting line.\r\n')
         self.assertEqual(lines[0], b'From: "Demo User" <nobody@example.net>\r\n')
 
-    def _check_post_ihave_sub(self, func, *args, file_factory):
+    def _check_post_ihave_sub(self, func_, *args, file_factory):
         # First the prepared post with CRLF endings
         post = self.sample_post
         func_args = args + (file_factory(post),)
         self.handler.posted_body = None
-        resp = func(*func_args)
+        resp = func_(*func_args)
         self._check_posted_body()
         # Then the same post with "normal" line endings - they should be
         # converted by NNTP.post and NNTP.ihave.
         post = self.sample_post.replace(b"\r\n", b"\n")
         func_args = args + (file_factory(post),)
         self.handler.posted_body = None
-        resp = func(*func_args)
+        resp = func_(*func_args)
         self._check_posted_body()
         return resp
 
-    def check_post_ihave(self, func, success_resp, *args):
+    def check_post_ihave(self, func_, success_resp, *args):
         # With a bytes object
-        resp = self._check_post_ihave_sub(func, *args, file_factory=bytes)
+        resp = self._check_post_ihave_sub(func_, *args, file_factory=bytes)
         self.assertEqual(resp, success_resp)
         # With a bytearray object
-        resp = self._check_post_ihave_sub(func, *args, file_factory=bytearray)
+        resp = self._check_post_ihave_sub(func_, *args, file_factory=bytearray)
         self.assertEqual(resp, success_resp)
         # With a file object
-        resp = self._check_post_ihave_sub(func, *args, file_factory=io.BytesIO)
+        resp = self._check_post_ihave_sub(func_, *args, file_factory=io.BytesIO)
         self.assertEqual(resp, success_resp)
         # With an iterable of terminated lines
         def iterlines(b):
             return iter(b.splitlines(keepends=True))
-        resp = self._check_post_ihave_sub(func, *args, file_factory=iterlines)
+        resp = self._check_post_ihave_sub(func_, *args, file_factory=iterlines)
         self.assertEqual(resp, success_resp)
         # With an iterable of non-terminated lines
         def iterlines(b):
             return iter(b.splitlines(keepends=False))
-        resp = self._check_post_ihave_sub(func, *args, file_factory=iterlines)
+        resp = self._check_post_ihave_sub(func_, *args, file_factory=iterlines)
         self.assertEqual(resp, success_resp)
 
     def test_post(self):

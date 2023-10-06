@@ -3,7 +3,7 @@
 
 """Fixer for apply().
 
-This converts apply(func, v, k) into (func)(*v, **k)."""
+This converts apply(func_, v, k) into (func_)(*v, **k)."""
 
 # Local imports
 from .. import pytree
@@ -19,7 +19,7 @@ class FixApply(fixer_base.BaseFix):
         trailer<
             '('
             arglist<
-                (not argument<NAME '=' any>) func=any ','
+                (not argument<NAME '=' any>) func_=any ','
                 (not argument<NAME '=' any>) args=any [','
                 (not argument<NAME '=' any>) kwds=any] [',']
             >
@@ -31,7 +31,7 @@ class FixApply(fixer_base.BaseFix):
     def transform(self, node, results):
         syms = self.syms
         assert results
-        func = results["func"]
+        func_ = results["func_"]
         args = results["args"]
         kwds = results.get("kwds")
         # I feel like we should be able to express this logic in the
@@ -44,13 +44,13 @@ class FixApply(fixer_base.BaseFix):
                      kwds.children[0].value == '**'):
             return  # Make no change.
         prefix = node.prefix
-        func = func.clone()
-        if (func.type not in (token.NAME, syms.atom) and
-            (func.type != syms.power or
-             func.children[-2].type == token.DOUBLESTAR)):
+        func_ = func_.clone()
+        if (func_.type not in (token.NAME, syms.atom) and
+            (func_.type != syms.power or
+             func_.children[-2].type == token.DOUBLESTAR)):
             # Need to parenthesize
-            func = parenthesize(func)
-        func.prefix = ""
+            func_ = parenthesize(func_)
+        func_.prefix = ""
         args = args.clone()
         args.prefix = ""
         if kwds is not None:
@@ -64,5 +64,5 @@ class FixApply(fixer_base.BaseFix):
             l_newargs[-2].prefix = " " # that's the ** token
         # XXX Sometimes we could be cleverer, e.g. apply(f, (x, y) + t)
         # can be translated into f(x, y, *t) instead of f(*(x, y) + t)
-        #new = pytree.Node(syms.power, (func, ArgList(l_newargs)))
-        return Call(func, l_newargs, prefix=prefix)
+        #new = pytree.Node(syms.power, (func_, ArgList(l_newargs)))
+        return Call(func_, l_newargs, prefix=prefix)

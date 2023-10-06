@@ -438,9 +438,9 @@ def test_factory(abc_ABCMeta, abc_get_cache_token):
                 lambda: [42],
             ]
 
-            for i, func in enumerate(bogus_subclasses):
+            for i, func_ in enumerate(bogus_subclasses):
                 class S(metaclass=abc_ABCMeta):
-                    __subclasses__ = func
+                    __subclasses__ = func_
 
                 with self.subTest(i=i):
                     with self.assertRaises(TypeError):

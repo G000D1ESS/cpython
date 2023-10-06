@@ -37,17 +37,17 @@ from test.test_sqlite3.test_dbapi import cx_limit
 
 def with_tracebacks(exc, regex="", name=""):
     """Convenience decorator for testing callback tracebacks."""
-    def decorator(func):
+    def decorator(func_):
         _regex = re.compile(regex) if regex else None
-        @functools.wraps(func)
+        @functools.wraps(func_)
         def wrapper(self, *args, **kwargs):
             with catch_unraisable_exception() as cm:
                 # First, run the test with traceback enabled.
                 with check_tracebacks(self, cm, exc, _regex, name):
-                    func(self, *args, **kwargs)
+                    func_(self, *args, **kwargs)
 
             # Then run the test with traceback disabled.
-            func(self, *args, **kwargs)
+            func_(self, *args, **kwargs)
         return wrapper
     return decorator
 

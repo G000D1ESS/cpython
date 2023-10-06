@@ -309,7 +309,7 @@ class TestCase(unittest.TestCase):
                 self.assertEqual(run_iter(*case), (orig["iter"], ((),)))
         finally:
             # Restore original builtins
-            for key, func in orig.items():
+            for key, func_ in orig.items():
                 # need to suppress KeyErrors in case
                 # a failed test deletes the key without setting anything
                 with contextlib.suppress(KeyError):
@@ -317,7 +317,7 @@ class TestCase(unittest.TestCase):
                     # to not invoke our custom __eq__ from
                     # the hash collision with the old key
                     del builtins_dict[key]
-                builtins_dict[key] = func
+                builtins_dict[key] = func_
 
     # Test a new_style class with __iter__ but no next() method
     def test_new_style_iter_class(self):

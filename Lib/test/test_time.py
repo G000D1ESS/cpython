@@ -181,61 +181,61 @@ class TimeTestCase(unittest.TestCase):
         # embedded null character
         self.assertRaises(ValueError, time.strftime, '%S\0', tt)
 
-    def _bounds_checking(self, func):
+    def _bounds_checking(self, func_):
         # Make sure that strftime() checks the bounds of the various parts
         # of the time tuple (0 is valid for *all* values).
 
         # The year field is tested by other test cases above
 
         # Check month [1, 12] + zero support
-        func((1900, 0, 1, 0, 0, 0, 0, 1, -1))
-        func((1900, 12, 1, 0, 0, 0, 0, 1, -1))
-        self.assertRaises(ValueError, func,
+        func_((1900, 0, 1, 0, 0, 0, 0, 1, -1))
+        func_((1900, 12, 1, 0, 0, 0, 0, 1, -1))
+        self.assertRaises(ValueError, func_,
                             (1900, -1, 1, 0, 0, 0, 0, 1, -1))
-        self.assertRaises(ValueError, func,
+        self.assertRaises(ValueError, func_,
                             (1900, 13, 1, 0, 0, 0, 0, 1, -1))
         # Check day of month [1, 31] + zero support
-        func((1900, 1, 0, 0, 0, 0, 0, 1, -1))
-        func((1900, 1, 31, 0, 0, 0, 0, 1, -1))
-        self.assertRaises(ValueError, func,
+        func_((1900, 1, 0, 0, 0, 0, 0, 1, -1))
+        func_((1900, 1, 31, 0, 0, 0, 0, 1, -1))
+        self.assertRaises(ValueError, func_,
                             (1900, 1, -1, 0, 0, 0, 0, 1, -1))
-        self.assertRaises(ValueError, func,
+        self.assertRaises(ValueError, func_,
                             (1900, 1, 32, 0, 0, 0, 0, 1, -1))
         # Check hour [0, 23]
-        func((1900, 1, 1, 23, 0, 0, 0, 1, -1))
-        self.assertRaises(ValueError, func,
+        func_((1900, 1, 1, 23, 0, 0, 0, 1, -1))
+        self.assertRaises(ValueError, func_,
                             (1900, 1, 1, -1, 0, 0, 0, 1, -1))
-        self.assertRaises(ValueError, func,
+        self.assertRaises(ValueError, func_,
                             (1900, 1, 1, 24, 0, 0, 0, 1, -1))
         # Check minute [0, 59]
-        func((1900, 1, 1, 0, 59, 0, 0, 1, -1))
-        self.assertRaises(ValueError, func,
+        func_((1900, 1, 1, 0, 59, 0, 0, 1, -1))
+        self.assertRaises(ValueError, func_,
                             (1900, 1, 1, 0, -1, 0, 0, 1, -1))
-        self.assertRaises(ValueError, func,
+        self.assertRaises(ValueError, func_,
                             (1900, 1, 1, 0, 60, 0, 0, 1, -1))
         # Check second [0, 61]
-        self.assertRaises(ValueError, func,
+        self.assertRaises(ValueError, func_,
                             (1900, 1, 1, 0, 0, -1, 0, 1, -1))
         # C99 only requires allowing for one leap second, but Python's docs say
         # allow two leap seconds (0..61)
-        func((1900, 1, 1, 0, 0, 60, 0, 1, -1))
-        func((1900, 1, 1, 0, 0, 61, 0, 1, -1))
-        self.assertRaises(ValueError, func,
+        func_((1900, 1, 1, 0, 0, 60, 0, 1, -1))
+        func_((1900, 1, 1, 0, 0, 61, 0, 1, -1))
+        self.assertRaises(ValueError, func_,
                             (1900, 1, 1, 0, 0, 62, 0, 1, -1))
         # No check for upper-bound day of week;
         #  value forced into range by a ``% 7`` calculation.
         # Start check at -2 since gettmarg() increments value before taking
         #  modulo.
-        self.assertEqual(func((1900, 1, 1, 0, 0, 0, -1, 1, -1)),
-                         func((1900, 1, 1, 0, 0, 0, +6, 1, -1)))
-        self.assertRaises(ValueError, func,
+        self.assertEqual(func_((1900, 1, 1, 0, 0, 0, -1, 1, -1)),
+                         func_((1900, 1, 1, 0, 0, 0, +6, 1, -1)))
+        self.assertRaises(ValueError, func_,
                             (1900, 1, 1, 0, 0, 0, -2, 1, -1))
         # Check day of the year [1, 366] + zero support
-        func((1900, 1, 1, 0, 0, 0, 0, 0, -1))
-        func((1900, 1, 1, 0, 0, 0, 0, 366, -1))
-        self.assertRaises(ValueError, func,
+        func_((1900, 1, 1, 0, 0, 0, 0, 0, -1))
+        func_((1900, 1, 1, 0, 0, 0, 0, 366, -1))
+        self.assertRaises(ValueError, func_,
                             (1900, 1, 1, 0, 0, 0, 0, -1, -1))
-        self.assertRaises(ValueError, func,
+        self.assertRaises(ValueError, func_,
                             (1900, 1, 1, 0, 0, 0, 0, 367, -1))
 
     def test_strftime_bounding_check(self):
@@ -411,9 +411,9 @@ class TimeTestCase(unittest.TestCase):
         # and that this test will fail there.  This test should
         # exempt such platforms (provided they return reasonable
         # results!).
-        for func in time.ctime, time.gmtime, time.localtime:
+        for func_ in time.ctime, time.gmtime, time.localtime:
             for unreasonable in -1e200, 1e200:
-                self.assertRaises(OverflowError, func, unreasonable)
+                self.assertRaises(OverflowError, func_, unreasonable)
 
     def test_ctime_without_arg(self):
         # Not sure how to check the values, since the clock could tick
@@ -639,7 +639,7 @@ class _TestStrftimeYear:
         else:
             def year4d(y):
                 return time.strftime('%4Y', (y,) + (0,) * 8)
-            self.test_year('%04d', func=year4d)
+            self.test_year('%04d', func_=year4d)
 
     def skip_if_not_supported(y):
         msg = "strftime() is limited to [1; 9999] with Visual Studio"
@@ -666,15 +666,15 @@ class _TestStrftimeYear:
 class _Test4dYear:
     _format = '%d'
 
-    def test_year(self, fmt=None, func=None):
+    def test_year(self, fmt=None, func_=None):
         fmt = fmt or self._format
-        func = func or self.yearstr
-        self.assertEqual(func(1),    fmt % 1)
-        self.assertEqual(func(68),   fmt % 68)
-        self.assertEqual(func(69),   fmt % 69)
-        self.assertEqual(func(99),   fmt % 99)
-        self.assertEqual(func(999),  fmt % 999)
-        self.assertEqual(func(9999), fmt % 9999)
+        func_ = func_ or self.yearstr
+        self.assertEqual(func_(1),    fmt % 1)
+        self.assertEqual(func_(68),   fmt % 68)
+        self.assertEqual(func_(69),   fmt % 69)
+        self.assertEqual(func_(99),   fmt % 99)
+        self.assertEqual(func_(999),  fmt % 999)
+        self.assertEqual(func_(9999), fmt % 9999)
 
     def test_large_year(self):
         self.assertEqual(self.yearstr(12345).lstrip('+'), '12345')

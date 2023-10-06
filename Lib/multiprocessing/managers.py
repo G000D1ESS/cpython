@@ -121,8 +121,8 @@ def all_methods(obj):
     '''
     temp = []
     for name in dir(obj):
-        func = getattr(obj, name)
-        if callable(func):
+        func_ = getattr(obj, name)
+        if callable(func_):
             temp.append(name)
     return temp
 
@@ -201,12 +201,12 @@ class Server(object):
             request = c.recv()
             ignore, funcname, args, kwds = request
             assert funcname in self.public, '%r unrecognized' % funcname
-            func = getattr(self, funcname)
+            func_ = getattr(self, funcname)
         except Exception:
             msg = ('#TRACEBACK', format_exc())
         else:
             try:
-                result = func(c, *args, **kwds)
+                result = func_(c, *args, **kwds)
             except Exception:
                 msg = ('#TRACEBACK', format_exc())
             else:
@@ -927,7 +927,7 @@ class BaseProxy(object):
 # Function used for unpickling
 #
 
-def RebuildProxy(func, token, serializer, kwds):
+def RebuildProxy(func_, token, serializer, kwds):
     '''
     Function used for unpickling proxy objects.
     '''
@@ -942,7 +942,7 @@ def RebuildProxy(func, token, serializer, kwds):
         kwds.pop('incref', True) and
         not getattr(process.current_process(), '_inheriting', False)
         )
-    return func(token, serializer, incref=incref, **kwds)
+    return func_(token, serializer, incref=incref, **kwds)
 
 #
 # Functions to create proxies and proxy types

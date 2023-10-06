@@ -25,8 +25,8 @@ class BITS(Structure):
                 ("R", c_short, 6),
                 ("S", c_short, 7)]
 
-func = CDLL(_ctypes_test.__file__).unpack_bitfields
-func.argtypes = POINTER(BITS), c_char
+func_ = CDLL(_ctypes_test.__file__).unpack_bitfields
+func_.argtypes = POINTER(BITS), c_char
 
 ##for n in "ABCDEFGHIMNOPQRS":
 ##    print n, hex(getattr(BITS, n).size), getattr(BITS, n).offset
@@ -38,20 +38,20 @@ class C_Test(unittest.TestCase):
             for name in "ABCDEFGHI":
                 b = BITS()
                 setattr(b, name, i)
-                self.assertEqual(getattr(b, name), func(byref(b), name.encode('ascii')))
+                self.assertEqual(getattr(b, name), func_(byref(b), name.encode('ascii')))
 
     # bpo-46913: _ctypes/cfield.c h_get() has an undefined behavior
     @support.skip_if_sanitizer(ub=True)
     def test_shorts(self):
         b = BITS()
         name = "M"
-        if func(byref(b), name.encode('ascii')) == 999:
+        if func_(byref(b), name.encode('ascii')) == 999:
             self.skipTest("Compiler does not support signed short bitfields")
         for i in range(256):
             for name in "MNOPQRS":
                 b = BITS()
                 setattr(b, name, i)
-                self.assertEqual(getattr(b, name), func(byref(b), name.encode('ascii')))
+                self.assertEqual(getattr(b, name), func_(byref(b), name.encode('ascii')))
 
 signed_int_types = (c_byte, c_short, c_int, c_long, c_longlong)
 unsigned_int_types = (c_ubyte, c_ushort, c_uint, c_ulong, c_ulonglong)
@@ -193,9 +193,9 @@ class BitFieldTest(unittest.TestCase):
         self.assertEqual(X.c.offset, sizeof(c_short)*2)
 
 
-    def get_except(self, func, *args, **kw):
+    def get_except(self, func_, *args, **kw):
         try:
-            func(*args, **kw)
+            func_(*args, **kw)
         except Exception as detail:
             return detail.__class__, str(detail)
 

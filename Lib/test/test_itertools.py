@@ -906,8 +906,8 @@ class TestBasicOps(unittest.TestCase):
             for i in range(n):
                 yield 'yo'
             raise ExpectedError
-        def gulp(iterable, keyp=None, func=list):
-            return [func(g) for k, g in groupby(iterable, keyp)]
+        def gulp(iterable, keyp=None, func_=list):
+            return [func_(g) for k, g in groupby(iterable, keyp)]
 
         # iter.__next__ failure on outer object
         self.assertRaises(ExpectedError, gulp, delayed_raise(0))
@@ -921,7 +921,7 @@ class TestBasicOps(unittest.TestCase):
         s = [DummyCmp(), DummyCmp(), None]
 
         # __eq__ failure on outer object
-        self.assertRaises(ExpectedError, gulp, s, func=id)
+        self.assertRaises(ExpectedError, gulp, s, func_=id)
         # __eq__ failure on inner object
         self.assertRaises(ExpectedError, gulp, s)
 

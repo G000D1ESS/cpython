@@ -338,9 +338,9 @@ class BaseFutureTests:
             f'<{self.cls.__name__} finished exception=RuntimeError()>')
         self.assertIs(f_exception.exception(), exc)
 
-        def func_repr(func):
-            filename, lineno = test_utils.get_function_source(func)
-            text = '%s() at %s:%s' % (func.__qualname__, filename, lineno)
+        def func_repr(func_):
+            filename, lineno = test_utils.get_function_source(func_)
+            text = '%s() at %s:%s' % (func_.__qualname__, filename, lineno)
             return re.escape(text)
 
         f_one_callbacks = self._new_future(loop=self.loop)

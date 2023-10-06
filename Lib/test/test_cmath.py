@@ -395,9 +395,9 @@ class CMathTests(unittest.TestCase):
             self.rAssertAlmostEqual(expected.imag, actual.imag,
                                         msg=error_message)
 
-    def check_polar(self, func):
+    def check_polar(self, func_):
         def check(arg, expected):
-            got = func(arg)
+            got = func_(arg)
             for e, g in zip(expected, got):
                 self.rAssertAlmostEqual(e, g)
         check(0, (0., 0.))

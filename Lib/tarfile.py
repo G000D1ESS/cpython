@@ -1794,11 +1794,11 @@ class TarFile(object):
                 return cls.OPEN_METH[comptype] == 'taropen'
             error_msgs = []
             for comptype in sorted(cls.OPEN_METH, key=not_compressed):
-                func = getattr(cls, cls.OPEN_METH[comptype])
+                func_ = getattr(cls, cls.OPEN_METH[comptype])
                 if fileobj is not None:
                     saved_pos = fileobj.tell()
                 try:
-                    return func(name, "r", fileobj, **kwargs)
+                    return func_(name, "r", fileobj, **kwargs)
                 except (ReadError, CompressionError) as e:
                     error_msgs.append(f'- method {comptype}: {e!r}')
                     if fileobj is not None:
@@ -1815,10 +1815,10 @@ class TarFile(object):
             # Select the *open() function according to
             # given compression.
             if comptype in cls.OPEN_METH:
-                func = getattr(cls, cls.OPEN_METH[comptype])
+                func_ = getattr(cls, cls.OPEN_METH[comptype])
             else:
                 raise CompressionError("unknown compression type %r" % comptype)
-            return func(name, filemode, fileobj, **kwargs)
+            return func_(name, filemode, fileobj, **kwargs)
 
         elif "|" in mode:
             filemode, comptype = mode.split("|", 1)

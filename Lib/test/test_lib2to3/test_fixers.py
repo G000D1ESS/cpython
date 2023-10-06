@@ -264,7 +264,7 @@ class Test_apply(FixerTestCase):
         self.unchanged(s)
 
     def test_unchanged_7(self):
-        s = """apply(func=f, args=args, kwds=kwds)"""
+        s = """apply(func_=f, args=args, kwds=kwds)"""
         self.unchanged(s)
 
     def test_unchanged_8(self):
@@ -2182,7 +2182,7 @@ class Test_tuple_params(FixerTestCase):
 class Test_methodattrs(FixerTestCase):
     fixer = "methodattrs"
 
-    attrs = ["func", "self", "class"]
+    attrs = ["func_", "self", "class"]
 
     def test(self):
         for attr in self.attrs:
@@ -4564,11 +4564,11 @@ class Test_exitfunc(FixerTestCase):
 
         b = """
             import apples, sys, crumbs, larry # Pleasant comments
-            sys.exitfunc = func
+            sys.exitfunc = func_
             """
         a = """
             import apples, sys, crumbs, larry, atexit # Pleasant comments
-            atexit.register(func)
+            atexit.register(func_)
             """
         self.check(b, a)
 
@@ -4576,13 +4576,13 @@ class Test_exitfunc(FixerTestCase):
         b = """
             import sys
             def f():
-                sys.exitfunc = func
+                sys.exitfunc = func_
             """
         a = """
             import sys
             import atexit
             def f():
-                atexit.register(func)
+                atexit.register(func_)
              """
         self.check(b, a)
 

@@ -247,14 +247,14 @@ class AutoFileTests:
 
     #A set of functions testing that we get expected behaviour if someone has
     #manually closed the internal file descriptor.  First, a decorator:
-    def ClosedFD(func):
-        @wraps(func)
+    def ClosedFD(func_):
+        @wraps(func_)
         def wrapper(self):
             #forcibly close the fd before invoking the problem function
             f = self.f
             os.close(f.fileno())
             try:
-                func(self, f)
+                func_(self, f)
             finally:
                 try:
                     self.f.close()
@@ -262,14 +262,14 @@ class AutoFileTests:
                     pass
         return wrapper
 
-    def ClosedFDRaises(func):
-        @wraps(func)
+    def ClosedFDRaises(func_):
+        @wraps(func_)
         def wrapper(self):
             #forcibly close the fd before invoking the problem function
             f = self.f
             os.close(f.fileno())
             try:
-                func(self, f)
+                func_(self, f)
             except OSError as e:
                 self.assertEqual(e.errno, errno.EBADF)
             else:

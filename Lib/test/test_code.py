@@ -216,8 +216,8 @@ class CodeTest(unittest.TestCase):
         self.assertEqual(obj[0], "Foreign getitem: 1")
 
     def test_constructor(self):
-        def func(): pass
-        co = func.__code__
+        def func_(): pass
+        co = func_.__code__
         CodeType = type(co)
 
         # test code constructor
@@ -247,10 +247,10 @@ class CodeTest(unittest.TestCase):
         )
 
     def test_replace(self):
-        def func():
+        def func_():
             x = 1
             return x
-        code = func.__code__
+        code = func_.__code__
 
         # different co_name, co_varnames, co_consts
         def func2():
@@ -287,10 +287,10 @@ class CodeTest(unittest.TestCase):
         self.assertEqual(new_code.co_nlocals, code2.co_nlocals)
 
     def test_nlocals_mismatch(self):
-        def func():
+        def func_():
             x = 1
             return x
-        co = func.__code__
+        co = func_.__code__
         assert co.co_nlocals > 0;
 
         # First we try the constructor.
@@ -326,24 +326,24 @@ class CodeTest(unittest.TestCase):
     def test_shrinking_localsplus(self):
         # Check that PyCode_NewWithPosOnlyArgs resizes both
         # localsplusnames and localspluskinds, if an argument is a cell.
-        def func(arg):
+        def func_(arg):
             return lambda: arg
-        code = func.__code__
-        newcode = code.replace(co_name="func")  # Should not raise SystemError
+        code = func_.__code__
+        newcode = code.replace(co_name="func_")  # Should not raise SystemError
         self.assertEqual(code, newcode)
 
     def test_empty_linetable(self):
-        def func():
+        def func_():
             pass
-        new_code = code = func.__code__.replace(co_linetable=b'')
+        new_code = code = func_.__code__.replace(co_linetable=b'')
         self.assertEqual(list(new_code.co_lines()), [])
 
     def test_co_lnotab_is_deprecated(self):  # TODO: remove in 3.14
-        def func():
+        def func_():
             pass
 
         with self.assertWarns(DeprecationWarning):
-            func.__code__.co_lnotab
+            func_.__code__.co_lnotab
 
     def test_invalid_bytecode(self):
         def foo():
@@ -443,9 +443,9 @@ class CodeTest(unittest.TestCase):
 
     @requires_debug_ranges()
     def test_co_positions_empty_linetable(self):
-        def func():
+        def func_():
             x = 1
-        new_code = func.__code__.replace(co_linetable=b'')
+        new_code = func_.__code__.replace(co_linetable=b'')
         positions = new_code.co_positions()
         for line, end_line, column, end_column in positions:
             self.assertIsNone(line)
@@ -695,9 +695,9 @@ def bug93662():
 
 class CodeLocationTest(unittest.TestCase):
 
-    def check_positions(self, func):
-        pos1 = list(func.__code__.co_positions())
-        pos2 = list(positions_from_location_table(func.__code__))
+    def check_positions(self, func_):
+        pos1 = list(func_.__code__.co_positions())
+        pos2 = list(positions_from_location_table(func_.__code__))
         for l1, l2 in zip(pos1, pos2):
             self.assertEqual(l1, l2)
         self.assertEqual(len(pos1), len(pos2))
@@ -707,8 +707,8 @@ class CodeLocationTest(unittest.TestCase):
         self.check_positions(misshappen)
         self.check_positions(bug93662)
 
-    def check_lines(self, func):
-        co = func.__code__
+    def check_lines(self, func_):
+        co = func_.__code__
         lines1 = [line for _, _, line in co.co_lines()]
         self.assertEqual(lines1, list(dedup(lines1)))
         lines2 = list(lines_from_postions(positions_from_location_table(co)))

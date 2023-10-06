@@ -710,8 +710,8 @@ def rmtree(path, ignore_errors=False, onerror=None, *, onexc=None, dir_fd=None):
     If it is unavailable, using it will raise a NotImplementedError.
 
     If ignore_errors is set, errors are ignored; otherwise, if onexc or
-    onerror is set, it is called to handle the error with arguments (func,
-    path, exc_info) where func is platform and implementation dependent;
+    onerror is set, it is called to handle the error with arguments (func_,
+    path, exc_info) where func_ is platform and implementation dependent;
     path is the argument to that function that caused it to fail; and
     the value of exc_info describes the exception. For onexc it is the
     exception instance, and for onerror it is a tuple as returned by
@@ -740,12 +740,12 @@ def rmtree(path, ignore_errors=False, onerror=None, *, onexc=None, dir_fd=None):
         else:
             # delegate to onerror
             def onexc(*args):
-                func, path, exc = args
+                func_, path, exc = args
                 if exc is None:
                     exc_info = None, None, None
                 else:
                     exc_info = type(exc), exc, exc.__traceback__
-                return onerror(func, path, exc_info)
+                return onerror(func_, path, exc_info)
 
     if _use_fd_functions:
         # While the unsafe rmtree works fine on bytes, the fd based does not.
@@ -1146,14 +1146,14 @@ def make_archive(base_name, format, root_dir=None, base_dir=None, verbose=0,
     kwargs = {'dry_run': dry_run, 'logger': logger,
               'owner': owner, 'group': group}
 
-    func = format_info[0]
+    func_ = format_info[0]
     for arg, val in format_info[1]:
         kwargs[arg] = val
 
     if base_dir is None:
         base_dir = os.curdir
 
-    supports_root_dir = getattr(func, 'supports_root_dir', False)
+    supports_root_dir = getattr(func_, 'supports_root_dir', False)
     save_cwd = None
     if root_dir is not None:
         stmd = os.stat(root_dir).st_mode
@@ -1173,7 +1173,7 @@ def make_archive(base_name, format, root_dir=None, base_dir=None, verbose=0,
                 os.chdir(root_dir)
 
     try:
-        filename = func(base_name, base_dir, **kwargs)
+        filename = func_(base_name, base_dir, **kwargs)
     finally:
         if save_cwd is not None:
             if logger is not None:
@@ -1353,17 +1353,17 @@ def unpack_archive(filename, extract_dir=None, format=None, *, filter=None):
         except KeyError:
             raise ValueError("Unknown unpack format '{0}'".format(format)) from None
 
-        func = format_info[1]
-        func(filename, extract_dir, **dict(format_info[2]), **filter_kwargs)
+        func_ = format_info[1]
+        func_(filename, extract_dir, **dict(format_info[2]), **filter_kwargs)
     else:
         # we need to look at the registered unpackers supported extensions
         format = _find_unpack_format(filename)
         if format is None:
             raise ReadError("Unknown archive format '{0}'".format(filename))
 
-        func = _UNPACK_FORMATS[format][1]
+        func_ = _UNPACK_FORMATS[format][1]
         kwargs = dict(_UNPACK_FORMATS[format][2]) | filter_kwargs
-        func(filename, extract_dir, **kwargs)
+        func_(filename, extract_dir, **kwargs)
 
 
 if hasattr(os, 'statvfs'):

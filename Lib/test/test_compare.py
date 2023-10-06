@@ -96,7 +96,7 @@ class ComparisonSimpleTest(unittest.TestCase):
             ('__gt__', lambda a, b: a > b),
             ('__ge__', lambda a, b: a >= b),
         )
-        for name, func in ops:
+        for name, func_ in ops:
             with self.subTest(name):
                 def unexpected(*args):
                     self.fail('Unexpected operator method called')
@@ -106,9 +106,9 @@ class ComparisonSimpleTest(unittest.TestCase):
                     if other != name:
                         setattr(C, other, unexpected)
                 if name == '__eq__':
-                    self.assertIs(func(C(), object()), False)
+                    self.assertIs(func_(C(), object()), False)
                 else:
-                    self.assertRaises(TypeError, func, C(), object())
+                    self.assertRaises(TypeError, func_, C(), object())
 
     def test_issue_1393(self):
         x = lambda: None

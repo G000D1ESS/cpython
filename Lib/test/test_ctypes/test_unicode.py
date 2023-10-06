@@ -34,19 +34,19 @@ class UnicodeTestCase(unittest.TestCase):
         t.unicode = "foo\0bar\0\0"
 
 
-func = ctypes.CDLL(_ctypes_test.__file__)._testfunc_p_p
+func_ = ctypes.CDLL(_ctypes_test.__file__)._testfunc_p_p
 
 class StringTestCase(UnicodeTestCase):
     def setUp(self):
-        func.argtypes = [ctypes.c_char_p]
-        func.restype = ctypes.c_char_p
+        func_.argtypes = [ctypes.c_char_p]
+        func_.restype = ctypes.c_char_p
 
     def tearDown(self):
-        func.argtypes = None
-        func.restype = ctypes.c_int
+        func_.argtypes = None
+        func_.restype = ctypes.c_int
 
     def test_func(self):
-        self.assertEqual(func(b"abc\xe4"), b"abc\xe4")
+        self.assertEqual(func_(b"abc\xe4"), b"abc\xe4")
 
     def test_buffers(self):
         buf = ctypes.create_string_buffer(b"abc")

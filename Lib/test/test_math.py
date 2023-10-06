@@ -1331,10 +1331,10 @@ class MathTests(unittest.TestCase):
                 total += p_i * q_i
             return total
 
-        def run(func, *args):
+        def run(func_, *args):
             "Make comparing functions easier. Returns error status, type, and result."
             try:
-                result = func(*args)
+                result = func_(*args)
             except (AssertionError, NameError):
                 raise
             except Exception as e:
@@ -1958,7 +1958,7 @@ class MathTests(unittest.TestCase):
                 if id in SKIP_ON_TIGER:
                     continue
 
-            func = getattr(math, fn)
+            func_ = getattr(math, fn)
 
             if 'invalid' in flags or 'divide-by-zero' in flags:
                 er = 'ValueError'
@@ -1966,7 +1966,7 @@ class MathTests(unittest.TestCase):
                 er = 'OverflowError'
 
             try:
-                result = func(ar)
+                result = func_(ar)
             except ValueError:
                 result = 'ValueError'
             except OverflowError:
@@ -1992,7 +1992,7 @@ class MathTests(unittest.TestCase):
 
         failures = []
         for id, fn, arg, expected, flags in parse_mtestfile(math_testcases):
-            func = getattr(math, fn)
+            func_ = getattr(math, fn)
 
             if 'invalid' in flags or 'divide-by-zero' in flags:
                 expected = 'ValueError'
@@ -2000,7 +2000,7 @@ class MathTests(unittest.TestCase):
                 expected = 'OverflowError'
 
             try:
-                got = func(arg)
+                got = func_(arg)
             except ValueError:
                 got = 'ValueError'
             except OverflowError:
@@ -2369,10 +2369,10 @@ class MathTests(unittest.TestCase):
             def __float__(self):
                 self.converted = True
                 1/0
-        for func in math.atan2, math.copysign, math.remainder:
+        for func_ in math.atan2, math.copysign, math.remainder:
             y = F()
             with self.assertRaises(TypeError):
-                func("not a number", y)
+                func_("not a number", y)
 
             # There should not have been any attempt to convert the second
             # argument to a float.

@@ -126,7 +126,7 @@ function calls leading up to the error, in the order they occurred.</p>'''
     indent = '<tt>' + small('&nbsp;' * 5) + '&nbsp;</tt>'
     frames = []
     records = inspect.getinnerframes(etb, context)
-    for frame, file, lnum, func, lines, index in records:
+    for frame, file, lnum, func_, lines, index in records:
         if file:
             file = os.path.abspath(file)
             link = '<a href="file://%s">%s</a>' % (file, pydoc.html.escape(file))
@@ -134,9 +134,9 @@ function calls leading up to the error, in the order they occurred.</p>'''
             file = link = '?'
         args, varargs, varkw, locals = inspect.getargvalues(frame)
         call = ''
-        if func != '?':
-            call = 'in ' + strong(pydoc.html.escape(func))
-            if func != "<module>":
+        if func_ != '?':
+            call = 'in ' + strong(pydoc.html.escape(func_))
+            if func_ != "<module>":
                 call += inspect.formatargvalues(args, varargs, varkw, locals,
                     formatvalue=lambda value: '=' + pydoc.html.repr(value))
 
@@ -214,13 +214,13 @@ function calls leading up to the error, in the order they occurred.
 
     frames = []
     records = inspect.getinnerframes(etb, context)
-    for frame, file, lnum, func, lines, index in records:
+    for frame, file, lnum, func_, lines, index in records:
         file = file and os.path.abspath(file) or '?'
         args, varargs, varkw, locals = inspect.getargvalues(frame)
         call = ''
-        if func != '?':
-            call = 'in ' + func
-            if func != "<module>":
+        if func_ != '?':
+            call = 'in ' + func_
+            if func_ != "<module>":
                 call += inspect.formatargvalues(args, varargs, varkw, locals,
                     formatvalue=lambda value: '=' + pydoc.text.repr(value))
 

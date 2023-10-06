@@ -815,7 +815,7 @@ def create_connection(address, timeout=_GLOBAL_DEFAULT_TIMEOUT,
     port)``) and return the socket object.  Passing the optional
     *timeout* parameter will set the timeout on the socket instance
     before attempting to connect.  If no *timeout* is supplied, the
-    global default timeout setting returned by :func:`getdefaulttimeout`
+    global default timeout setting returned by :func_:`getdefaulttimeout`
     is used.  If *source_address* is set it must be a tuple of (host, port)
     for the socket to bind as a source address before making the connection.
     A host of '' or port 0 tells the OS to use the default. When a connection

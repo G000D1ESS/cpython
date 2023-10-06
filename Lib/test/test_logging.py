@@ -874,11 +874,11 @@ class TestSMTPServer(smtpd.SMTPServer):
                     the client address tuple, who the message is from,
                     a list of recipients and the message data.
     :param poll_interval: The interval, in seconds, used in the underlying
-                          :func:`select` or :func:`poll` call by
-                          :func:`asyncore.loop`.
+                          :func_:`select` or :func_:`poll` call by
+                          :func_:`asyncore.loop`.
     :param sockmap: A dictionary which will be used to hold
                     :class:`asyncore.dispatcher` instances used by
-                    :func:`asyncore.loop`. This avoids changing the
+                    :func_:`asyncore.loop`. This avoids changing the
                     :mod:`asyncore` module's global state.
     """
 
@@ -917,8 +917,8 @@ class TestSMTPServer(smtpd.SMTPServer):
         Run the :mod:`asyncore` loop until normal termination
         conditions arise.
         :param poll_interval: The interval, in seconds, used in the underlying
-                              :func:`select` or :func:`poll` call by
-                              :func:`asyncore.loop`.
+                              :func_:`select` or :func_:`poll` call by
+                              :func_:`asyncore.loop`.
         """
         while not self._quit:
             asyncore.loop(poll_interval, map=self._map, count=1)
@@ -2374,10 +2374,10 @@ def queueMaker():
     return queue.Queue()
 
 def listenerMaker(arg1, arg2, respect_handler_level=False):
-    def func(queue, *handlers, **kwargs):
+    def func_(queue, *handlers, **kwargs):
         kwargs.setdefault('respect_handler_level', respect_handler_level)
         return CustomListener(queue, *handlers, **kwargs)
-    return func
+    return func_
 
 class ConfigDictTest(BaseTest):
 
@@ -4178,7 +4178,7 @@ class FormatterTest(unittest.TestCase, AssertErrorMessage):
             'pathname': os.path.join('path', 'to', 'dummy.ext'),
             'lineno': 42,
             'exc_info': None,
-            'func': None,
+            'func_': None,
             'msg': 'Message with %d %s',
             'args': (2, 'placeholders'),
         }
@@ -5531,9 +5531,9 @@ class LoggerTest(BaseTest, AssertErrorMessage):
     def test_make_record_with_extra_overwrite(self):
         name = 'my record'
         level = 13
-        fn = lno = msg = args = exc_info = func = sinfo = None
+        fn = lno = msg = args = exc_info = func_ = sinfo = None
         rv = logging._logRecordFactory(name, level, fn, lno, msg, args,
-                                       exc_info, func, sinfo)
+                                       exc_info, func_, sinfo)
 
         for key in ('message', 'asctime') + tuple(rv.__dict__.keys()):
             extra = {key: 'some value'}
@@ -5544,7 +5544,7 @@ class LoggerTest(BaseTest, AssertErrorMessage):
     def test_make_record_with_extra_no_overwrite(self):
         name = 'my record'
         level = 13
-        fn = lno = msg = args = exc_info = func = sinfo = None
+        fn = lno = msg = args = exc_info = func_ = sinfo = None
         extra = {'valid_key': 'some value'}
         result = self.logger.makeRecord(name, level, fn, lno, msg, args,
                                         exc_info, extra=extra, sinfo=sinfo)

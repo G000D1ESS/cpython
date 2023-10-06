@@ -857,7 +857,7 @@ class TestCase(object):
         # NOTE(gregory.p.smith): I considered isinstance(first, type(second))
         # and vice versa.  I opted for the conservative approach in case
         # subclasses are not intended to be compared in detail to their super
-        # class instances using a type equality func.  This means testing
+        # class instances using a type equality func_.  This means testing
         # subtypes won't automagically use the detailed comparison.  Callers
         # should use their type specific assertSpamEqual method to compare
         # subclasses if the detailed comparison is desired and appropriate.

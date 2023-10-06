@@ -385,8 +385,8 @@ class ListComprehensionTest(unittest.TestCase):
         code = """
             a = 1
             def f():
-                func, = [(lambda: b) for b in [a]]
-                return b, func()
+                func_, = [(lambda: b) for b in [a]]
+                return b, func_()
             x = f()
         """
         self._check_in_scopes(
@@ -398,8 +398,8 @@ class ListComprehensionTest(unittest.TestCase):
         code = """
             a = 1
             def f():
-                (func, inner_b), = [[lambda: b for b in c] + [b] for c in [[a]]]
-                return b, inner_b, func()
+                (func_, inner_b), = [[lambda: b for b in c] + [b] for c in [[a]]]
+                return b, inner_b, func_()
             x = f()
         """
         self._check_in_scopes(
@@ -505,16 +505,16 @@ class ListComprehensionTest(unittest.TestCase):
     def test_nested_listcomp_in_lambda(self):
         code = """
             f = [(z, lambda y: [(x, y, z) for x in [3]]) for z in [1]]
-            (z, func), = f
-            out = func(2)
+            (z, func_), = f
+            out = func_(2)
         """
         self._check_in_scopes(code, {"z": 1, "out": [(3, 2, 1)]})
 
     def test_lambda_in_iter(self):
         code = """
-            (func, c), = [(a, b) for b in [1] for a in [lambda : a]]
-            d = func()
-            assert d is func
+            (func_, c), = [(a, b) for b in [1] for a in [lambda : a]]
+            d = func_()
+            assert d is func_
             # must use "a" in this scope
             e = a if False else None
         """
@@ -566,16 +566,16 @@ class ListComprehensionTest(unittest.TestCase):
             value = ["ab"]
             result = snapshot = None
             try:
-                result = [{func}(value) for value in value]
+                result = [{func_}(value) for value in value]
             except:
                 snapshot = value
                 raise
         """
         # No exception.
-        code = template.format(func='len')
+        code = template.format(func_='len')
         self._check_in_scopes(code, {"value": ["ab"], "result": [2], "snapshot": None})
         # Handles exception.
-        code = template.format(func='int')
+        code = template.format(func_='int')
         self._check_in_scopes(code, {"value": ["ab"], "result": None, "snapshot": ["ab"]},
                               raises=ValueError)
 
@@ -584,15 +584,15 @@ class ListComprehensionTest(unittest.TestCase):
             value = ["ab"]
             result = snapshot = None
             try:
-                result = [{func}(value) for value in value]
+                result = [{func_}(value) for value in value]
             finally:
                 snapshot = value
         """
         # No exception.
-        code = template.format(func='len')
+        code = template.format(func_='len')
         self._check_in_scopes(code, {"value": ["ab"], "result": [2], "snapshot": ["ab"]})
         # Handles exception.
-        code = template.format(func='int')
+        code = template.format(func_='int')
         self._check_in_scopes(code, {"value": ["ab"], "result": None, "snapshot": ["ab"]},
                               raises=ValueError)
 

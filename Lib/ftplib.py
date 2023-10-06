@@ -554,13 +554,13 @@ class FTP:
         non-empty arguments before it are concatenated to the
         LIST command.  (This *should* only be used for a pathname.)'''
         cmd = 'LIST'
-        func = None
+        func_ = None
         if args[-1:] and not isinstance(args[-1], str):
-            args, func = args[:-1], args[-1]
+            args, func_ = args[:-1], args[-1]
         for arg in args:
             if arg:
                 cmd = cmd + (' ' + arg)
-        self.retrlines(cmd, func)
+        self.retrlines(cmd, func_)
 
     def mlsd(self, path="", facts=[]):
         '''List a directory in a standardized format by using MLSD

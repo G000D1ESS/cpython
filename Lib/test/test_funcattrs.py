@@ -82,9 +82,9 @@ class FunctionPropertiesTest(FuncAttrsTest):
 
         # bpo-42990: If globals is specified and has no "__builtins__" key,
         # a function inherits the current builtins namespace.
-        def func(s): return len(s)
+        def func_(s): return len(s)
         ns = {}
-        func2 = type(func)(func.__code__, ns)
+        func2 = type(func_)(func_.__code__, ns)
         self.assertIs(func2.__globals__, ns)
         self.assertIs(func2.__builtins__, __builtins__)
 
@@ -198,15 +198,15 @@ class FunctionPropertiesTest(FuncAttrsTest):
         T, = generic.__type_params__
         self.assertIsInstance(T, typing.TypeVar)
         self.assertEqual(generic.__type_params__, (T,))
-        for func in (not_generic, lambda_):
-            with self.subTest(func=func):
-                self.assertEqual(func.__type_params__, ())
+        for func_ in (not_generic, lambda_):
+            with self.subTest(func_=func_):
+                self.assertEqual(func_.__type_params__, ())
                 with self.assertRaises(TypeError):
-                    del func.__type_params__
+                    del func_.__type_params__
                 with self.assertRaises(TypeError):
-                    func.__type_params__ = 42
-                func.__type_params__ = (T,)
-                self.assertEqual(func.__type_params__, (T,))
+                    func_.__type_params__ = 42
+                func_.__type_params__ = (T,)
+                self.assertEqual(func_.__type_params__, (T,))
 
     def test___code__(self):
         num_one, num_two = 7, 8
@@ -215,8 +215,8 @@ class FunctionPropertiesTest(FuncAttrsTest):
         def c(): return num_one
         def d(): return num_two
         def e(): return num_one, num_two
-        for func in [a, b, c, d, e]:
-            self.assertEqual(type(func.__code__), types.CodeType)
+        for func_ in [a, b, c, d, e]:
+            self.assertEqual(type(func_.__code__), types.CodeType)
         self.assertEqual(c(), 7)
         self.assertEqual(d(), 8)
         d.__code__ = c.__code__
@@ -316,9 +316,9 @@ class ArbitraryFunctionAttrTest(FuncAttrsTest):
             self.fail("deleting unknown attribute should raise TypeError")
 
     def test_unset_attr(self):
-        for func in [self.b, self.fi.a]:
+        for func_ in [self.b, self.fi.a]:
             try:
-                func.non_existent_attr
+                func_.non_existent_attr
             except AttributeError:
                 pass
             else:
@@ -338,7 +338,7 @@ class FunctionDictsTest(FuncAttrsTest):
         self.b.__dict__ = d
         # Test assignment
         self.assertIs(d, self.b.__dict__)
-        # ... and on all the different ways of referencing the method's func
+        # ... and on all the different ways of referencing the method's func_
         self.F.a.__dict__ = d
         self.assertIs(d, self.fi.a.__func__.__dict__)
         self.assertIs(d, self.fi.a.__dict__)

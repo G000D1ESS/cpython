@@ -131,12 +131,12 @@ class WStringTestCase(unittest.TestCase):
         self.assertRaises(ValueError, setattr, cs, "value", "1234567")
 
 
-def run_test(rep, msg, func, arg):
+def run_test(rep, msg, func_, arg):
     items = range(rep)
     from time import perf_counter as clock
     start = clock()
     for i in items:
-        func(arg); func(arg); func(arg); func(arg); func(arg)
+        func_(arg); func_(arg); func_(arg); func_(arg); func_(arg)
     stop = clock()
     print("%20s: %.2f us" % (msg, ((stop-start)*1e6/5/rep)))
 

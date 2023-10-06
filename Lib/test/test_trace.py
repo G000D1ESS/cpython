@@ -30,8 +30,8 @@ def my_file_and_modname():
     modname = os.path.splitext(os.path.basename(__file__))[0]
     return fix_ext_py(__file__), modname
 
-def get_firstlineno(func):
-    return func.__code__.co_firstlineno
+def get_firstlineno(func_):
+    return func_.__code__.co_firstlineno
 
 #-------------------- Target functions for tracing ---------------------------#
 #
@@ -53,7 +53,7 @@ def traced_func_loop(x, y):
     return c
 
 def traced_func_importing(x, y):
-    return x + y + testmod.func(1)
+    return x + y + testmod.func_(1)
 
 def traced_func_simple_caller(x):
     c = traced_func_linear(x, x)
@@ -94,9 +94,9 @@ def traced_decorated_function():
         return decorator2
     @decorator1
     @decorator_fabric()
-    def func():
+    def func_():
         pass
-    func()
+    func_()
 
 
 class TracedClass(object):
@@ -279,10 +279,10 @@ class TestFuncs(unittest.TestCase):
         self.assertEqual(self.tracer.results().calledfuncs, expected)
 
     def test_arg_errors(self):
-        res = self.tracer.runfunc(traced_capturer, 1, 2, self=3, func=4)
-        self.assertEqual(res, ((1, 2), {'self': 3, 'func': 4}))
+        res = self.tracer.runfunc(traced_capturer, 1, 2, self=3, func_=4)
+        self.assertEqual(res, ((1, 2), {'self': 3, 'func_': 4}))
         with self.assertRaises(TypeError):
-            self.tracer.runfunc(func=traced_capturer, arg=1)
+            self.tracer.runfunc(func_=traced_capturer, arg=1)
         with self.assertRaises(TypeError):
             self.tracer.runfunc()
 
@@ -294,7 +294,7 @@ class TestFuncs(unittest.TestCase):
             self.filemod + ('traced_func_linear',): 1,
             self.filemod + ('traced_func_importing_caller',): 1,
             self.filemod + ('traced_func_importing',): 1,
-            (fix_ext_py(testmod.__file__), 'testmod', 'func'): 1,
+            (fix_ext_py(testmod.__file__), 'testmod', 'func_'): 1,
         }
         self.assertEqual(self.tracer.results().calledfuncs, expected)
 
@@ -319,7 +319,7 @@ class TestFuncs(unittest.TestCase):
             self.filemod + ('decorator_fabric',): 1,
             self.filemod + ('decorator2',): 1,
             self.filemod + ('decorator1',): 1,
-            self.filemod + ('func',): 1,
+            self.filemod + ('func_',): 1,
         }
         self.assertEqual(self.tracer.results().calledfuncs, expected)
 
@@ -346,7 +346,7 @@ class TestCallers(unittest.TestCase):
             ((self.filemod + ('traced_func_importing_caller',)),
                 (self.filemod + ('traced_func_importing',))): 1,
             ((self.filemod + ('traced_func_importing',)),
-                (fix_ext_py(testmod.__file__), 'testmod', 'func')): 1,
+                (fix_ext_py(testmod.__file__), 'testmod', 'func_')): 1,
         }
         self.assertEqual(self.tracer.results().callers, expected)
 
@@ -403,7 +403,7 @@ class TestCoverage(unittest.TestCase):
         if modname in sys.modules:
             del sys.modules[modname]
         cmd = ("import test.tracedmodules.testmod as t;"
-               "t.func(0); t.func2();")
+               "t.func_(0); t.func2();")
         with captured_stdout() as stdout:
             self._coverage(tracer, cmd)
         stdout.seek(0)

@@ -258,20 +258,20 @@ class TestRaiseChanges(GrammarTest):
 # test_dict_displays, test_argument_unpacking, ... changes.
 class TestUnpackingGeneralizations(GrammarTest):
     def test_mid_positional_star(self):
-        self.validate("""func(1, *(2, 3), 4)""")
+        self.validate("""func_(1, *(2, 3), 4)""")
 
     def test_double_star_dict_literal(self):
-        self.validate("""func(**{'eggs':'scrambled', 'spam':'fried'})""")
+        self.validate("""func_(**{'eggs':'scrambled', 'spam':'fried'})""")
 
     def test_double_star_dict_literal_after_keywords(self):
-        self.validate("""func(spam='fried', **{'eggs':'scrambled'})""")
+        self.validate("""func_(spam='fried', **{'eggs':'scrambled'})""")
 
     def test_double_star_expression(self):
-        self.validate("""func(**{'a':2} or {})""")
-        self.validate("""func(**() or {})""")
+        self.validate("""func_(**{'a':2} or {})""")
+        self.validate("""func_(**() or {})""")
 
     def test_star_expression(self):
-        self.validate("""func(*[] or [2])""")
+        self.validate("""func_(*[] or [2])""")
 
     def test_list_display(self):
         self.validate("""[*{2}, 3, *[4]]""")
@@ -286,10 +286,10 @@ class TestUnpackingGeneralizations(GrammarTest):
         self.validate("""{**{}, 3:4, **{5:6, 7:8}}""")
 
     def test_complex_star_expression(self):
-        self.validate("func(* [] or [1])")
+        self.validate("func_(* [] or [1])")
 
     def test_complex_double_star_expression(self):
-        self.validate("func(**{1: 3} if False else {x: x for x in range(3)})")
+        self.validate("func_(**{1: 3} if False else {x: x for x in range(3)})")
 
     def test_argument_unpacking_1(self):
         self.validate("""f(a, *b, *c, d)""")
@@ -691,7 +691,7 @@ class TestPositionalOnlyArgs(GrammarTest):
                 "lambda a, b, /, c, d, *args, e, f, **kw: kw\n")
 
     def test_only_positional_or_keyword(self):
-        driver.parse_string("def func(a,b,/,*,g,e=3): pass\n")
+        driver.parse_string("def func_(a,b,/,*,g,e=3): pass\n")
 
 
 class TestPickleableException(unittest.TestCase):

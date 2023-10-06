@@ -1664,8 +1664,8 @@ def _simple_enum(etype=Enum, *, boundary=None, use_args=None):
     """
     Class decorator that converts a normal class into an :class:`Enum`.  No
     safety checks are done, and some advanced behavior (such as
-    :func:`__init_subclass__`) is not available.  Enum creation can be faster
-    using :func:`simple_enum`.
+    :func_:`__init_subclass__`) is not available.  Enum creation can be faster
+    using :func_:`simple_enum`.
 
         >>> from enum import Enum, _simple_enum
         >>> @_simple_enum(Enum)
@@ -1928,7 +1928,7 @@ class verify:
 
 def _test_simple_enum(checked_enum, simple_enum):
     """
-    A function that can be used to test an enum created with :func:`_simple_enum`
+    A function that can be used to test an enum created with :func_:`_simple_enum`
     against the version created by subclassing :class:`Enum`::
 
         >>> from enum import Enum, _simple_enum, _test_simple_enum

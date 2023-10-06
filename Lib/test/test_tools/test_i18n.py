@@ -223,7 +223,7 @@ class Test_pygettext(unittest.TestCase):
         def foo2(bar: List[1:2]) -> (lambda x: x):
             """doc2"""
 
-        def foo3(bar: 'func'=lambda x: x) -> {1: 2}:
+        def foo3(bar: 'func_'=lambda x: x) -> {1: 2}:
             """doc3"""
         '''))
         self.assertIn('doc1', msgids)

@@ -114,7 +114,7 @@ class ThreadTests(BaseTestCase):
 
     @cpython_only
     def test_name(self):
-        def func(): pass
+        def func_(): pass
 
         thread = threading.Thread(name="myname1")
         self.assertEqual(thread.name, "myname1")
@@ -124,7 +124,7 @@ class ThreadTests(BaseTestCase):
         self.assertEqual(thread.name, "123")
 
         # target name is ignored if name is specified
-        thread = threading.Thread(target=func, name="myname2")
+        thread = threading.Thread(target=func_, name="myname2")
         self.assertEqual(thread.name, "myname2")
 
         with mock.patch.object(threading, '_counter', return_value=2):
@@ -136,8 +136,8 @@ class ThreadTests(BaseTestCase):
             self.assertEqual(thread.name, "Thread-3")
 
         with mock.patch.object(threading, '_counter', return_value=5):
-            thread = threading.Thread(target=func)
-            self.assertEqual(thread.name, "Thread-5 (func)")
+            thread = threading.Thread(target=func_)
+            self.assertEqual(thread.name, "Thread-5 (func_)")
 
     def test_args_argument(self):
         # bpo-45735: Using list or tuple as *args* in constructor could
@@ -426,11 +426,11 @@ class ThreadTests(BaseTestCase):
             t.start()
 
             # This is the trace function
-            def func(frame, event, arg):
+            def func_(frame, event, arg):
                 threading.current_thread()
-                return func
+                return func_
 
-            sys.settrace(func)
+            sys.settrace(func_)
             """)
 
     def test_join_nondaemon_on_shutdown(self):
@@ -644,7 +644,7 @@ class ThreadTests(BaseTestCase):
             import os, threading, sys, warnings
             from test import support
 
-            def func():
+            def func_():
                 with warnings.catch_warnings(record=True) as ws:
                     warnings.filterwarnings(
                             "always", category=DeprecationWarning)
@@ -662,14 +662,14 @@ class ThreadTests(BaseTestCase):
                         assert 'fork' in str(ws[0].message), ws[0]
                         support.wait_process(pid, exitcode=0)
 
-            th = threading.Thread(target=func)
+            th = threading.Thread(target=func_)
             th.start()
             th.join()
         """
         _, out, err = assert_python_ok("-c", code)
         data = out.decode().replace('\r', '')
         self.assertEqual(err.decode('utf-8'), "")
-        self.assertEqual(data, "Thread-1 (func)\nTrue\nTrue\n")
+        self.assertEqual(data, "Thread-1 (func_)\nTrue\nTrue\n")
 
     def test_main_thread_during_shutdown(self):
         # bpo-31516: current_thread() should still point to the main thread
@@ -1334,9 +1334,9 @@ class SubinterpThreadingTests(BaseTestCase):
         subinterp_code = textwrap.dedent(f"""
             import test.support
             import threading
-            def func():
+            def func_():
                 print('this should not have run!')
-            t = threading.Thread(target=func, daemon={daemon})
+            t = threading.Thread(target=func_, daemon={daemon})
             {before_start}
             t.start()
             """)
@@ -1902,11 +1902,11 @@ class AtexitTests(unittest.TestCase):
         rc, out, err = assert_python_ok("-c", """if True:
             import threading
 
-            def func():
+            def func_():
                 pass
 
             def run_last():
-                threading._register_atexit(func)
+                threading._register_atexit(func_)
 
             threading._register_atexit(run_last)
         """)

@@ -352,33 +352,33 @@ _cleanups = []
 _caches = {}
 
 
-def _tp_cache(func=None, /, *, typed=False):
+def _tp_cache(func_=None, /, *, typed=False):
     """Internal wrapper caching __getitem__ of generic types.
 
     For non-hashable arguments, the original function is used as a fallback.
     """
-    def decorator(func):
+    def decorator(func_):
         # The callback 'inner' references the newly created lru_cache
         # indirectly by performing a lookup in the global '_caches' dictionary.
         # This breaks a reference that can be problematic when combined with
         # C API extensions that leak references to types. See GH-98253.
 
-        cache = functools.lru_cache(typed=typed)(func)
-        _caches[func] = cache
+        cache = functools.lru_cache(typed=typed)(func_)
+        _caches[func_] = cache
         _cleanups.append(cache.cache_clear)
         del cache
 
-        @functools.wraps(func)
+        @functools.wraps(func_)
         def inner(*args, **kwds):
             try:
-                return _caches[func](*args, **kwds)
+                return _caches[func_](*args, **kwds)
             except TypeError:
                 pass  # All real errors (not unhashable args) are raised below.
-            return func(*args, **kwds)
+            return func_(*args, **kwds)
         return inner
 
-    if func is not None:
-        return decorator(func)
+    if func_ is not None:
+        return decorator(func_)
 
     return decorator
 
@@ -1562,8 +1562,8 @@ class _UnionGenericAlias(_NotIterable, _GenericAlias, _root=True):
                 return True
 
     def __reduce__(self):
-        func, (origin, args) = super().__reduce__()
-        return func, (Union, args)
+        func_, (origin, args) = super().__reduce__()
+        return func_, (Union, args)
 
 
 def _value_and_type_iter(parameters):
@@ -1918,10 +1918,10 @@ class Protocol(Generic, metaclass=_ProtocolMeta):
             def meth(self) -> int:
                 return 0
 
-        def func(x: Proto) -> int:
+        def func_(x: Proto) -> int:
             return x.meth()
 
-        func(C())  # Passes static type check
+        func_(C())  # Passes static type check
 
     See PEP 544 for details. Protocol classes decorated with
     @typing.runtime_checkable act as simple-minded runtime protocols that check
@@ -2401,9 +2401,9 @@ def no_type_check_decorator(decorator):
     """
     @functools.wraps(decorator)
     def wrapped_decorator(*args, **kwds):
-        func = decorator(*args, **kwds)
-        func = no_type_check(func)
-        return func
+        func_ = decorator(*args, **kwds)
+        func_ = no_type_check(func_)
+        return func_
 
     return wrapped_decorator
 
@@ -2417,11 +2417,11 @@ def _overload_dummy(*args, **kwds):
         "by an implementation that is not @overload-ed.")
 
 
-# {module: {qualname: {firstlineno: func}}}
+# {module: {qualname: {firstlineno: func_}}}
 _overload_registry = defaultdict(functools.partial(defaultdict, dict))
 
 
-def overload(func):
+def overload(func_):
     """Decorator for overloaded functions/methods.
 
     In a stub file, place two or more stub definitions for the same
@@ -2453,19 +2453,19 @@ def overload(func):
     get_overloads() function.
     """
     # classmethod and staticmethod
-    f = getattr(func, "__func__", func)
+    f = getattr(func_, "__func__", func_)
     try:
-        _overload_registry[f.__module__][f.__qualname__][f.__code__.co_firstlineno] = func
+        _overload_registry[f.__module__][f.__qualname__][f.__code__.co_firstlineno] = func_
     except AttributeError:
         # Not a normal function; ignore.
         pass
     return _overload_dummy
 
 
-def get_overloads(func):
-    """Return all defined overloads for *func* as a sequence."""
+def get_overloads(func_):
+    """Return all defined overloads for *func_* as a sequence."""
     # classmethod and staticmethod
-    f = getattr(func, "__func__", func)
+    f = getattr(func_, "__func__", func_)
     if f.__module__ not in _overload_registry:
         return []
     mod_dict = _overload_registry[f.__module__]

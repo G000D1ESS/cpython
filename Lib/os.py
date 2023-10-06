@@ -850,8 +850,8 @@ if _exists("fork") and not _exists("spawnv") and _exists("execv"):
     # and close the std I/O streams.  Also, P_OVERLAY is the same
     # as execv*()?
 
-    def _spawnvef(mode, file, args, env, func):
-        # Internal helper; func is the exec*() function to use
+    def _spawnvef(mode, file, args, env, func_):
+        # Internal helper; func_ is the exec*() function to use
         if not isinstance(args, (tuple, list)):
             raise TypeError('argv must be a tuple or a list')
         if not args or not args[0]:
@@ -861,9 +861,9 @@ if _exists("fork") and not _exists("spawnv") and _exists("execv"):
             # Child
             try:
                 if env is None:
-                    func(file, args)
+                    func_(file, args)
                 else:
-                    func(file, args, env)
+                    func_(file, args, env)
             except:
                 _exit(127)
         else:

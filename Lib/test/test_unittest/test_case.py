@@ -663,7 +663,7 @@ class Test_TestCase(unittest.TestCase, TestEquality, TestHashing):
             return type(a) == type(b) == SadSnake
         self.addTypeEqualityFunc(SadSnake, AllSnakesCreatedEqual)
         self.assertEqual(s1, s2)
-        # No this doesn't clean up and remove the SadSnake equality func
+        # No this doesn't clean up and remove the SadSnake equality func_
         # from this TestCase instance but since it's local nothing else
         # will ever notice that.
 
@@ -1363,15 +1363,15 @@ test case
     def testAssertRaisesRefcount(self):
         # bpo-23890: assertRaises() must not keep objects alive longer
         # than expected
-        def func() :
+        def func_() :
             try:
                 raise ValueError
             except ValueError:
                 raise ValueError
 
-        refcount = sys.getrefcount(func)
-        self.assertRaises(ValueError, func)
-        self.assertEqual(refcount, sys.getrefcount(func))
+        refcount = sys.getrefcount(func_)
+        self.assertRaises(ValueError, func_)
+        self.assertEqual(refcount, sys.getrefcount(func_))
 
     def testAssertRaisesRegex(self):
         class ExceptionMock(Exception):

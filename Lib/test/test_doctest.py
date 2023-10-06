@@ -2450,12 +2450,12 @@ def test_trailing_space_in_test():
     """
 
 class Wrapper:
-    def __init__(self, func):
-        self.func = func
-        functools.update_wrapper(self, func)
+    def __init__(self, func_):
+        self.func_ = func_
+        functools.update_wrapper(self, func_)
 
     def __call__(self, *args, **kwargs):
-        self.func(*args, **kwargs)
+        self.func_(*args, **kwargs)
 
 @Wrapper
 def test_look_in_unwrapped():

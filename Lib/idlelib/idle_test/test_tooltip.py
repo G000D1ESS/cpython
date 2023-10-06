@@ -26,11 +26,11 @@ def tearDownModule():
     del root
 
 
-def add_call_counting(func):
-    @wraps(func)
+def add_call_counting(func_):
+    @wraps(func_)
     def wrapped_func(*args, **kwargs):
         wrapped_func.call_args_list.append((args, kwargs))
-        return func(*args, **kwargs)
+        return func_(*args, **kwargs)
     wrapped_func.call_args_list = []
     return wrapped_func
 

@@ -9,8 +9,8 @@ __unittest = True
 
 
 def _call_if_exists(parent, attr):
-    func = getattr(parent, attr, lambda: None)
-    func()
+    func_ = getattr(parent, attr, lambda: None)
+    func_()
 
 
 class BaseTestSuite(object):

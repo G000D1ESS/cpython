@@ -244,13 +244,13 @@ def requires_tls_version(version):
     :param version: TLS version name or ssl.TLSVersion member
     :return:
     """
-    def decorator(func):
-        @functools.wraps(func)
+    def decorator(func_):
+        @functools.wraps(func_)
         def wrapper(*args, **kw):
             if not has_tls_version(version):
                 raise unittest.SkipTest(f"{version} is not available.")
             else:
-                return func(*args, **kw)
+                return func_(*args, **kw)
         return wrapper
     return decorator
 
@@ -2062,8 +2062,8 @@ class SimpleBackgroundTests(unittest.TestCase):
             self.assertIs(ss.context, ctx2)
             self.assertIs(ss._sslobj.context, ctx2)
 
-    def ssl_io_loop(self, sock, incoming, outgoing, func, *args, **kwargs):
-        # A simple IO loop. Call func(*args) depending on the error we get
+    def ssl_io_loop(self, sock, incoming, outgoing, func_, *args, **kwargs):
+        # A simple IO loop. Call func_(*args) depending on the error we get
         # (WANT_READ or WANT_WRITE) move data between the socket and the BIOs.
         timeout = kwargs.get('timeout', support.SHORT_TIMEOUT)
         count = 0
@@ -2071,7 +2071,7 @@ class SimpleBackgroundTests(unittest.TestCase):
             errno = None
             count += 1
             try:
-                ret = func(*args)
+                ret = func_(*args)
             except ssl.SSLError as e:
                 if e.errno not in (ssl.SSL_ERROR_WANT_READ,
                                    ssl.SSL_ERROR_WANT_WRITE):
@@ -2093,7 +2093,7 @@ class SimpleBackgroundTests(unittest.TestCase):
                     incoming.write_eof()
         if support.verbose:
             sys.stdout.write("Needed %d calls to complete %s().\n"
-                             % (count, func.__name__))
+                             % (count, func_.__name__))
         return ret
 
     def test_bio_handshake(self):
@@ -3387,7 +3387,7 @@ class ThreadedTests(unittest.TestCase):
                 count, addr = s.recvfrom_into(b)
                 return b[:count]
 
-            # (name, method, expect success?, *args, return value func)
+            # (name, method, expect success?, *args, return value func_)
             send_methods = [
                 ('send', s.send, True, [], len),
                 ('sendto', s.sendto, False, ["some.address"], len),
@@ -5069,8 +5069,8 @@ def setUpModule():
             'Mac': platform.mac_ver,
             'Windows': platform.win32_ver,
         }
-        for name, func in plats.items():
-            plat = func()
+        for name, func_ in plats.items():
+            plat = func_()
             if plat and plat[0]:
                 plat = '%s %r' % (name, plat)
                 break

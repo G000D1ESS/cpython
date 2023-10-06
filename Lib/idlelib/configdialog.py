@@ -633,7 +633,7 @@ class HighPage(Frame):
             ('code context section', 'context'), ('\n', 'normal'),
             ('| cursor', 'cursor'), ('\n', 'normal'),
             ('def', 'keyword'), (' ', 'normal'),
-            ('func', 'definition'), ('(param):\n  ', 'normal'),
+            ('func_', 'definition'), ('(param):\n  ', 'normal'),
             ('"Return None."', 'string'), ('\n  var0 = ', 'normal'),
             ("'string'", 'string'), ('\n  var1 = ', 'normal'),
             ("'selected'", 'hilite'), ('\n  var2 = ', 'normal'),
@@ -1191,9 +1191,9 @@ class KeysPage(Frame):
                     (*)builtin_keyset_on: Radiobutton - var keyset_source
                     (*)custom_keyset_on: Radiobutton - var keyset_source
                     (*)builtinlist: DynOptionMenu - var builtin_name,
-                            func keybinding_selected
+                            func_ keybinding_selected
                     (*)customlist: DynOptionMenu - var custom_name,
-                            func keybinding_selected
+                            func_ keybinding_selected
                     (*)keys_message: Label
                 frames[1]: Frame
                     (*)button_delete_custom_keys: Button - delete_custom_keys

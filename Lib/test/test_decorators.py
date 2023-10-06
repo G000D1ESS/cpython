@@ -2,36 +2,36 @@ import unittest
 from types import MethodType
 
 def funcattrs(**kwds):
-    def decorate(func):
-        func.__dict__.update(kwds)
-        return func
+    def decorate(func_):
+        func_.__dict__.update(kwds)
+        return func_
     return decorate
 
 class MiscDecorators (object):
     @staticmethod
     def author(name):
-        def decorate(func):
-            func.__dict__['author'] = name
-            return func
+        def decorate(func_):
+            func_.__dict__['author'] = name
+            return func_
         return decorate
 
 # -----------------------------------------------
 
 class DbcheckError (Exception):
-    def __init__(self, exprstr, func, args, kwds):
+    def __init__(self, exprstr, func_, args, kwds):
         # A real version of this would set attributes here
-        Exception.__init__(self, "dbcheck %r failed (func=%s args=%s kwds=%s)" %
-                           (exprstr, func, args, kwds))
+        Exception.__init__(self, "dbcheck %r failed (func_=%s args=%s kwds=%s)" %
+                           (exprstr, func_, args, kwds))
 
 
 def dbcheck(exprstr, globals=None, locals=None):
     "Decorator to implement debugging assertions"
-    def decorate(func):
-        expr = compile(exprstr, "dbcheck-%s" % func.__name__, "eval")
+    def decorate(func_):
+        expr = compile(exprstr, "dbcheck-%s" % func_.__name__, "eval")
         def check(*args, **kwds):
             if not eval(expr, globals, locals):
-                raise DbcheckError(exprstr, func, args, kwds)
-            return func(*args, **kwds)
+                raise DbcheckError(exprstr, func_, args, kwds)
+            return func_(*args, **kwds)
         return check
     return decorate
 
@@ -39,31 +39,31 @@ def dbcheck(exprstr, globals=None, locals=None):
 
 def countcalls(counts):
     "Decorator to count calls to a function"
-    def decorate(func):
-        func_name = func.__name__
+    def decorate(func_):
+        func_name = func_.__name__
         counts[func_name] = 0
         def call(*args, **kwds):
             counts[func_name] += 1
-            return func(*args, **kwds)
+            return func_(*args, **kwds)
         call.__name__ = func_name
         return call
     return decorate
 
 # -----------------------------------------------
 
-def memoize(func):
+def memoize(func_):
     saved = {}
     def call(*args):
         try:
             return saved[args]
         except KeyError:
-            res = func(*args)
+            res = func_(*args)
             saved[args] = res
             return res
         except TypeError:
             # Unhashable argument
-            return func(*args)
-    call.__name__ = func.__name__
+            return func_(*args)
+    call.__name__ = func_.__name__
     return call
 
 # -----------------------------------------------
@@ -78,19 +78,19 @@ class TestDecorators(unittest.TestCase):
         self.assertEqual(C().foo(), 42)
 
     def check_wrapper_attrs(self, method_wrapper, format_str):
-        def func(x):
+        def func_(x):
             return x
-        wrapper = method_wrapper(func)
+        wrapper = method_wrapper(func_)
 
-        self.assertIs(wrapper.__func__, func)
-        self.assertIs(wrapper.__wrapped__, func)
+        self.assertIs(wrapper.__func__, func_)
+        self.assertIs(wrapper.__wrapped__, func_)
 
         for attr in ('__module__', '__qualname__', '__name__',
                      '__doc__', '__annotations__'):
             self.assertIs(getattr(wrapper, attr),
-                          getattr(func, attr))
+                          getattr(func_, attr))
 
-        self.assertEqual(repr(wrapper), format_str.format(func))
+        self.assertEqual(repr(wrapper), format_str.format(func_))
         return wrapper
 
     def test_staticmethod(self):
@@ -116,9 +116,9 @@ class TestDecorators(unittest.TestCase):
         # of expressions for decorators.
 
         def noteargs(*args, **kwds):
-            def decorate(func):
-                setattr(func, 'dbval', (args, kwds))
-                return func
+            def decorate(func_):
+                setattr(func_, 'dbval', (args, kwds))
+                return func_
             return decorate
 
         args = ( 'Now', 'is', 'the', 'time' )
@@ -186,7 +186,7 @@ class TestDecorators(unittest.TestCase):
             with self.assertRaises(TypeError):
                 exec(f"@{expr}\ndef f(): pass")
 
-        def unimp(func):
+        def unimp(func_):
             raise NotImplementedError
         context = dict(nullval=None, unimp=unimp)
 
@@ -221,7 +221,7 @@ class TestDecorators(unittest.TestCase):
         def callnum(num):
             """Decorator factory that returns a decorator that replaces the
             passed-in function with one that returns the value of 'num'"""
-            def deco(func):
+            def deco(func_):
                 return lambda: num
             return deco
         @callnum(2)
@@ -248,9 +248,9 @@ class TestDecorators(unittest.TestCase):
 
         def make_decorator(tag):
             actions.append('makedec' + tag)
-            def decorate(func):
+            def decorate(func_):
                 actions.append('calldec' + tag)
-                return func
+                return func_
             return decorate
 
         class NameLookupTracer (object):
@@ -341,13 +341,13 @@ class TestDecorators(unittest.TestCase):
 
     def test_wrapped_classmethod_inside_classmethod(self):
         class MyClassMethod1:
-            def __init__(self, func):
-                self.func = func
+            def __init__(self, func_):
+                self.func_ = func_
 
             def __call__(self, cls):
-                if hasattr(self.func, '__get__'):
-                    return self.func.__get__(cls, cls)()
-                return self.func(cls)
+                if hasattr(self.func_, '__get__'):
+                    return self.func_.__get__(cls, cls)()
+                return self.func_(cls)
 
             def __get__(self, instance, owner=None):
                 if owner is None:
@@ -355,13 +355,13 @@ class TestDecorators(unittest.TestCase):
                 return MethodType(self, owner)
 
         class MyClassMethod2:
-            def __init__(self, func):
-                if isinstance(func, classmethod):
-                    func = func.__func__
-                self.func = func
+            def __init__(self, func_):
+                if isinstance(func_, classmethod):
+                    func_ = func_.__func__
+                self.func_ = func_
 
             def __call__(self, cls):
-                return self.func(cls)
+                return self.func_(cls)
 
             def __get__(self, instance, owner=None):
                 if owner is None:

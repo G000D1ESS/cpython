@@ -282,35 +282,35 @@ class TestCurses(unittest.TestCase):
         stdscr = self.stdscr
         encoding = stdscr.encoding
         # addstr()/insstr()
-        for func in [stdscr.addstr, stdscr.insstr]:
-            with self.subTest(func.__qualname__):
+        for func_ in [stdscr.addstr, stdscr.insstr]:
+            with self.subTest(func_.__qualname__):
                 stdscr.move(0, 0)
-                func('abcd')
-                func(b'abcd')
+                func_('abcd')
+                func_(b'abcd')
                 s = 'àßçđ'
                 try:
-                    func(s)
+                    func_(s)
                 except UnicodeEncodeError:
                     self.assertRaises(UnicodeEncodeError, s.encode, encoding)
-                func('abcd', curses.A_BOLD)
-                func(1, 2, 'abcd')
-                func(2, 3, 'abcd', curses.A_BOLD)
+                func_('abcd', curses.A_BOLD)
+                func_(1, 2, 'abcd')
+                func_(2, 3, 'abcd', curses.A_BOLD)
 
         # addnstr()/insnstr()
-        for func in [stdscr.addnstr, stdscr.insnstr]:
-            with self.subTest(func.__qualname__):
+        for func_ in [stdscr.addnstr, stdscr.insnstr]:
+            with self.subTest(func_.__qualname__):
                 stdscr.move(0, 0)
-                func('1234', 3)
-                func(b'1234', 3)
+                func_('1234', 3)
+                func_(b'1234', 3)
                 s = '\u0661\u0662\u0663\u0664'
                 try:
-                    func(s, 3)
+                    func_(s, 3)
                 except UnicodeEncodeError:
                     self.assertRaises(UnicodeEncodeError, s.encode, encoding)
-                func('1234', 5)
-                func('1234', 3, curses.A_BOLD)
-                func(1, 2, '1234', 3)
-                func(2, 3, '1234', 3, curses.A_BOLD)
+                func_('1234', 5)
+                func_('1234', 3, curses.A_BOLD)
+                func_(1, 2, '1234', 3)
+                func_(2, 3, '1234', 3, curses.A_BOLD)
 
     def test_output_string_embedded_null_chars(self):
         # reject embedded null bytes and characters
@@ -389,9 +389,9 @@ class TestCurses(unittest.TestCase):
         self.assertEqual(win.instr(0, 0).rstrip(), b'Lor')
         self.assertEqual(win.instr(1, 0).rstrip(), b'')
 
-        for func in [win.erase, win.clear]:
+        for func_ in [win.erase, win.clear]:
             lorem_ipsum(win)
-            func()
+            func_()
             self.assertEqual(win.instr(0, 0).rstrip(), b'')
             self.assertEqual(win.instr(1, 0).rstrip(), b'')
 
@@ -1223,10 +1223,10 @@ class TestAscii(unittest.TestCase):
             self.assertTrue(hasattr(curses.ascii, name), name)
 
     def test_ctypes(self):
-        def check(func, expected):
-            with self.subTest(ch=c, func=func):
-                self.assertEqual(func(i), expected)
-                self.assertEqual(func(c), expected)
+        def check(func_, expected):
+            with self.subTest(ch=c, func_=func_):
+                self.assertEqual(func_(i), expected)
+                self.assertEqual(func_(c), expected)
 
         for i in range(256):
             c = chr(i)

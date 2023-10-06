@@ -53,10 +53,10 @@ def foo(x: int = 10):
         x: str = 'yes'
     bar()
 
-def dec(func):
-    @wraps(func)
+def dec(func_):
+    @wraps(func_)
     def wrapper(*args, **kwargs):
-        return func(*args, **kwargs)
+        return func_(*args, **kwargs)
     return wrapper
 
 u: int | float

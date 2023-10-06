@@ -162,14 +162,14 @@ _afterfork_counter = itertools.count()
 def _run_after_forkers():
     items = list(_afterfork_registry.items())
     items.sort()
-    for (index, ident, func), obj in items:
+    for (index, ident, func_), obj in items:
         try:
-            func(obj)
+            func_(obj)
         except Exception as e:
             info('after forker raised exception %s', e)
 
-def register_after_fork(obj, func):
-    _afterfork_registry[(next(_afterfork_counter), id(obj), func)] = obj
+def register_after_fork(obj, func_):
+    _afterfork_registry[(next(_afterfork_counter), id(obj), func_)] = obj
 
 #
 # Finalization using weakrefs

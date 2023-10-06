@@ -129,11 +129,11 @@ class CFunctionCallsErrorMessages(unittest.TestCase):
 
     def test_varargs12_kw(self):
         msg = r"^staticmethod\(\) takes no keyword arguments$"
-        self.assertRaisesRegex(TypeError, msg, staticmethod, func=id)
+        self.assertRaisesRegex(TypeError, msg, staticmethod, func_=id)
 
     def test_varargs13_kw(self):
         msg = r"^classmethod\(\) takes no keyword arguments$"
-        self.assertRaisesRegex(TypeError, msg, classmethod, func=id)
+        self.assertRaisesRegex(TypeError, msg, classmethod, func_=id)
 
     def test_varargs14_kw(self):
         msg = r"^product\(\) takes at most 1 keyword argument \(2 given\)$"
@@ -439,7 +439,7 @@ class FastCallTests(unittest.TestCase):
 
     # Test calls with positional arguments
     CALLS_POSARGS = [
-        # (func, args: tuple, result)
+        # (func_, args: tuple, result)
 
         # Python function with 2 arguments
         (pyfunc, (1, 2), [1, 2]),
@@ -462,7 +462,7 @@ class FastCallTests(unittest.TestCase):
 
     # Test calls with positional and keyword arguments
     CALLS_KWARGS = [
-        # (func, args: tuple, kwargs: dict, result)
+        # (func_, args: tuple, kwargs: dict, result)
 
         # Python function with 2 arguments
         (pyfunc, (1,), {'arg2': 2}, [1, 2]),
@@ -522,62 +522,62 @@ class FastCallTests(unittest.TestCase):
     def test_fastcall(self):
         # Test _PyObject_FastCall()
 
-        for func, args, expected in self.CALLS_POSARGS:
-            with self.subTest(func=func, args=args):
-                result = _testcapi.pyobject_fastcall(func, args)
+        for func_, args, expected in self.CALLS_POSARGS:
+            with self.subTest(func_=func_, args=args):
+                result = _testcapi.pyobject_fastcall(func_, args)
                 self.check_result(result, expected)
 
                 if not args:
                     # args=NULL, nargs=0
-                    result = _testcapi.pyobject_fastcall(func, None)
+                    result = _testcapi.pyobject_fastcall(func_, None)
                     self.check_result(result, expected)
 
     def test_vectorcall_dict(self):
         # Test PyObject_VectorcallDict()
 
-        for func, args, expected in self.CALLS_POSARGS:
-            with self.subTest(func=func, args=args):
+        for func_, args, expected in self.CALLS_POSARGS:
+            with self.subTest(func_=func_, args=args):
                 # kwargs=NULL
-                result = _testcapi.pyobject_fastcalldict(func, args, None)
+                result = _testcapi.pyobject_fastcalldict(func_, args, None)
                 self.check_result(result, expected)
 
                 if not args:
                     # args=NULL, nargs=0, kwargs=NULL
-                    result = _testcapi.pyobject_fastcalldict(func, None, None)
+                    result = _testcapi.pyobject_fastcalldict(func_, None, None)
                     self.check_result(result, expected)
 
-        for func, args, kwargs, expected in self.CALLS_KWARGS:
-            with self.subTest(func=func, args=args, kwargs=kwargs):
-                result = _testcapi.pyobject_fastcalldict(func, args, kwargs)
+        for func_, args, kwargs, expected in self.CALLS_KWARGS:
+            with self.subTest(func_=func_, args=args, kwargs=kwargs):
+                result = _testcapi.pyobject_fastcalldict(func_, args, kwargs)
                 self.check_result(result, expected)
 
     def test_vectorcall(self):
         # Test PyObject_Vectorcall()
 
-        for func, args, expected in self.CALLS_POSARGS:
-            with self.subTest(func=func, args=args):
+        for func_, args, expected in self.CALLS_POSARGS:
+            with self.subTest(func_=func_, args=args):
                 # kwnames=NULL
-                result = _testcapi.pyobject_vectorcall(func, args, None)
+                result = _testcapi.pyobject_vectorcall(func_, args, None)
                 self.check_result(result, expected)
 
                 # kwnames=()
-                result = _testcapi.pyobject_vectorcall(func, args, ())
+                result = _testcapi.pyobject_vectorcall(func_, args, ())
                 self.check_result(result, expected)
 
                 if not args:
                     # kwnames=NULL
-                    result = _testcapi.pyobject_vectorcall(func, None, None)
+                    result = _testcapi.pyobject_vectorcall(func_, None, None)
                     self.check_result(result, expected)
 
                     # kwnames=()
-                    result = _testcapi.pyobject_vectorcall(func, None, ())
+                    result = _testcapi.pyobject_vectorcall(func_, None, ())
                     self.check_result(result, expected)
 
-        for func, args, kwargs, expected in self.CALLS_KWARGS:
-            with self.subTest(func=func, args=args, kwargs=kwargs):
+        for func_, args, kwargs, expected in self.CALLS_KWARGS:
+            with self.subTest(func_=func_, args=args, kwargs=kwargs):
                 kwnames = tuple(kwargs.keys())
                 args = args + tuple(kwargs.values())
-                result = _testcapi.pyobject_vectorcall(func, args, kwnames)
+                result = _testcapi.pyobject_vectorcall(func_, args, kwnames)
                 self.check_result(result, expected)
 
     def test_fastcall_clearing_dict(self):
@@ -743,16 +743,16 @@ class TestPEP590(unittest.TestCase):
         from types import MethodType
         from functools import partial
 
-        def vectorcall(func, args, kwargs):
+        def vectorcall(func_, args, kwargs):
             args = *args, *kwargs.values()
             kwnames = tuple(kwargs)
-            return pyobject_vectorcall(func, args, kwnames)
+            return pyobject_vectorcall(func_, args, kwnames)
 
-        for (func, args, kwargs, expected) in calls:
-            with self.subTest(str(func)):
+        for (func_, args, kwargs, expected) in calls:
+            with self.subTest(str(func_)):
                 if not kwargs:
-                    self.assertEqual(expected, pyvectorcall_call(func, args))
-                self.assertEqual(expected, pyvectorcall_call(func, args, kwargs))
+                    self.assertEqual(expected, pyvectorcall_call(func_, args))
+                self.assertEqual(expected, pyvectorcall_call(func_, args, kwargs))
 
         # Add derived classes (which do not support vectorcall directly,
         # but do support all other ways of calling).
@@ -780,18 +780,18 @@ class TestPEP590(unittest.TestCase):
             (MethodDescriptorSuper(), (0,), {}, True),
         ]
 
-        for (func, args, kwargs, expected) in calls:
-            with self.subTest(str(func)):
+        for (func_, args, kwargs, expected) in calls:
+            with self.subTest(str(func_)):
                 args1 = args[1:]
-                meth = MethodType(func, args[0])
-                wrapped = partial(func)
+                meth = MethodType(func_, args[0])
+                wrapped = partial(func_)
                 if not kwargs:
-                    self.assertEqual(expected, func(*args))
-                    self.assertEqual(expected, pyobject_vectorcall(func, args, None))
+                    self.assertEqual(expected, func_(*args))
+                    self.assertEqual(expected, pyobject_vectorcall(func_, args, None))
                     self.assertEqual(expected, meth(*args1))
                     self.assertEqual(expected, wrapped(*args))
-                self.assertEqual(expected, func(*args, **kwargs))
-                self.assertEqual(expected, vectorcall(func, args, kwargs))
+                self.assertEqual(expected, func_(*args, **kwargs))
+                self.assertEqual(expected, vectorcall(func_, args, kwargs))
                 self.assertEqual(expected, meth(*args1, **kwargs))
                 self.assertEqual(expected, wrapped(*args, **kwargs))
 

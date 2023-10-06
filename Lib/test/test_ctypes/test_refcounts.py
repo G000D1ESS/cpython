@@ -39,59 +39,59 @@ class RefcountTestCase(unittest.TestCase):
     @support.refcount_test
     def test_refcount(self):
         from sys import getrefcount as grc
-        def func(*args):
+        def func_(*args):
             pass
-        # this is the standard refcount for func
-        self.assertEqual(grc(func), 2)
+        # this is the standard refcount for func_
+        self.assertEqual(grc(func_), 2)
 
-        # the CFuncPtr instance holds at least one refcount on func:
-        f = OtherCallback(func)
-        self.assertGreater(grc(func), 2)
+        # the CFuncPtr instance holds at least one refcount on func_:
+        f = OtherCallback(func_)
+        self.assertGreater(grc(func_), 2)
 
         # and may release it again
         del f
-        self.assertGreaterEqual(grc(func), 2)
+        self.assertGreaterEqual(grc(func_), 2)
 
         # but now it must be gone
         gc.collect()
-        self.assertEqual(grc(func), 2)
+        self.assertEqual(grc(func_), 2)
 
         class X(ctypes.Structure):
             _fields_ = [("a", OtherCallback)]
         x = X()
-        x.a = OtherCallback(func)
+        x.a = OtherCallback(func_)
 
-        # the CFuncPtr instance holds at least one refcount on func:
-        self.assertGreater(grc(func), 2)
+        # the CFuncPtr instance holds at least one refcount on func_:
+        self.assertGreater(grc(func_), 2)
 
         # and may release it again
         del x
-        self.assertGreaterEqual(grc(func), 2)
+        self.assertGreaterEqual(grc(func_), 2)
 
         # and now it must be gone again
         gc.collect()
-        self.assertEqual(grc(func), 2)
+        self.assertEqual(grc(func_), 2)
 
-        f = OtherCallback(func)
+        f = OtherCallback(func_)
 
-        # the CFuncPtr instance holds at least one refcount on func:
-        self.assertGreater(grc(func), 2)
+        # the CFuncPtr instance holds at least one refcount on func_:
+        self.assertGreater(grc(func_), 2)
 
         # create a cycle
         f.cycle = f
 
         del f
         gc.collect()
-        self.assertEqual(grc(func), 2)
+        self.assertEqual(grc(func_), 2)
 
 class AnotherLeak(unittest.TestCase):
     def test_callback(self):
         import sys
 
         proto = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int, ctypes.c_int)
-        def func(a, b):
+        def func_(a, b):
             return a * b * 2
-        f = proto(func)
+        f = proto(func_)
 
         a = sys.getrefcount(ctypes.c_int)
         f(1, 2)
@@ -105,12 +105,12 @@ class AnotherLeak(unittest.TestCase):
         for FUNCTYPE in (ctypes.CFUNCTYPE, ctypes.PYFUNCTYPE):
             with self.subTest(FUNCTYPE=FUNCTYPE):
                 @FUNCTYPE(ctypes.py_object)
-                def func():
+                def func_():
                     return None
 
-                # Check that calling func does not affect None's refcount.
+                # Check that calling func_ does not affect None's refcount.
                 for _ in range(10000):
-                    func()
+                    func_()
 
 if __name__ == '__main__':
     unittest.main()

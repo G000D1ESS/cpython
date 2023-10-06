@@ -325,9 +325,9 @@ class StructTest(unittest.TestCase):
 
     def test_nN_code(self):
         # n and N don't exist in standard sizes
-        def assertStructError(func, *args, **kwargs):
+        def assertStructError(func_, *args, **kwargs):
             with self.assertRaises(struct.error) as cm:
-                func(*args, **kwargs)
+                func_(*args, **kwargs)
             self.assertIn("bad char in struct format", str(cm.exception))
         for code in 'nN':
             for byteorder in ('=', '<', '>', '!'):

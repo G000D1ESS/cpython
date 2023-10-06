@@ -123,9 +123,9 @@ class Callbacks(unittest.TestCase):
         proto = self.functype.__func__(None)
 
         class X:
-            def func(self): pass
+            def func_(self): pass
             def __init__(self):
-                self.v = proto(self.func)
+                self.v = proto(self.func_)
 
         import gc
         for i in range(32):
@@ -170,7 +170,7 @@ class SampleCallbacksTestCase(unittest.TestCase):
         # Derived from some then non-working code, posted by David Foster
         dll = CDLL(_ctypes_test.__file__)
 
-        # The function prototype called by 'integrate': double func(double);
+        # The function prototype called by 'integrate': double func_(double);
         CALLBACK = CFUNCTYPE(c_double, c_double)
 
         # The integrate function itself, exposed from the _ctypes_test dll
@@ -178,10 +178,10 @@ class SampleCallbacksTestCase(unittest.TestCase):
         integrate.argtypes = (c_double, c_double, CALLBACK, c_long)
         integrate.restype = c_double
 
-        def func(x):
+        def func_(x):
             return x**2
 
-        result = integrate(0.0, 1.0, CALLBACK(func), 10)
+        result = integrate(0.0, 1.0, CALLBACK(func_), 10)
         diff = abs(result - 1./3.)
 
         self.assertLess(diff, 0.01, "%s not less than 0.01" % diff)
@@ -222,14 +222,14 @@ class SampleCallbacksTestCase(unittest.TestCase):
         dll = CDLL(_ctypes_test.__file__)
         CALLBACK = CFUNCTYPE(c_int, c_int, c_int, c_int, c_int, c_int)
         # All this function does is call the callback with its args squared
-        func = dll._testfunc_cbk_reg_int
-        func.argtypes = (c_int, c_int, c_int, c_int, c_int, CALLBACK)
-        func.restype = c_int
+        func_ = dll._testfunc_cbk_reg_int
+        func_.argtypes = (c_int, c_int, c_int, c_int, c_int, CALLBACK)
+        func_.restype = c_int
 
         def callback(a, b, c, d, e):
             return a + b + c + d + e
 
-        result = func(2, 3, 4, 5, 6, CALLBACK(callback))
+        result = func_(2, 3, 4, 5, 6, CALLBACK(callback))
         self.assertEqual(result, callback(2*2, 3*3, 4*4, 5*5, 6*6))
 
     def test_callback_register_double(self):
@@ -239,15 +239,15 @@ class SampleCallbacksTestCase(unittest.TestCase):
         CALLBACK = CFUNCTYPE(c_double, c_double, c_double, c_double,
                              c_double, c_double)
         # All this function does is call the callback with its args squared
-        func = dll._testfunc_cbk_reg_double
-        func.argtypes = (c_double, c_double, c_double,
+        func_ = dll._testfunc_cbk_reg_double
+        func_.argtypes = (c_double, c_double, c_double,
                          c_double, c_double, CALLBACK)
-        func.restype = c_double
+        func_.restype = c_double
 
         def callback(a, b, c, d, e):
             return a + b + c + d + e
 
-        result = func(1.1, 2.2, 3.3, 4.4, 5.5, CALLBACK(callback))
+        result = func_(1.1, 2.2, 3.3, 4.4, 5.5, CALLBACK(callback))
         self.assertEqual(result,
                          callback(1.1*1.1, 2.2*2.2, 3.3*3.3, 4.4*4.4, 5.5*5.5))
 
@@ -280,11 +280,11 @@ class SampleCallbacksTestCase(unittest.TestCase):
 
         CALLBACK = CFUNCTYPE(None, X)
         dll = CDLL(_ctypes_test.__file__)
-        func = dll._testfunc_cbk_large_struct
-        func.argtypes = (X, CALLBACK)
-        func.restype = None
+        func_ = dll._testfunc_cbk_large_struct
+        func_.argtypes = (X, CALLBACK)
+        func_.restype = None
         # the function just calls the callback with the passed structure
-        func(s, CALLBACK(functools.partial(callback, check)))
+        func_(s, CALLBACK(functools.partial(callback, check)))
         self.assertEqual(check.first, s.first)
         self.assertEqual(check.second, s.second)
         self.assertEqual(check.third, s.third)
@@ -298,12 +298,12 @@ class SampleCallbacksTestCase(unittest.TestCase):
         self.assertEqual(s.third, check.third)
 
     def test_callback_too_many_args(self):
-        def func(*args):
+        def func_(*args):
             return len(args)
 
         # valid call with nargs <= CTYPES_MAX_ARGCOUNT
         proto = CFUNCTYPE(c_int, *(c_int,) * CTYPES_MAX_ARGCOUNT)
-        cb = proto(func)
+        cb = proto(func_)
         args1 = (1,) * CTYPES_MAX_ARGCOUNT
         self.assertEqual(cb(*args1), CTYPES_MAX_ARGCOUNT)
 
@@ -317,11 +317,11 @@ class SampleCallbacksTestCase(unittest.TestCase):
             CFUNCTYPE(c_int, *(c_int,) * (CTYPES_MAX_ARGCOUNT + 1))
 
     def test_convert_result_error(self):
-        def func():
+        def func_():
             return ("tuple",)
 
         proto = CFUNCTYPE(c_int)
-        ctypes_func = proto(func)
+        ctypes_func = proto(func_)
         with support.catch_unraisable_exception() as cm:
             # don't test the result since it is an uninitialized value
             result = ctypes_func()
@@ -330,7 +330,7 @@ class SampleCallbacksTestCase(unittest.TestCase):
             self.assertEqual(cm.unraisable.err_msg,
                              "Exception ignored on converting result "
                              "of ctypes callback function")
-            self.assertIs(cm.unraisable.object, func)
+            self.assertIs(cm.unraisable.object, func_)
 
 
 if __name__ == '__main__':

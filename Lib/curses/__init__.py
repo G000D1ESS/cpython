@@ -60,10 +60,10 @@ except NameError:
 # raises an exception, wrapper() will restore the terminal to a sane state so
 # you can read the resulting traceback.
 
-def wrapper(func, /, *args, **kwds):
+def wrapper(func_, /, *args, **kwds):
     """Wrapper function that initializes curses and calls another function,
     restoring normal keyboard/screen behavior on error.
-    The callable object 'func' is then passed the main window 'stdscr'
+    The callable object 'func_' is then passed the main window 'stdscr'
     as its first argument, followed by any other arguments passed to
     wrapper().
     """
@@ -91,7 +91,7 @@ def wrapper(func, /, *args, **kwds):
         except:
             pass
 
-        return func(stdscr, *args, **kwds)
+        return func_(stdscr, *args, **kwds)
     finally:
         # Set everything back to normal
         if 'stdscr' in locals():

@@ -631,7 +631,7 @@ class Bdb:
 
     # This method is more useful to debug a single function call.
 
-    def runcall(self, func, /, *args, **kwds):
+    def runcall(self, func_, /, *args, **kwds):
         """Debug a single function call.
 
         Return the result of the function call.
@@ -640,7 +640,7 @@ class Bdb:
         sys.settrace(self.trace_dispatch)
         res = None
         try:
-            res = func(*args, **kwds)
+            res = func_(*args, **kwds)
         except BdbQuit:
             pass
         finally:

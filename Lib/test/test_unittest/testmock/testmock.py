@@ -1026,10 +1026,10 @@ class MockTest(unittest.TestCase):
         self.assertIsInstance(mock.foo, MagicMock)
 
 
-    def assertRaisesWithMsg(self, exception, message, func, *args, **kwargs):
+    def assertRaisesWithMsg(self, exception, message, func_, *args, **kwargs):
         # needed because assertRaisesRegex doesn't work easily with newlines
         with self.assertRaises(exception) as context:
-            func(*args, **kwargs)
+            func_(*args, **kwargs)
         msg = str(context.exception)
         self.assertEqual(msg, message)
 
@@ -1603,12 +1603,12 @@ class MockTest(unittest.TestCase):
             create_autospec(f),
             create_autospec(obj).f
         ]
-        for func in funcs:
-            func(1, 2)
-            func(3, 4)
+        for func_ in funcs:
+            func_(1, 2)
+            func_(3, 4)
 
             self.assertEqual(
-                func.mock_calls, [call(1, 2), call(3, 4)]
+                func_.mock_calls, [call(1, 2), call(3, 4)]
             )
 
     #Issue21222

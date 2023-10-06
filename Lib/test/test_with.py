@@ -28,9 +28,9 @@ class MockContextManager(_GeneratorContextManager):
                                                  value, traceback)
 
 
-def mock_contextmanager(func):
+def mock_contextmanager(func_):
     def helper(*args, **kwds):
-        return MockContextManager(func, args, kwds)
+        return MockContextManager(func_, args, kwds)
     return helper
 
 

@@ -9,17 +9,17 @@ from . import events
 __all__ = "to_thread",
 
 
-async def to_thread(func, /, *args, **kwargs):
-    """Asynchronously run function *func* in a separate thread.
+async def to_thread(func_, /, *args, **kwargs):
+    """Asynchronously run function *func_* in a separate thread.
 
     Any *args and **kwargs supplied for this function are directly passed
-    to *func*. Also, the current :class:`contextvars.Context` is propagated,
+    to *func_*. Also, the current :class:`contextvars.Context` is propagated,
     allowing context variables from the main thread to be accessed in the
     separate thread.
 
-    Return a coroutine that can be awaited to get the eventual result of *func*.
+    Return a coroutine that can be awaited to get the eventual result of *func_*.
     """
     loop = events.get_running_loop()
     ctx = contextvars.copy_context()
-    func_call = functools.partial(ctx.run, func, *args, **kwargs)
+    func_call = functools.partial(ctx.run, func_, *args, **kwargs)
     return await loop.run_in_executor(None, func_call)

@@ -1000,8 +1000,8 @@ class SpecSignatureTest(unittest.TestCase):
 
 
     def test_spec_function_no_name(self):
-        func = lambda: 'nope'
-        mock = create_autospec(func)
+        func_ = lambda: 'nope'
+        mock = create_autospec(func_)
         self.assertEqual(mock.__name__, 'funcopy')
 
 

@@ -4,8 +4,8 @@ from ._helpers import StubClass, stub_factory
 
 
 class StubStrategy(StubClass):
-    def __make_trailing_repr(self, transformation_name, func):
-        func_name = func.__name__ or repr(func)
+    def __make_trailing_repr(self, transformation_name, func_):
+        func_name = func_.__name__ or repr(func_)
         return f"{self!r}.{transformation_name}({func_name})"
 
     def map(self, pack):

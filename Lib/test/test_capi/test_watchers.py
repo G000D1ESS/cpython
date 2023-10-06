@@ -446,8 +446,8 @@ class TestCodeObjectWatchers(unittest.TestCase):
 
 class TestFuncWatchers(unittest.TestCase):
     @contextmanager
-    def add_watcher(self, func):
-        wid = _testcapi.add_func_watcher(func)
+    def add_watcher(self, func_):
+        wid = _testcapi.add_func_watcher(func_)
         try:
             yield
         finally:
@@ -484,7 +484,7 @@ class TestFuncWatchers(unittest.TestCase):
             _testcapi.set_func_kwdefaults_via_capi(myfunc, new_kwdefaults)
             self.assertIn((_testcapi.PYFUNC_EVENT_MODIFY_KWDEFAULTS, myfunc, new_kwdefaults), events)
 
-            # Clear events reference to func
+            # Clear events reference to func_
             events = []
             del myfunc
             self.assertIn((_testcapi.PYFUNC_EVENT_DESTROY, myfunc_id, None), events)
@@ -541,17 +541,17 @@ class TestFuncWatchers(unittest.TestCase):
                 self.assertIsInstance(cm.unraisable.exc_value, MyError)
 
     def test_clear_out_of_range_watcher_id(self):
-        with self.assertRaisesRegex(ValueError, r"invalid func watcher ID -1"):
+        with self.assertRaisesRegex(ValueError, r"invalid func_ watcher ID -1"):
             _testcapi.clear_func_watcher(-1)
-        with self.assertRaisesRegex(ValueError, r"invalid func watcher ID 8"):
+        with self.assertRaisesRegex(ValueError, r"invalid func_ watcher ID 8"):
             _testcapi.clear_func_watcher(8)  # FUNC_MAX_WATCHERS = 8
 
     def test_clear_unassigned_watcher_id(self):
-        with self.assertRaisesRegex(ValueError, r"no func watcher set for ID 1"):
+        with self.assertRaisesRegex(ValueError, r"no func_ watcher set for ID 1"):
             _testcapi.clear_func_watcher(1)
 
     def test_allocate_too_many_watchers(self):
-        with self.assertRaisesRegex(RuntimeError, r"no more func watcher IDs"):
+        with self.assertRaisesRegex(RuntimeError, r"no more func_ watcher IDs"):
             _testcapi.allocate_too_many_func_watchers()
 
 

@@ -12,17 +12,17 @@ Package = Union[types.ModuleType, str]
 Resource = str
 
 
-def deprecated(func):
-    @functools.wraps(func)
+def deprecated(func_):
+    @functools.wraps(func_)
     def wrapper(*args, **kwargs):
         warnings.warn(
-            f"{func.__name__} is deprecated. Use files() instead. "
+            f"{func_.__name__} is deprecated. Use files() instead. "
             "Refer to https://importlib-resources.readthedocs.io"
             "/en/latest/using.html#migrating-from-legacy for migration advice.",
             DeprecationWarning,
             stacklevel=2,
         )
-        return func(*args, **kwargs)
+        return func_(*args, **kwargs)
 
     return wrapper
 

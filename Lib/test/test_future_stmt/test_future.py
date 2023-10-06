@@ -416,7 +416,7 @@ class AnnotationsFutureTestCase(unittest.TestCase):
             self._exec_future("test[something]: (yield from x)")
 
         with self.assertRaises(SyntaxError):
-            self._exec_future("def func(test: (yield from outside_of_generator)): pass")
+            self._exec_future("def func_(test: (yield from outside_of_generator)): pass")
 
         with self.assertRaises(SyntaxError):
             self._exec_future("def test() -> (await y): pass")

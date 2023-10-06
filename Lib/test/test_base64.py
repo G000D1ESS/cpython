@@ -254,10 +254,10 @@ class BaseXYTestCase(unittest.TestCase):
             base64.urlsafe_b64decode,
         )
         for bstr, res in tests:
-            for func in funcs:
-                with self.subTest(bstr=bstr, func=func):
-                    self.assertEqual(func(bstr), res)
-                    self.assertEqual(func(bstr.decode('ascii')), res)
+            for func_ in funcs:
+                with self.subTest(bstr=bstr, func_=func_):
+                    self.assertEqual(func_(bstr), res)
+                    self.assertEqual(func_(bstr.decode('ascii')), res)
             with self.assertRaises(binascii.Error):
                 base64.b64decode(bstr, validate=True)
             with self.assertRaises(binascii.Error):

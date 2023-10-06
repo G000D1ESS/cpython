@@ -49,20 +49,20 @@ class StdStreamTest(unittest.TestCase):
 
     def test_skip_invalid_stdout(self):
         parser = argparse.ArgumentParser()
-        for func in (
+        for func_ in (
             parser.print_usage,
             parser.print_help,
             functools.partial(parser.parse_args, ['-h'])
         ):
             with (
-                self.subTest(func=func),
+                self.subTest(func_=func_),
                 contextlib.redirect_stdout(None),
                 # argparse uses stderr as a fallback
                 StdIOBuffer() as mocked_stderr,
                 contextlib.redirect_stderr(mocked_stderr),
                 mock.patch('argparse._sys.exit'),
             ):
-                func()
+                func_()
                 self.assertRegex(mocked_stderr.getvalue(), r'usage:')
 
 
@@ -5009,8 +5009,8 @@ class TestStrings(TestCase):
     """Test str()  and repr() on Optionals and Positionals"""
 
     def assertStringEqual(self, obj, result_string):
-        for func in [str, repr]:
-            self.assertEqual(func(obj), result_string)
+        for func_ in [str, repr]:
+            self.assertEqual(func_(obj), result_string)
 
     def test_optional(self):
         option = argparse.Action(

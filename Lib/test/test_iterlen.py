@@ -2,7 +2,7 @@
 
 Some functions or methods which accept general iterable arguments have
 optional, more efficient code paths if they know how many items to expect.
-For instance, map(func, iterable), will pre-allocate the exact amount of
+For instance, map(func_, iterable), will pre-allocate the exact amount of
 space required whenever the iterable can report its length.
 
 The desired invariant is:  len(it)==len(list(it)).
@@ -12,7 +12,7 @@ maintain the invariant, an iterator needs to dynamically update its length.
 For instance, an iterable such as range(10) always reports its length as ten,
 but it=iter(range(10)) starts at ten, and then goes to nine after next(it).
 Having this capability means that map() can ignore the distinction between
-map(func, iterable) and map(func, iter(iterable)).
+map(func_, iterable) and map(func_, iter(iterable)).
 
 When the iterable is immutable, the implementation can straight-forwardly
 report the original length minus the cumulative number of calls to next().

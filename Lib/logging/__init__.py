@@ -296,7 +296,7 @@ class LogRecord(object):
     information to be logged.
     """
     def __init__(self, name, level, pathname, lineno,
-                 msg, args, exc_info, func=None, sinfo=None, **kwargs):
+                 msg, args, exc_info, func_=None, sinfo=None, **kwargs):
         """
         Initialize a logging record with interesting information.
         """
@@ -338,7 +338,7 @@ class LogRecord(object):
         self.exc_text = None      # used to cache the traceback text
         self.stack_info = sinfo
         self.lineno = lineno
-        self.funcName = func
+        self.funcName = func_
         self.created = ct
         self.msecs = int((ct - int(ct)) * 1000) + 0.0  # see gh-89047
         self.relativeCreated = (self.created - _startTime) * 1000
@@ -680,7 +680,7 @@ class Formatter(object):
         formatting of stack information.
 
         The input data is a string as returned from a call to
-        :func:`traceback.print_stack`, but with the last trailing newline
+        :func_:`traceback.print_stack`, but with the last trailing newline
         removed.
 
         The base implementation just returns the value passed in.
@@ -1643,12 +1643,12 @@ class Logger(Filterer):
         return co.co_filename, f.f_lineno, co.co_name, sinfo
 
     def makeRecord(self, name, level, fn, lno, msg, args, exc_info,
-                   func=None, extra=None, sinfo=None):
+                   func_=None, extra=None, sinfo=None):
         """
         A factory method which can be overridden in subclasses to create
         specialized LogRecords.
         """
-        rv = _logRecordFactory(name, level, fn, lno, msg, args, exc_info, func,
+        rv = _logRecordFactory(name, level, fn, lno, msg, args, exc_info, func_,
                              sinfo)
         if extra is not None:
             for key in extra:
@@ -1669,18 +1669,18 @@ class Logger(Filterer):
             #exception on some versions of IronPython. We trap it here so that
             #IronPython can use logging.
             try:
-                fn, lno, func, sinfo = self.findCaller(stack_info, stacklevel)
+                fn, lno, func_, sinfo = self.findCaller(stack_info, stacklevel)
             except ValueError: # pragma: no cover
-                fn, lno, func = "(unknown file)", 0, "(unknown function)"
+                fn, lno, func_ = "(unknown file)", 0, "(unknown function)"
         else: # pragma: no cover
-            fn, lno, func = "(unknown file)", 0, "(unknown function)"
+            fn, lno, func_ = "(unknown file)", 0, "(unknown function)"
         if exc_info:
             if isinstance(exc_info, BaseException):
                 exc_info = (type(exc_info), exc_info, exc_info.__traceback__)
             elif not isinstance(exc_info, tuple):
                 exc_info = sys.exc_info()
         record = self.makeRecord(self.name, level, fn, lno, msg, args,
-                                 exc_info, func, extra, sinfo)
+                                 exc_info, func_, extra, sinfo)
         self.handle(record)
 
     def handle(self, record):

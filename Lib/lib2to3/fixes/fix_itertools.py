@@ -17,9 +17,9 @@ class FixItertools(fixer_base.BaseFix):
     PATTERN = """
               power< it='itertools'
                   trailer<
-                     dot='.' func=%(it_funcs)s > trailer< '(' [any] ')' > >
+                     dot='.' func_=%(it_funcs)s > trailer< '(' [any] ')' > >
               |
-              power< func=%(it_funcs)s trailer< '(' [any] ')' > >
+              power< func_=%(it_funcs)s trailer< '(' [any] ')' > >
               """ %(locals())
 
     # Needs to be run after fix_(map|zip|filter)
@@ -27,9 +27,9 @@ class FixItertools(fixer_base.BaseFix):
 
     def transform(self, node, results):
         prefix = None
-        func = results['func'][0]
+        func_ = results['func_'][0]
         if ('it' in results and
-            func.value not in ('ifilterfalse', 'izip_longest')):
+            func_.value not in ('ifilterfalse', 'izip_longest')):
             dot, it = (results['dot'], results['it'])
             # Remove the 'itertools'
             prefix = it.prefix
@@ -37,7 +37,7 @@ class FixItertools(fixer_base.BaseFix):
             # Replace the node which contains ('.', 'function') with the
             # function (to be consistent with the second part of the pattern)
             dot.remove()
-            func.parent.replace(func)
+            func_.parent.replace(func_)
 
-        prefix = prefix or func.prefix
-        func.replace(Name(func.value[1:], prefix=prefix))
+        prefix = prefix or func_.prefix
+        func_.replace(Name(func_.value[1:], prefix=prefix))

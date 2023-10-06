@@ -431,9 +431,9 @@ class Test_TestSkipping(unittest.TestCase):
         self.assertFalse(Foo.wasTornDown)
 
     def test_decorated_skip(self):
-        def decorator(func):
+        def decorator(func_):
             def inner(*a):
-                return func(*a)
+                return func_(*a)
             return inner
 
         class Foo(unittest.TestCase):

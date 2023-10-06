@@ -9,8 +9,8 @@ class CodePicklerTest(unittest.TestCase):
 
     def test_pickle_unpickle(self):
         def f(): return a + b + c
-        func, (cbytes,) = rpc.pickle_code(f.__code__)
-        self.assertIs(func, rpc.unpickle_code)
+        func_, (cbytes,) = rpc.pickle_code(f.__code__)
+        self.assertIs(func_, rpc.unpickle_code)
         self.assertIn(b'test_rpc.py', cbytes)
         code = rpc.unpickle_code(cbytes)
         self.assertEqual(code.co_names, ('a', 'b', 'c'))

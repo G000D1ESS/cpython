@@ -29,9 +29,9 @@ class AsyncIOInteractiveConsole(code.InteractiveConsole):
             repl_future = None
             repl_future_interrupted = False
 
-            func = types.FunctionType(code, self.locals)
+            func_ = types.FunctionType(code, self.locals)
             try:
-                coro = func()
+                coro = func_()
             except SystemExit:
                 raise
             except KeyboardInterrupt as ex:

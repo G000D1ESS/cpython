@@ -82,10 +82,10 @@ class BaseTest(unittest.TestCase):
     def tearDown(self):
         rmtree(self.env_dir)
 
-    def run_with_capture(self, func, *args, **kwargs):
+    def run_with_capture(self, func_, *args, **kwargs):
         with captured_stdout() as output:
             with captured_stderr() as error:
-                func(*args, **kwargs)
+                func_(*args, **kwargs)
         return output.getvalue(), error.getvalue()
 
     def get_env_file(self, *args):

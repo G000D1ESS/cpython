@@ -217,8 +217,8 @@ class MiscTest(unittest.TestCase):
         def do(bad):
             not bad
 
-        for func in (do, operator.not_):
-            self.assertRaises(Exc, func, Bad())
+        for func_ in (do, operator.not_):
+            self.assertRaises(Exc, func_, Bad())
 
     @support.no_tracing
     def test_recursion(self):

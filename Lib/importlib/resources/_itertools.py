@@ -17,8 +17,8 @@ def only(iterable, default=None, too_long=None):
     Traceback (most recent call last):
     ...
     TypeError
-    Note that :func:`only` attempts to advance *iterable* twice to ensure there
-    is only one item.  See :func:`spy` or :func:`peekable` to check
+    Note that :func_:`only` attempts to advance *iterable* twice to ensure there
+    is only one item.  See :func_:`spy` or :func_:`peekable` to check
     iterable contents less destructively.
     """
     it = iter(iterable)

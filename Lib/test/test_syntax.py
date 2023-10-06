@@ -2253,7 +2253,7 @@ def func2():
 
         # Some more complex examples:
         code = """\
-func(
+func_(
     a=["unclosed], # Need a quote in this comment: "
     b=2,
 )

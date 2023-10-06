@@ -270,7 +270,7 @@ def get_annotations(obj, *, globals=None, locals=None, eval_str=False):
                 unwrap = unwrap.__wrapped__
                 continue
             if isinstance(unwrap, functools.partial):
-                unwrap = unwrap.func
+                unwrap = unwrap.func_
                 continue
             break
         if hasattr(unwrap, "__globals__"):
@@ -408,14 +408,14 @@ def _has_coroutine_mark(f):
     f = functools._unwrap_partial(f)
     return getattr(f, "_is_coroutine_marker", None) is _is_coroutine_marker
 
-def markcoroutinefunction(func):
+def markcoroutinefunction(func_):
     """
     Decorator to ensure callable is recognised as a coroutine function.
     """
-    if hasattr(func, '__func__'):
-        func = func.__func__
-    func._is_coroutine_marker = _is_coroutine_marker
-    return func
+    if hasattr(func_, '__func__'):
+        func_ = func_.__func__
+    func_._is_coroutine_marker = _is_coroutine_marker
+    return func_
 
 def iscoroutinefunction(obj):
     """Return true if the object is a coroutine function.
@@ -744,8 +744,8 @@ def getmro(cls):
 
 # -------------------------------------------------------- function helpers
 
-def unwrap(func, *, stop=None):
-    """Get the object wrapped by *func*.
+def unwrap(func_, *, stop=None):
+    """Get the object wrapped by *func_*.
 
    Follows the chain of :attr:`__wrapped__` attributes returning the last
    object in the chain.
@@ -754,7 +754,7 @@ def unwrap(func, *, stop=None):
    as its sole argument that allows the unwrapping to be terminated early if
    the callback returns a true value. If the callback never returns a true
    value, the last object in the chain is returned as usual. For example,
-   :func:`signature` uses this to stop unwrapping if any object in the
+   :func_:`signature` uses this to stop unwrapping if any object in the
    chain has a ``__signature__`` attribute defined.
 
    :exc:`ValueError` is raised if a cycle is encountered.
@@ -766,18 +766,18 @@ def unwrap(func, *, stop=None):
     else:
         def _is_wrapper(f):
             return hasattr(f, '__wrapped__') and not stop(f)
-    f = func  # remember the original func for error reporting
+    f = func_  # remember the original func_ for error reporting
     # Memoise by id to tolerate non-hashable objects, but store objects to
     # ensure they aren't destroyed, which would allow their IDs to be reused.
     memo = {id(f): f}
     recursion_limit = sys.getrecursionlimit()
-    while _is_wrapper(func):
-        func = func.__wrapped__
-        id_func = id(func)
+    while _is_wrapper(func_):
+        func_ = func_.__wrapped__
+        id_func = id(func_)
         if (id_func in memo) or (len(memo) >= recursion_limit):
             raise ValueError('wrapper loop when unwrapping {!r}'.format(f))
-        memo[id_func] = func
-    return func
+        memo[id_func] = func_
+    return func_
 
 # -------------------------------------------------- source code extraction
 def indentsize(line):
@@ -785,11 +785,11 @@ def indentsize(line):
     expline = line.expandtabs()
     return len(expline) - len(expline.lstrip())
 
-def _findclass(func):
-    cls = sys.modules.get(func.__module__)
+def _findclass(func_):
+    cls = sys.modules.get(func_.__module__)
     if cls is None:
         return None
-    for name in func.__qualname__.split('.')[:-1]:
+    for name in func_.__qualname__.split('.')[:-1]:
         cls = getattr(cls, name)
     if not isclass(cls):
         return None
@@ -832,9 +832,9 @@ def _finddoc(obj):
             cls = self.__class__
     # Should be tested before isdatadescriptor().
     elif isinstance(obj, property):
-        func = obj.fget
-        name = func.__name__
-        cls = _findclass(func)
+        func_ = obj.fget
+        name = func_.__name__
+        cls = _findclass(func_)
         if cls is None or getattr(cls, name) is not obj:
             return None
     elif ismethoddescriptor(obj) or isdatadescriptor(obj):
@@ -1352,7 +1352,7 @@ def getargs(co):
 FullArgSpec = namedtuple('FullArgSpec',
     'args, varargs, varkw, defaults, kwonlyargs, kwonlydefaults, annotations')
 
-def getfullargspec(func):
+def getfullargspec(func_):
     """Get the names and default values of a callable object's parameters.
 
     A tuple of seven things is returned:
@@ -1385,7 +1385,7 @@ def getfullargspec(func):
         # getfullargspec() historically ignored __wrapped__ attributes,
         # so we ensure that remains the case in 3.3+
 
-        sig = _signature_from_callable(func,
+        sig = _signature_from_callable(func_,
                                        follow_wrapper_chains=False,
                                        skip_bound_arg=False,
                                        sigcls=Signature,
@@ -1434,11 +1434,11 @@ def getfullargspec(func):
             annotations[name] = param.annotation
 
     if not kwdefaults:
-        # compatibility with 'func.__kwdefaults__'
+        # compatibility with 'func_.__kwdefaults__'
         kwdefaults = None
 
     if not defaults:
-        # compatibility with 'func.__defaults__'
+        # compatibility with 'func_.__defaults__'
         defaults = None
 
     return FullArgSpec(posonlyargs + args, varargs, varkw, defaults,
@@ -1538,21 +1538,21 @@ def _too_many(f_name, args, kwonly, varargs, defcount, given, values):
             (f_name, sig, "s" if plural else "", given, kwonly_sig,
              "was" if given == 1 and not kwonly_given else "were"))
 
-def getcallargs(func, /, *positional, **named):
+def getcallargs(func_, /, *positional, **named):
     """Get the mapping of arguments to values.
 
     A dict is returned, with keys the function argument names (including the
     names of the * and ** arguments, if any), and values the respective bound
     values from 'positional' and 'named'."""
-    spec = getfullargspec(func)
+    spec = getfullargspec(func_)
     args, varargs, varkw, defaults, kwonlyargs, kwonlydefaults, ann = spec
-    f_name = func.__name__
+    f_name = func_.__name__
     arg2value = {}
 
 
-    if ismethod(func) and func.__self__ is not None:
+    if ismethod(func_) and func_.__self__ is not None:
         # implicit 'self' (or 'cls' for classmethods) argument
-        positional = (func.__self__,) + positional
+        positional = (func_.__self__,) + positional
     num_pos = len(positional)
     num_args = len(args)
     num_defaults = len(defaults) if defaults else 0
@@ -1600,7 +1600,7 @@ def getcallargs(func, /, *positional, **named):
 
 ClosureVars = namedtuple('ClosureVars', 'nonlocals globals builtins unbound')
 
-def getclosurevars(func):
+def getclosurevars(func_):
     """
     Get the mapping of free variables to their current values.
 
@@ -1609,26 +1609,26 @@ def getclosurevars(func):
     set of unbound names that could not be resolved is also provided.
     """
 
-    if ismethod(func):
-        func = func.__func__
+    if ismethod(func_):
+        func_ = func_.__func__
 
-    if not isfunction(func):
-        raise TypeError("{!r} is not a Python function".format(func))
+    if not isfunction(func_):
+        raise TypeError("{!r} is not a Python function".format(func_))
 
-    code = func.__code__
+    code = func_.__code__
     # Nonlocal references are named in co_freevars and resolved
     # by looking them up in __closure__ by positional index
-    if func.__closure__ is None:
+    if func_.__closure__ is None:
         nonlocal_vars = {}
     else:
         nonlocal_vars = {
             var : cell.cell_contents
-            for var, cell in zip(code.co_freevars, func.__closure__)
+            for var, cell in zip(code.co_freevars, func_.__closure__)
        }
 
     # Global and builtin references are named in co_names and resolved
     # by looking them up in __globals__ or __builtins__
-    global_ns = func.__globals__
+    global_ns = func_.__globals__
     builtin_ns = global_ns.get("__builtins__", builtins.__dict__)
     if ismodule(builtin_ns):
         builtin_ns = builtin_ns.__dict__
@@ -2349,52 +2349,52 @@ def _signature_fromstr(cls, obj, s, skip_bound_arg=True):
     return cls(parameters, return_annotation=cls.empty)
 
 
-def _signature_from_builtin(cls, func, skip_bound_arg=True):
+def _signature_from_builtin(cls, func_, skip_bound_arg=True):
     """Private helper function to get signature for
     builtin callables.
     """
 
-    if not _signature_is_builtin(func):
+    if not _signature_is_builtin(func_):
         raise TypeError("{!r} is not a Python builtin "
-                        "function".format(func))
+                        "function".format(func_))
 
-    s = getattr(func, "__text_signature__", None)
+    s = getattr(func_, "__text_signature__", None)
     if not s:
-        raise ValueError("no signature found for builtin {!r}".format(func))
+        raise ValueError("no signature found for builtin {!r}".format(func_))
 
-    return _signature_fromstr(cls, func, s, skip_bound_arg)
+    return _signature_fromstr(cls, func_, s, skip_bound_arg)
 
 
-def _signature_from_function(cls, func, skip_bound_arg=True,
+def _signature_from_function(cls, func_, skip_bound_arg=True,
                              globals=None, locals=None, eval_str=False):
     """Private helper: constructs Signature for the given python function."""
 
     is_duck_function = False
-    if not isfunction(func):
-        if _signature_is_functionlike(func):
+    if not isfunction(func_):
+        if _signature_is_functionlike(func_):
             is_duck_function = True
         else:
             # If it's not a pure Python function, and not a duck type
             # of pure function:
-            raise TypeError('{!r} is not a Python function'.format(func))
+            raise TypeError('{!r} is not a Python function'.format(func_))
 
-    s = getattr(func, "__text_signature__", None)
+    s = getattr(func_, "__text_signature__", None)
     if s:
-        return _signature_fromstr(cls, func, s, skip_bound_arg)
+        return _signature_fromstr(cls, func_, s, skip_bound_arg)
 
     Parameter = cls._parameter_cls
 
     # Parameter information.
-    func_code = func.__code__
+    func_code = func_.__code__
     pos_count = func_code.co_argcount
     arg_names = func_code.co_varnames
     posonly_count = func_code.co_posonlyargcount
     positional = arg_names[:pos_count]
     keyword_only_count = func_code.co_kwonlyargcount
     keyword_only = arg_names[pos_count:pos_count + keyword_only_count]
-    annotations = get_annotations(func, globals=globals, locals=locals, eval_str=eval_str)
-    defaults = func.__defaults__
-    kwdefaults = func.__kwdefaults__
+    annotations = get_annotations(func_, globals=globals, locals=locals, eval_str=eval_str)
+    defaults = func_.__defaults__
+    kwdefaults = func_.__kwdefaults__
 
     if defaults:
         pos_default_count = len(defaults)
@@ -2453,7 +2453,7 @@ def _signature_from_function(cls, func, skip_bound_arg=True,
         parameters.append(Parameter(name, annotation=annotation,
                                     kind=_VAR_KEYWORD))
 
-    # Is 'func' is a pure Python function - don't validate the
+    # Is 'func_' is a pure Python function - don't validate the
     # parameters list (for correct order and defaults), it should be OK.
     return cls(parameters,
                return_annotation=annotations.get('return', _empty),
@@ -2538,7 +2538,7 @@ def _signature_from_callable(obj, *,
             # (usually `self`, or `cls`) will not be passed
             # automatically (as for boundmethods)
 
-            wrapped_sig = _get_signature_of(partialmethod.func)
+            wrapped_sig = _get_signature_of(partialmethod.func_)
 
             sig = _signature_get_partial(wrapped_sig, partialmethod, (None,))
             first_wrapped_param = tuple(wrapped_sig.parameters.values())[0]
@@ -2565,7 +2565,7 @@ def _signature_from_callable(obj, *,
                                        skip_bound_arg=skip_bound_arg)
 
     if isinstance(obj, functools.partial):
-        wrapped_sig = _get_signature_of(obj.func)
+        wrapped_sig = _get_signature_of(obj.func_)
         return _signature_get_partial(wrapped_sig, obj)
 
     sig = None

@@ -52,7 +52,7 @@ def capture(*args, **kw):
 
 def signature(part):
     """ return the signature of a partial object """
-    return (part.func, part.args, part.keywords, part.__dict__)
+    return (part.func_, part.args, part.keywords, part.__dict__)
 
 class MyTuple(tuple):
     pass
@@ -78,12 +78,12 @@ class TestPartial:
     def test_attributes(self):
         p = self.partial(capture, 1, 2, a=10, b=20)
         # attributes should be readable
-        self.assertEqual(p.func, capture)
+        self.assertEqual(p.func_, capture)
         self.assertEqual(p.args, (1, 2))
         self.assertEqual(p.keywords, dict(a=10, b=20))
 
     def test_argument_checking(self):
-        self.assertRaises(TypeError, self.partial)     # need at least a func arg
+        self.assertRaises(TypeError, self.partial)     # need at least a func_ arg
         try:
             self.partial(2)()
         except TypeError:
@@ -93,10 +93,10 @@ class TestPartial:
 
     def test_protection_of_callers_dict_argument(self):
         # a caller's dictionary should not be altered by partial
-        def func(a=10, b=20):
+        def func_(a=10, b=20):
             return a
         d = {'a':3}
-        p = self.partial(func, a=5)
+        p = self.partial(func_, a=5)
         self.assertEqual(p(**d), 3)
         self.assertEqual(d, {'a':3})
         p(b=7)
@@ -170,10 +170,10 @@ class TestPartial:
     def test_weakref(self):
         f = self.partial(int, base=16)
         p = proxy(f)
-        self.assertEqual(f.func, p.func)
+        self.assertEqual(f.func_, p.func_)
         f = None
         support.gc_collect()  # For PyPy or other GCs.
-        self.assertRaises(ReferenceError, getattr, p, 'func')
+        self.assertRaises(ReferenceError, getattr, p, 'func_')
 
     def test_with_bound_and_unbound_methods(self):
         data = list(map(str, range(10)))
@@ -399,7 +399,7 @@ class TestPartialC(TestPartial, unittest.TestCase):
     def test_attributes_unwritable(self):
         # attributes should not be writable
         p = self.partial(capture, 1, 2, a=10, b=20)
-        self.assertRaises(AttributeError, setattr, p, 'func', map)
+        self.assertRaises(AttributeError, setattr, p, 'func_', map)
         self.assertRaises(AttributeError, setattr, p, 'args', (1, 2))
         self.assertRaises(AttributeError, setattr, p, 'keywords', dict(a=1, b=2))
 
@@ -467,7 +467,7 @@ class TestPartialMethod(unittest.TestCase):
         positional = functools.partialmethod(capture, 1)
         keywords = functools.partialmethod(capture, a=2)
         both = functools.partialmethod(capture, 3, b=4)
-        spec_keywords = functools.partialmethod(capture, self=1, func=2)
+        spec_keywords = functools.partialmethod(capture, self=1, func_=2)
 
         nested = functools.partialmethod(positional, 5)
 
@@ -501,7 +501,7 @@ class TestPartialMethod(unittest.TestCase):
 
         self.assertEqual(self.A.both(self.a, 5, c=6), ((self.a, 3, 5), {'b': 4, 'c': 6}))
 
-        self.assertEqual(self.a.spec_keywords(), ((self.a,), {'self': 1, 'func': 2}))
+        self.assertEqual(self.a.spec_keywords(), ((self.a,), {'self': 1, 'func_': 2}))
 
     def test_nested(self):
         self.assertEqual(self.a.nested(), ((self.a, 1, 5), {}))
@@ -561,7 +561,7 @@ class TestPartialMethod(unittest.TestCase):
                 method = functools.partialmethod()
         with self.assertRaises(TypeError):
             class B:
-                method = functools.partialmethod(func=capture, a=1)
+                method = functools.partialmethod(func_=capture, a=1)
 
     def test_repr(self):
         self.assertEqual(repr(vars(self.A)['both']),
@@ -579,8 +579,8 @@ class TestPartialMethod(unittest.TestCase):
         self.assertTrue(Abstract.add.__isabstractmethod__)
         self.assertTrue(Abstract.add5.__isabstractmethod__)
 
-        for func in [self.A.static, self.A.cls, self.A.over_partial, self.A.nested, self.A.both]:
-            self.assertFalse(getattr(func, '__isabstractmethod__', False))
+        for func_ in [self.A.static, self.A.cls, self.A.over_partial, self.A.nested, self.A.both]:
+            self.assertFalse(getattr(func_, '__isabstractmethod__', False))
 
     def test_positional_only(self):
         def f(a, b, /):
@@ -803,8 +803,8 @@ class TestReduce:
         self.assertRaises(TypeError, self.reduce)
         self.assertRaises(TypeError, self.reduce, 42, 42)
         self.assertRaises(TypeError, self.reduce, 42, 42, 42)
-        self.assertEqual(self.reduce(42, "1"), "1") # func is never called with one item
-        self.assertEqual(self.reduce(42, "", "1"), "1") # func is never called with one item
+        self.assertEqual(self.reduce(42, "1"), "1") # func_ is never called with one item
+        self.assertEqual(self.reduce(42, "", "1"), "1") # func_ is never called with one item
         self.assertRaises(TypeError, self.reduce, 42, (42, 42))
         self.assertRaises(TypeError, self.reduce, add, []) # arg 2 must not be empty sequence with no initial value
         self.assertRaises(TypeError, self.reduce, add, "")
@@ -1536,15 +1536,15 @@ class TestLRU:
         # http://bugs.python.org/issue13177
         for maxsize in (None, 128):
             @self.module.lru_cache(maxsize)
-            def func(i):
+            def func_(i):
                 return 'abc'[i]
-            self.assertEqual(func(0), 'a')
+            self.assertEqual(func_(0), 'a')
             with self.assertRaises(IndexError) as cm:
-                func(15)
+                func_(15)
             self.assertIsNone(cm.exception.__context__)
             # Verify that the previous exception did not result in a cached entry
             with self.assertRaises(IndexError):
-                func(15)
+                func_(15)
 
     def test_lru_with_types(self):
         for maxsize in (None, 128):
@@ -1787,7 +1787,7 @@ class TestLRU:
         cls = self.__class__
         for f in cls.cached_func[0], cls.cached_meth, cls.cached_staticmeth:
             for proto in range(pickle.HIGHEST_PROTOCOL + 1):
-                with self.subTest(proto=proto, func=f):
+                with self.subTest(proto=proto, func_=f):
                     f_copy = pickle.loads(pickle.dumps(f, proto))
                     self.assertIs(f_copy, f)
 
@@ -1799,7 +1799,7 @@ class TestLRU:
         funcs = (cls.cached_func[0], cls.cached_meth, cls.cached_staticmeth,
                  self.module.lru_cache(2)(part))
         for f in funcs:
-            with self.subTest(func=f):
+            with self.subTest(func_=f):
                 f_copy = copy.copy(f)
                 self.assertIs(f_copy, f)
 
@@ -1811,7 +1811,7 @@ class TestLRU:
         funcs = (cls.cached_func[0], cls.cached_meth, cls.cached_staticmeth,
                  self.module.lru_cache(2)(part))
         for f in funcs:
-            with self.subTest(func=f):
+            with self.subTest(func_=f):
                 f_copy = copy.deepcopy(f)
                 self.assertIs(f_copy, f)
 
@@ -2593,7 +2593,7 @@ class TestSingleDispatch(unittest.TestCase):
     def test_method_wrapping_attributes(self):
         class A:
             @functools.singledispatchmethod
-            def func(self, arg: int) -> str:
+            def func_(self, arg: int) -> str:
                 """My function docstring"""
                 return str(arg)
             @functools.singledispatchmethod
@@ -2608,8 +2608,8 @@ class TestSingleDispatch(unittest.TestCase):
                 return str(arg)
 
         for meth in (
-            A.func,
-            A().func,
+            A.func_,
+            A().func_,
             A.cls_func,
             A().cls_func,
             A.static_func,
@@ -2619,16 +2619,16 @@ class TestSingleDispatch(unittest.TestCase):
                 self.assertEqual(meth.__doc__, 'My function docstring')
                 self.assertEqual(meth.__annotations__['arg'], int)
 
-        self.assertEqual(A.func.__name__, 'func')
-        self.assertEqual(A().func.__name__, 'func')
+        self.assertEqual(A.func_.__name__, 'func_')
+        self.assertEqual(A().func_.__name__, 'func_')
         self.assertEqual(A.cls_func.__name__, 'cls_func')
         self.assertEqual(A().cls_func.__name__, 'cls_func')
         self.assertEqual(A.static_func.__name__, 'static_func')
         self.assertEqual(A().static_func.__name__, 'static_func')
 
     def test_double_wrapped_methods(self):
-        def classmethod_friendly_decorator(func):
-            wrapped = func.__func__
+        def classmethod_friendly_decorator(func_):
+            wrapped = func_.__func__
             @classmethod
             @functools.wraps(wrapped)
             def wrapper(*args, **kwargs):

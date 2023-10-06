@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         module.messagebox = orig_mbox
     ---
-    For 'ask' functions, set func.result return value before calling the method
+    For 'ask' functions, set func_.result return value before calling the method
     that uses the message function. When messagebox functions are the
     only GUI calls in a method, this replacement makes the method GUI-free,
     """
@@ -296,8 +296,8 @@ class Text:
     #  The following is a Misc method inherited by Text.
     # It should properly go in a Misc mock, but is included here for now.
 
-    def bind(sequence=None, func=None, add=None):
-        "Bind to this widget at event sequence a call to function func."
+    def bind(sequence=None, func_=None, add=None):
+        "Bind to this widget at event sequence a call to function func_."
         pass
 
 

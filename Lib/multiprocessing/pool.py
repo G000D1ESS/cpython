@@ -120,11 +120,11 @@ def worker(inqueue, outqueue, initializer=None, initargs=(), maxtasks=None,
             util.debug('worker got sentinel -- exiting')
             break
 
-        job, i, func, args, kwds = task
+        job, i, func_, args, kwds = task
         try:
-            result = (True, func(*args, **kwds))
+            result = (True, func_(*args, **kwds))
         except Exception as e:
-            if wrap_exception and func is not _helper_reraises_exception:
+            if wrap_exception and func_ is not _helper_reraises_exception:
                 e = ExceptionWithTraceback(e, e.__traceback__)
             result = (False, e)
         try:
@@ -135,7 +135,7 @@ def worker(inqueue, outqueue, initializer=None, initargs=(), maxtasks=None,
                 wrapped))
             put((job, i, (False, wrapped)))
 
-        task = job = result = func = args = kwds = None
+        task = job = result = func_ = args = kwds = None
         completed += 1
     util.debug('worker exiting after %d tasks' % completed)
 
@@ -352,48 +352,48 @@ class Pool(object):
         if self._state != RUN:
             raise ValueError("Pool not running")
 
-    def apply(self, func, args=(), kwds={}):
+    def apply(self, func_, args=(), kwds={}):
         '''
-        Equivalent of `func(*args, **kwds)`.
+        Equivalent of `func_(*args, **kwds)`.
         Pool must be running.
         '''
-        return self.apply_async(func, args, kwds).get()
+        return self.apply_async(func_, args, kwds).get()
 
-    def map(self, func, iterable, chunksize=None):
+    def map(self, func_, iterable, chunksize=None):
         '''
-        Apply `func` to each element in `iterable`, collecting the results
+        Apply `func_` to each element in `iterable`, collecting the results
         in a list that is returned.
         '''
-        return self._map_async(func, iterable, mapstar, chunksize).get()
+        return self._map_async(func_, iterable, mapstar, chunksize).get()
 
-    def starmap(self, func, iterable, chunksize=None):
+    def starmap(self, func_, iterable, chunksize=None):
         '''
         Like `map()` method but the elements of the `iterable` are expected to
         be iterables as well and will be unpacked as arguments. Hence
-        `func` and (a, b) becomes func(a, b).
+        `func_` and (a, b) becomes func_(a, b).
         '''
-        return self._map_async(func, iterable, starmapstar, chunksize).get()
+        return self._map_async(func_, iterable, starmapstar, chunksize).get()
 
-    def starmap_async(self, func, iterable, chunksize=None, callback=None,
+    def starmap_async(self, func_, iterable, chunksize=None, callback=None,
             error_callback=None):
         '''
         Asynchronous version of `starmap()` method.
         '''
-        return self._map_async(func, iterable, starmapstar, chunksize,
+        return self._map_async(func_, iterable, starmapstar, chunksize,
                                callback, error_callback)
 
-    def _guarded_task_generation(self, result_job, func, iterable):
+    def _guarded_task_generation(self, result_job, func_, iterable):
         '''Provides a generator of tasks for imap and imap_unordered with
         appropriate handling for iterables which throw exceptions during
         iteration.'''
         try:
             i = -1
             for i, x in enumerate(iterable):
-                yield (result_job, i, func, (x,), {})
+                yield (result_job, i, func_, (x,), {})
         except Exception as e:
             yield (result_job, i+1, _helper_reraises_exception, (e,), {})
 
-    def imap(self, func, iterable, chunksize=1):
+    def imap(self, func_, iterable, chunksize=1):
         '''
         Equivalent of `map()` -- can be MUCH slower than `Pool.map()`.
         '''
@@ -402,7 +402,7 @@ class Pool(object):
             result = IMapIterator(self)
             self._taskqueue.put(
                 (
-                    self._guarded_task_generation(result._job, func, iterable),
+                    self._guarded_task_generation(result._job, func_, iterable),
                     result._set_length
                 ))
             return result
@@ -411,7 +411,7 @@ class Pool(object):
                 raise ValueError(
                     "Chunksize must be 1+, not {0:n}".format(
                         chunksize))
-            task_batches = Pool._get_tasks(func, iterable, chunksize)
+            task_batches = Pool._get_tasks(func_, iterable, chunksize)
             result = IMapIterator(self)
             self._taskqueue.put(
                 (
@@ -422,7 +422,7 @@ class Pool(object):
                 ))
             return (item for chunk in result for item in chunk)
 
-    def imap_unordered(self, func, iterable, chunksize=1):
+    def imap_unordered(self, func_, iterable, chunksize=1):
         '''
         Like `imap()` method but ordering of results is arbitrary.
         '''
@@ -431,7 +431,7 @@ class Pool(object):
             result = IMapUnorderedIterator(self)
             self._taskqueue.put(
                 (
-                    self._guarded_task_generation(result._job, func, iterable),
+                    self._guarded_task_generation(result._job, func_, iterable),
                     result._set_length
                 ))
             return result
@@ -439,7 +439,7 @@ class Pool(object):
             if chunksize < 1:
                 raise ValueError(
                     "Chunksize must be 1+, not {0!r}".format(chunksize))
-            task_batches = Pool._get_tasks(func, iterable, chunksize)
+            task_batches = Pool._get_tasks(func_, iterable, chunksize)
             result = IMapUnorderedIterator(self)
             self._taskqueue.put(
                 (
@@ -450,25 +450,25 @@ class Pool(object):
                 ))
             return (item for chunk in result for item in chunk)
 
-    def apply_async(self, func, args=(), kwds={}, callback=None,
+    def apply_async(self, func_, args=(), kwds={}, callback=None,
             error_callback=None):
         '''
         Asynchronous version of `apply()` method.
         '''
         self._check_running()
         result = ApplyResult(self, callback, error_callback)
-        self._taskqueue.put(([(result._job, 0, func, args, kwds)], None))
+        self._taskqueue.put(([(result._job, 0, func_, args, kwds)], None))
         return result
 
-    def map_async(self, func, iterable, chunksize=None, callback=None,
+    def map_async(self, func_, iterable, chunksize=None, callback=None,
             error_callback=None):
         '''
         Asynchronous version of `map()` method.
         '''
-        return self._map_async(func, iterable, mapstar, chunksize, callback,
+        return self._map_async(func_, iterable, mapstar, chunksize, callback,
             error_callback)
 
-    def _map_async(self, func, iterable, mapper, chunksize=None, callback=None,
+    def _map_async(self, func_, iterable, mapper, chunksize=None, callback=None,
             error_callback=None):
         '''
         Helper function to implement map, starmap and their async counterparts.
@@ -484,7 +484,7 @@ class Pool(object):
         if len(iterable) == 0:
             chunksize = 0
 
-        task_batches = Pool._get_tasks(func, iterable, chunksize)
+        task_batches = Pool._get_tasks(func_, iterable, chunksize)
         result = MapResult(self, chunksize, len(iterable), callback,
                            error_callback=error_callback)
         self._taskqueue.put(
@@ -631,13 +631,13 @@ class Pool(object):
               len(cache), thread._state)
 
     @staticmethod
-    def _get_tasks(func, it, size):
+    def _get_tasks(func_, it, size):
         it = iter(it)
         while 1:
             x = tuple(itertools.islice(it, size))
             if not x:
                 return
-            yield (func, x)
+            yield (func_, x)
 
     def __reduce__(self):
         raise NotImplementedError(

@@ -244,13 +244,13 @@ def _keep_alive(x, memo):
         # aha, this is the first one :-)
         memo[id(memo)]=[x]
 
-def _reconstruct(x, memo, func, args,
+def _reconstruct(x, memo, func_, args,
                  state=None, listiter=None, dictiter=None,
                  *, deepcopy=deepcopy):
     deep = memo is not None
     if deep and args:
         args = (deepcopy(arg, memo) for arg in args)
-    y = func(*args)
+    y = func_(*args)
     if deep:
         memo[id(x)] = y
 

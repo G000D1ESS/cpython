@@ -126,11 +126,11 @@ class SymtableTest(unittest.TestCase):
         self.assertEqual(self.spam.get_lineno(), 14)
 
     def test_function_info(self):
-        func = self.spam
-        self.assertEqual(sorted(func.get_parameters()), ["a", "b", "kw", "var"])
+        func_ = self.spam
+        self.assertEqual(sorted(func_.get_parameters()), ["a", "b", "kw", "var"])
         expected = ['a', 'b', 'internal', 'kw', 'other_internal', 'some_var', 'var', 'x']
-        self.assertEqual(sorted(func.get_locals()), expected)
-        self.assertEqual(sorted(func.get_globals()), ["bar", "glob", "some_assigned_global_var"])
+        self.assertEqual(sorted(func_.get_locals()), expected)
+        self.assertEqual(sorted(func_.get_globals()), ["bar", "glob", "some_assigned_global_var"])
         self.assertEqual(self.internal.get_frees(), ("x",))
 
     def test_globals(self):

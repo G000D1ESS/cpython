@@ -91,11 +91,11 @@ def pathdirs():
             normdirs.append(normdir)
     return dirs
 
-def _findclass(func):
-    cls = sys.modules.get(func.__module__)
+def _findclass(func_):
+    cls = sys.modules.get(func_.__module__)
     if cls is None:
         return None
-    for name in func.__qualname__.split('.')[:-1]:
+    for name in func_.__qualname__.split('.')[:-1]:
         cls = getattr(cls, name)
     if not inspect.isclass(cls):
         return None
@@ -127,9 +127,9 @@ def _finddoc(obj):
             cls = self.__class__
     # Should be tested before isdatadescriptor().
     elif isinstance(obj, property):
-        func = obj.fget
-        name = func.__name__
-        cls = _findclass(func)
+        func_ = obj.fget
+        name = func_.__name__
+        cls = _findclass(func_)
         if cls is None or getattr(cls, name) is not obj:
             return None
     elif inspect.ismethoddescriptor(obj) or inspect.isdatadescriptor(obj):

@@ -1136,14 +1136,14 @@ class GeneralModuleTests(unittest.TestCase):
         # when looking at the lower 16 or 32 bits.
         sizes = {socket.htonl: 32, socket.ntohl: 32,
                  socket.htons: 16, socket.ntohs: 16}
-        for func, size in sizes.items():
+        for func_, size in sizes.items():
             mask = (1<<size) - 1
             for i in (0, 1, 0xffff, ~0xffff, 2, 0x01234567, 0x76543210):
-                self.assertEqual(i & mask, func(func(i&mask)) & mask)
+                self.assertEqual(i & mask, func_(func_(i&mask)) & mask)
 
-            swapped = func(mask)
+            swapped = func_(mask)
             self.assertEqual(swapped & mask, mask)
-            self.assertRaises(OverflowError, func, 1<<34)
+            self.assertRaises(OverflowError, func_, 1<<34)
 
     @support.cpython_only
     def testNtoHErrors(self):
@@ -1252,8 +1252,8 @@ class GeneralModuleTests(unittest.TestCase):
         from socket import inet_aton as f, inet_pton, AF_INET
         g = lambda a: inet_pton(AF_INET, a)
 
-        assertInvalid = lambda func,a: self.assertRaises(
-            (OSError, ValueError), func, a
+        assertInvalid = lambda func_,a: self.assertRaises(
+            (OSError, ValueError), func_, a
         )
 
         self.assertEqual(b'\x00\x00\x00\x00', f('0.0.0.0'))
@@ -1348,8 +1348,8 @@ class GeneralModuleTests(unittest.TestCase):
     def testStringToIPv4(self):
         from socket import inet_ntoa as f, inet_ntop, AF_INET
         g = lambda a: inet_ntop(AF_INET, a)
-        assertInvalid = lambda func,a: self.assertRaises(
-            (OSError, ValueError), func, a
+        assertInvalid = lambda func_,a: self.assertRaises(
+            (OSError, ValueError), func_, a
         )
 
         self.assertEqual('1.0.1.0', f(b'\x01\x00\x01\x00'))
@@ -4644,13 +4644,13 @@ class InterruptedRecvTimeoutTest(InterruptedTimeoutBase, UDPTestBase):
         super().setUp()
         self.serv.settimeout(self.timeout)
 
-    def checkInterruptedRecv(self, func, *args, **kwargs):
-        # Check that func(*args, **kwargs) raises
+    def checkInterruptedRecv(self, func_, *args, **kwargs):
+        # Check that func_(*args, **kwargs) raises
         # errno of EINTR when interrupted by a signal.
         try:
             self.setAlarm(self.alarm_time)
             with self.assertRaises(ZeroDivisionError) as cm:
-                func(*args, **kwargs)
+                func_(*args, **kwargs)
         finally:
             self.setAlarm(0)
 
@@ -4703,15 +4703,15 @@ class InterruptedSendTimeoutTest(InterruptedTimeoutBase,
     def doConnect(self):
         self.serv_conn.connect(self.serv_addr)
 
-    def checkInterruptedSend(self, func, *args, **kwargs):
-        # Check that func(*args, **kwargs), run in a loop, raises
+    def checkInterruptedSend(self, func_, *args, **kwargs):
+        # Check that func_(*args, **kwargs), run in a loop, raises
         # OSError with an errno of EINTR when interrupted by a
         # signal.
         try:
             with self.assertRaises(ZeroDivisionError) as cm:
                 while True:
                     self.setAlarm(self.alarm_time)
-                    func(*args, **kwargs)
+                    func_(*args, **kwargs)
         finally:
             self.setAlarm(0)
 

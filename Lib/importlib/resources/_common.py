@@ -18,7 +18,7 @@ Package = Union[types.ModuleType, str]
 Anchor = Package
 
 
-def package_to_anchor(func):
+def package_to_anchor(func_):
     """
     Replace 'package' parameter as 'anchor' and warn about the change.
 
@@ -30,20 +30,20 @@ def package_to_anchor(func):
     """
     undefined = object()
 
-    @functools.wraps(func)
+    @functools.wraps(func_)
     def wrapper(anchor=undefined, package=undefined):
         if package is not undefined:
             if anchor is not undefined:
-                return func(anchor, package)
+                return func_(anchor, package)
             warnings.warn(
                 "First parameter to files is renamed to 'anchor'",
                 DeprecationWarning,
                 stacklevel=2,
             )
-            return func(package)
+            return func_(package)
         elif anchor is undefined:
-            return func()
-        return func(anchor)
+            return func_()
+        return func_(anchor)
 
     return wrapper
 

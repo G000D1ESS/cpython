@@ -1387,13 +1387,13 @@ class BaseTaskTests:
 
 
     def test_wait_generator(self):
-        async def func(a):
+        async def func_(a):
             return a
 
         loop = self.new_test_loop()
 
         async def main():
-            tasks = (self.new_task(loop, func(i)) for i in range(10))
+            tasks = (self.new_task(loop, func_(i)) for i in range(10))
             done, pending = await asyncio.wait(tasks, return_when=asyncio.ALL_COMPLETED)
             self.assertEqual(len(done), 10)
             self.assertEqual(len(pending), 0)
@@ -1779,12 +1779,12 @@ class BaseTaskTests:
         self.assertTrue(asyncio.iscoroutinefunction(mock.AsyncMock()))
 
     def test_coroutine_non_gen_function(self):
-        async def func():
+        async def func_():
             return 'test'
 
-        self.assertTrue(asyncio.iscoroutinefunction(func))
+        self.assertTrue(asyncio.iscoroutinefunction(func_))
 
-        coro = func()
+        coro = func_()
         self.assertTrue(asyncio.iscoroutine(coro))
 
         res = self.loop.run_until_complete(coro)
@@ -1793,13 +1793,13 @@ class BaseTaskTests:
     def test_coroutine_non_gen_function_return_future(self):
         fut = self.new_future(self.loop)
 
-        async def func():
+        async def func_():
             return fut
 
         async def coro():
             fut.set_result('test')
 
-        t1 = self.new_task(self.loop, func())
+        t1 = self.new_task(self.loop, func_())
         t2 = self.new_task(self.loop, coro())
         res = self.loop.run_until_complete(t1)
         self.assertEqual(res, fut)
@@ -2515,11 +2515,11 @@ def add_subclass_tests(cls):
     def test_subclasses_ctask_cfuture(self):
         fut = self.Future(loop=self.loop)
 
-        async def func():
+        async def func_():
             self.loop.call_soon(lambda: fut.set_result('spam'))
             return await fut
 
-        task = self.Task(func(), loop=self.loop)
+        task = self.Task(func_(), loop=self.loop)
 
         result = self.loop.run_until_complete(task)
 

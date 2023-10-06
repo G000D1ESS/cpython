@@ -518,11 +518,11 @@ class Pdb(bdb.Bdb, cmd.Cmd):
             cmdlist.append(cmd)
         # Determine if we must stop
         try:
-            func = getattr(self, 'do_' + cmd)
+            func_ = getattr(self, 'do_' + cmd)
         except AttributeError:
-            func = self.default
+            func_ = self.default
         # one of the resuming commands
-        if func.__name__ in self.commands_resuming:
+        if func_.__name__ in self.commands_resuming:
             self.commands_doprompt[self.commands_bnum] = False
             self.cmdqueue = []
             return 1
@@ -745,15 +745,15 @@ class Pdb(bdb.Bdb, cmd.Cmd):
                 lineno = int(arg)
             except ValueError:
                 try:
-                    func = eval(arg,
+                    func_ = eval(arg,
                                 self.curframe.f_globals,
                                 self.curframe_locals)
                 except:
-                    func = arg
+                    func_ = arg
                 try:
-                    if hasattr(func, '__func__'):
-                        func = func.__func__
-                    code = func.__code__
+                    if hasattr(func_, '__func__'):
+                        func_ = func_.__func__
+                    code = func_.__code__
                     #use co_name to identify the bkpt (function names
                     #could be aliased, but co_name is invariant)
                     funcname = code.co_name
@@ -1300,13 +1300,13 @@ class Pdb(bdb.Bdb, cmd.Cmd):
         exc = sys.exception()
         self.error(self._format_exc(exc))
 
-    def _msg_val_func(self, arg, func):
+    def _msg_val_func(self, arg, func_):
         try:
             val = self._getval(arg)
         except:
             return  # _getval() has displayed the error
         try:
-            self.message(func(val))
+            self.message(func_(val))
         except:
             self._error_exc()
 

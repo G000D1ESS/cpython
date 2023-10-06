@@ -103,17 +103,17 @@ tests.append(test_aifc)
 def test_au(h, f):
     """AU and SND files"""
     if h.startswith(b'.snd'):
-        func = get_long_be
+        func_ = get_long_be
     elif h[:4] in (b'\0ds.', b'dns.'):
-        func = get_long_le
+        func_ = get_long_le
     else:
         return None
     filetype = 'au'
-    hdr_size = func(h[4:8])
-    data_size = func(h[8:12])
-    encoding = func(h[12:16])
-    rate = func(h[16:20])
-    nchannels = func(h[20:24])
+    hdr_size = func_(h[4:8])
+    data_size = func_(h[8:12])
+    encoding = func_(h[12:16])
+    rate = func_(h[16:20])
+    nchannels = func_(h[20:24])
     sample_size = 1 # default
     if encoding == 1:
         sample_bits = 'U'

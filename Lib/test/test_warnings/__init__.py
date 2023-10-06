@@ -1002,12 +1002,12 @@ class PyWarningsDisplayTests(WarningsDisplayTests, unittest.TestCase):
 
         with open(os_helper.TESTFN, 'w', encoding="utf-8") as fp:
             fp.write(textwrap.dedent("""
-                def func():
+                def func_():
                     f = open(__file__, "rb")
                     # Emit ResourceWarning
                     f = None
 
-                func()
+                func_()
             """))
 
         def run(*args):
@@ -1036,7 +1036,7 @@ class PyWarningsDisplayTests(WarningsDisplayTests, unittest.TestCase):
               f = None
             Object allocated at (most recent call last):
               File "{filename}", lineno 7
-                func()
+                func_()
               File "{filename}", lineno 3
                 f = open(__file__, "rb")
         ''').strip()

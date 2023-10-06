@@ -42,9 +42,9 @@ class TracebackCases(unittest.TestCase):
     # For now, a very minimal set of tests.  I want to be sure that
     # formatting of SyntaxErrors works based on changes for 2.1.
 
-    def get_exception_format(self, func, exc):
+    def get_exception_format(self, func_, exc):
         try:
-            func()
+            func_()
         except exc as value:
             return traceback.format_exception_only(exc, value)
         else:
@@ -674,8 +674,8 @@ class TracebackErrorLocationCaretTestBase:
             file.write("1 $ 0 / 1 / 2\n")
         self.addCleanup(unlink, TESTFN)
 
-        func = partial(exec, bytecode)
-        result_lines = self.get_exception(func)
+        func_ = partial(exec, bytecode)
+        result_lines = self.get_exception(func_)
 
         lineno_f = bytecode.co_firstlineno
         expected_error = (
@@ -696,8 +696,8 @@ class TracebackErrorLocationCaretTestBase:
             file.write(source)
         self.addCleanup(unlink, TESTFN)
 
-        func = partial(exec, bytecode)
-        result_lines = self.get_exception(func)
+        func_ = partial(exec, bytecode)
+        result_lines = self.get_exception(func_)
 
         lineno_f = bytecode.co_firstlineno
         expected_error = (
@@ -752,8 +752,8 @@ class TracebackErrorLocationCaretTestBase:
         result_lines = self.get_exception(exc)
         self.assertEqual(result_lines, expected_error.splitlines())
 
-    def assertSpecialized(self, func, expected_specialization):
-        result_lines = self.get_exception(func)
+    def assertSpecialized(self, func_, expected_specialization):
+        result_lines = self.get_exception(func_)
         specialization_line = result_lines[-1]
         self.assertEqual(specialization_line.lstrip(), expected_specialization)
 
@@ -790,10 +790,10 @@ class TracebackErrorLocationCaretTestBase:
                                       "~^^~~")
 
     def test_decorator_application_lineno_correct(self):
-        def dec_error(func):
+        def dec_error(func_):
             raise TypeError
-        def dec_fine(func):
-            return func
+        def dec_fine(func_):
+            return func_
         def applydecs():
             @dec_error
             @dec_fine
@@ -998,9 +998,9 @@ class TracebackFormatTests(unittest.TestCase):
 
         # Make sure that Python and the traceback module format the same thing
         self.assertEqual(traceback_fmt, python_fmt)
-        # Now verify the _tb func output
+        # Now verify the _tb func_ output
         self.assertEqual(tbstderr.getvalue(), tbfile.getvalue())
-        # Now verify the _exc func output
+        # Now verify the _exc func_ output
         self.assertEqual(excstderr.getvalue(), excfile.getvalue())
         self.assertEqual(excfmt, excfile.getvalue())
 
@@ -3280,40 +3280,40 @@ class SuggestionFormattingTestBase:
             bluc = None
             print(bluch)
 
-        for func, suggestion in [(Substitution, "'blech'?"),
+        for func_, suggestion in [(Substitution, "'blech'?"),
                                 (Elimination, "'blch'?"),
                                 (Addition, "'bluchin'?"),
                                 (EliminationOverAddition, "'blucha'?"),
                                 (SubstitutionOverElimination, "'blach'?"),
                                 (SubstitutionOverAddition, "'blach'?")]:
-            actual = self.get_suggestion(func)
+            actual = self.get_suggestion(func_)
             self.assertIn(suggestion, actual)
 
     def test_name_error_suggestions_from_globals(self):
-        def func():
+        def func_():
             print(global_for_suggestio)
-        actual = self.get_suggestion(func)
+        actual = self.get_suggestion(func_)
         self.assertIn("'global_for_suggestions'?", actual)
 
     def test_name_error_suggestions_from_builtins(self):
-        def func():
+        def func_():
             print(ZeroDivisionErrrrr)
-        actual = self.get_suggestion(func)
+        actual = self.get_suggestion(func_)
         self.assertIn("'ZeroDivisionError'?", actual)
 
     def test_name_error_suggestions_from_builtins_when_builtins_is_module(self):
-        def func():
+        def func_():
             custom_globals = globals().copy()
             custom_globals["__builtins__"] = builtins
             print(eval("ZeroDivisionErrrrr", custom_globals))
-        actual = self.get_suggestion(func)
+        actual = self.get_suggestion(func_)
         self.assertIn("'ZeroDivisionError'?", actual)
 
     def test_name_error_suggestions_do_not_trigger_for_long_names(self):
-        def func():
+        def func_():
             somethingverywronghehehehehehe = None
             print(somethingverywronghe)
-        actual = self.get_suggestion(func)
+        actual = self.get_suggestion(func_)
         self.assertNotIn("somethingverywronghehe", actual)
 
     def test_name_error_bad_suggestions_do_not_trigger_for_small_names(self):
@@ -3334,9 +3334,9 @@ class SuggestionFormattingTestBase:
             vvv = mom = w = id = pytho = None
             py
 
-        for name, func in (("b", f_b), ("v", f_v), ("m", f_m), ("py", f_py)):
+        for name, func_ in (("b", f_b), ("v", f_v), ("m", f_m), ("py", f_py)):
             with self.subTest(name=name):
-                actual = self.get_suggestion(func)
+                actual = self.get_suggestion(func_)
                 self.assertNotIn("you mean", actual)
                 self.assertNotIn("vvv", actual)
                 self.assertNotIn("mom", actual)
@@ -3345,7 +3345,7 @@ class SuggestionFormattingTestBase:
                 self.assertNotIn("'pytho'", actual)
 
     def test_name_error_suggestions_do_not_trigger_for_too_many_locals(self):
-        def func():
+        def func_():
             # Mutating locals() is unreliable, so we need to do it by hand
             a1 = a2 = a3 = a4 = a5 = a6 = a7 = a8 = a9 = a10 = \
             a11 = a12 = a13 = a14 = a15 = a16 = a17 = a18 = a19 = a20 = \
@@ -3430,22 +3430,22 @@ class SuggestionFormattingTestBase:
                 = None
             print(a0)
 
-        actual = self.get_suggestion(func)
+        actual = self.get_suggestion(func_)
         self.assertNotRegex(actual, r"NameError.*a1")
 
     def test_name_error_with_custom_exceptions(self):
-        def func():
+        def func_():
             blech = None
             raise NameError()
 
-        actual = self.get_suggestion(func)
+        actual = self.get_suggestion(func_)
         self.assertNotIn("blech", actual)
 
-        def func():
+        def func_():
             blech = None
             raise NameError
 
-        actual = self.get_suggestion(func)
+        actual = self.get_suggestion(func_)
         self.assertNotIn("blech", actual)
 
     def test_name_error_with_instance(self):
@@ -3474,26 +3474,26 @@ class SuggestionFormattingTestBase:
         self.assertNotIn("self.blech", actual)
 
     def test_unbound_local_error_does_not_match(self):
-        def func():
+        def func_():
             something = 3
             print(somethong)
             somethong = 3
 
-        actual = self.get_suggestion(func)
+        actual = self.get_suggestion(func_)
         self.assertNotIn("something", actual)
 
     def test_name_error_for_stdlib_modules(self):
-        def func():
+        def func_():
             stream = io.StringIO()
 
-        actual = self.get_suggestion(func)
+        actual = self.get_suggestion(func_)
         self.assertIn("forget to import 'io'", actual)
 
     def test_name_error_for_private_stdlib_modules(self):
-        def func():
+        def func_():
             stream = _io.StringIO()
 
-        actual = self.get_suggestion(func)
+        actual = self.get_suggestion(func_)
         self.assertIn("forget to import '_io'", actual)
 
 

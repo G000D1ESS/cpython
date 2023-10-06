@@ -5307,16 +5307,16 @@ class CWhitebox(unittest.TestCase):
         for attr in ['exp', 'is_normal', 'is_subnormal', 'ln', 'log10',
                      'logb', 'logical_invert', 'next_minus', 'next_plus',
                      'normalize', 'number_class', 'sqrt', 'to_eng_string']:
-            func = getattr(x, attr)
-            self.assertRaises(TypeError, func, context="x")
-            self.assertRaises(TypeError, func, "x", context=None)
+            func_ = getattr(x, attr)
+            self.assertRaises(TypeError, func_, context="x")
+            self.assertRaises(TypeError, func_, "x", context=None)
 
         for attr in ['compare', 'compare_signal', 'logical_and',
                      'logical_or', 'max', 'max_mag', 'min', 'min_mag',
                      'remainder_near', 'rotate', 'scaleb', 'shift']:
-            func = getattr(x, attr)
-            self.assertRaises(TypeError, func, context="x")
-            self.assertRaises(TypeError, func, "x", context=None)
+            func_ = getattr(x, attr)
+            self.assertRaises(TypeError, func_, context="x")
+            self.assertRaises(TypeError, func_, "x", context=None)
 
         self.assertRaises(TypeError, x.to_integral, rounding=None, context=[])
         self.assertRaises(TypeError, x.to_integral, rounding={}, context=[])

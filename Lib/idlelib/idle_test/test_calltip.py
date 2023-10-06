@@ -134,9 +134,9 @@ you\'ll probably have to override _wrap_chunks().''')
                "bbbbbbbbbbbbbbbbb\n" + indent + "bbbbbbbbbbbbbbbbbbbbbb"\
                "bbbbbbbbbbbbbbbbbbbbbb')"
 
-        for func,doc in [(foo, sfoo), (bar, sbar), (baz, sbaz)]:
-            with self.subTest(func=func, doc=doc):
-                self.assertEqual(get_spec(func), doc)
+        for func_,doc in [(foo, sfoo), (bar, sbar), (baz, sbaz)]:
+            with self.subTest(func_=func_, doc=doc):
+                self.assertEqual(get_spec(func_), doc)
 
     def test_docline_truncation(self):
         def f(): pass
@@ -175,9 +175,9 @@ bytes() -> empty bytes object''')
         t5.tip = "(a, b=None, *args, **kw)"
 
         doc = '\ndoc' if t1.__doc__ is not None else ''
-        for func in (t1, t2, t3, t4, t5, TC):
-            with self.subTest(func=func):
-                self.assertEqual(get_spec(func), func.tip + doc)
+        for func_ in (t1, t2, t3, t4, t5, TC):
+            with self.subTest(func_=func_):
+                self.assertEqual(get_spec(func_), func_.tip + doc)
 
     def test_methods(self):
         doc = '\ndoc' if TC.__doc__ is not None else ''

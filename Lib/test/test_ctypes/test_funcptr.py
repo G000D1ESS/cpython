@@ -14,10 +14,10 @@ class CFuncPtrTestCase(unittest.TestCase):
     def test_basic(self):
         X = WINFUNCTYPE(c_int, c_int, c_int)
 
-        def func(*args):
+        def func_(*args):
             return len(args)
 
-        x = X(func)
+        x = X(func_)
         self.assertEqual(x.restype, c_int)
         self.assertEqual(x.argtypes, (c_int, c_int))
         self.assertEqual(sizeof(x), sizeof(c_voidp))
@@ -27,11 +27,11 @@ class CFuncPtrTestCase(unittest.TestCase):
         StdCallback = WINFUNCTYPE(c_int, c_int, c_int)
         CdeclCallback = CFUNCTYPE(c_int, c_int, c_int)
 
-        def func(a, b):
+        def func_(a, b):
             return a + b
 
-        s = StdCallback(func)
-        c = CdeclCallback(func)
+        s = StdCallback(func_)
+        c = CdeclCallback(func_)
 
         self.assertEqual(s(1, 2), 3)
         self.assertEqual(c(1, 2), 3)

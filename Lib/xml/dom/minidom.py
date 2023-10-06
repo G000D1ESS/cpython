@@ -1976,8 +1976,8 @@ def _nssplit(qualifiedName):
         return (None, fields[0])
 
 
-def _do_pulldom_parse(func, args, kwargs):
-    events = func(*args, **kwargs)
+def _do_pulldom_parse(func_, args, kwargs):
+    events = func_(*args, **kwargs)
     toktype, rootNode = events.getEvent()
     events.expandNode(rootNode)
     events.clear()

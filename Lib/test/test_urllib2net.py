@@ -15,18 +15,18 @@ import sys
 support.requires("network")
 
 
-def _retry_thrice(func, exc, *args, **kwargs):
+def _retry_thrice(func_, exc, *args, **kwargs):
     for i in range(3):
         try:
-            return func(*args, **kwargs)
+            return func_(*args, **kwargs)
         except exc as e:
             last_exc = e
             continue
     raise last_exc
 
-def _wrap_with_retry_thrice(func, exc):
+def _wrap_with_retry_thrice(func_, exc):
     def wrapped(*args, **kwargs):
-        return _retry_thrice(func, exc, *args, **kwargs)
+        return _retry_thrice(func_, exc, *args, **kwargs)
     return wrapped
 
 # Connecting to remote hosts is flaky.  Make it more robust by retrying

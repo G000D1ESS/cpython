@@ -318,9 +318,9 @@ def localize(string, grouping=False, monetary=False):
     """Parses a string as locale number according to the locale settings."""
     return _localize(string, grouping, monetary)
 
-def atof(string, func=float):
+def atof(string, func_=float):
     "Parses a string as a float according to the locale settings."
-    return func(delocalize(string))
+    return func_(delocalize(string))
 
 def atoi(string):
     "Converts a string to an integer according to the locale settings."

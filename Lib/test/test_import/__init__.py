@@ -114,13 +114,13 @@ def no_rerun(reason):
     impossible to find reference leaks. Provide a clear reason for skipping the
     test using the 'reason' parameter.
     """
-    def deco(func):
+    def deco(func_):
         _has_run = False
         def wrapper(self):
             nonlocal _has_run
             if _has_run:
                 self.skipTest(reason)
-            func(self)
+            func_(self)
             _has_run = True
         return wrapper
     return deco
@@ -887,9 +887,9 @@ import sys
 code_filename = sys._getframe().f_code.co_filename
 module_filename = __file__
 constant = 1
-def func():
+def func_():
     pass
-func_filename = func.__code__.co_filename
+func_filename = func_.__code__.co_filename
 """
     dir_name = os.path.abspath(TESTFN)
     file_name = os.path.join(dir_name, module_name) + os.extsep + "py"
@@ -2217,7 +2217,7 @@ class SinglephaseInitTests(unittest.TestCase):
         The module had not been loaded before (at least since fully reset).
         """
         snap = loaded.snapshot
-        # The module's init func was run.
+        # The module's init func_ was run.
         # A copy of the module's __dict__ was stored in def->m_base.m_copy.
         # The previous m_copy was deleted first.
         # _PyRuntime.imports.extensions was set.
@@ -2233,7 +2233,7 @@ class SinglephaseInitTests(unittest.TestCase):
         (but the module global state wasn't).
         """
         snap = loaded.snapshot
-        # The module's init func was run again.
+        # The module's init func_ was run again.
         # A copy of the module's __dict__ was stored in def->m_base.m_copy.
         # The previous m_copy was deleted first.
         # The module globals did not get reset.
@@ -2254,13 +2254,13 @@ class SinglephaseInitTests(unittest.TestCase):
         The module had been loaded before and never reset.
         """
         snap = loaded.snapshot
-        # The module's init func was not run again.
+        # The module's init func_ was not run again.
         # The interpreter copied m_copy, as set by the other interpreter,
         # with objects owned by the other interpreter.
         # The module globals did not get reset.
         self.assertNotEqual(snap.id, base.snapshot.id)
         self.assertEqual(snap.init_count, base.snapshot.init_count)
-        # The global state was not updated since the init func did not run.
+        # The global state was not updated since the init func_ did not run.
         # The module attrs were not directly initialized from that state.
         # The state and module attrs still match the previous loading.
         self.assertEqual(snap.module._module_initialized,
@@ -2411,7 +2411,7 @@ class SinglephaseInitTests(unittest.TestCase):
                 self.assertIs(reloaded.snapshot.cached, reloaded.module)
 
     def test_with_reinit_reloaded(self):
-        # The module's m_init func is run again.
+        # The module's m_init func_ is run again.
         self.maxDiff = None
 
         # Keep a reference around.
@@ -2470,7 +2470,7 @@ class SinglephaseInitTests(unittest.TestCase):
         #  * alive in 0 interpreters
         #  * module def may or may not be loaded already
         #  * module def not in _PyRuntime.imports.extensions
-        #  * mod init func has not run yet (since reset, at least)
+        #  * mod init func_ has not run yet (since reset, at least)
         #  * m_copy not set (hasn't been loaded yet or already cleared)
         #  * module's global state has not been initialized yet
         #    (or already cleared)
@@ -2489,7 +2489,7 @@ class SinglephaseInitTests(unittest.TestCase):
         # At this point:
         #  * alive in 1 interpreter (main)
         #  * module def in _PyRuntime.imports.extensions
-        #  * mod init func ran for the first time (since reset, at least)
+        #  * mod init func_ ran for the first time (since reset, at least)
         #  * m_copy was copied from the main interpreter (was NULL)
         #  * module's global state was initialized
 
@@ -2501,7 +2501,7 @@ class SinglephaseInitTests(unittest.TestCase):
         # At this point:
         #  * alive in 1 interpreter (main)
         #  * module def still in _PyRuntime.imports.extensions
-        #  * mod init func ran again
+        #  * mod init func_ ran again
         #  * m_copy is NULL (claered when the interpreter was destroyed)
         #    (was from main interpreter)
         #  * module's global state was updated, not reset
@@ -2514,7 +2514,7 @@ class SinglephaseInitTests(unittest.TestCase):
         # At this point:
         #  * alive in 2 interpreters (main, interp1)
         #  * module def still in _PyRuntime.imports.extensions
-        #  * mod init func ran again
+        #  * mod init func_ ran again
         #  * m_copy was copied from interp1
         #  * module's global state was updated, not reset
 
@@ -2526,7 +2526,7 @@ class SinglephaseInitTests(unittest.TestCase):
         # At this point:
         #  * alive in 3 interpreters (main, interp1, interp2)
         #  * module def still in _PyRuntime.imports.extensions
-        #  * mod init func ran again
+        #  * mod init func_ ran again
         #  * m_copy was copied from interp2 (was from interp1)
         #  * module's global state was updated, not reset
 
@@ -2545,7 +2545,7 @@ class SinglephaseInitTests(unittest.TestCase):
         #  * alive in 0 interpreters
         #  * module def may or may not be loaded already
         #  * module def not in _PyRuntime.imports.extensions
-        #  * mod init func has not run yet (since reset, at least)
+        #  * mod init func_ has not run yet (since reset, at least)
         #  * m_copy not set (hasn't been loaded yet or already cleared)
         #  * module's global state has not been initialized yet
         #    (or already cleared)
@@ -2562,7 +2562,7 @@ class SinglephaseInitTests(unittest.TestCase):
         #  * alive in 0 interpreters
         #  * module def loaded already
         #  * module def was in _PyRuntime.imports.extensions, but cleared
-        #  * mod init func ran for the first time (since reset, at least)
+        #  * mod init func_ ran for the first time (since reset, at least)
         #  * m_copy was set, but cleared (was NULL)
         #  * module's global state was initialized but cleared
 
@@ -2577,7 +2577,7 @@ class SinglephaseInitTests(unittest.TestCase):
         # At this point:
         #  * alive in 0 interpreters
         #  * module def in _PyRuntime.imports.extensions
-        #  * mod init func ran again
+        #  * mod init func_ ran again
         #  * m_copy is NULL (claered when the interpreter was destroyed)
         #  * module's global state was initialized, not reset
 
@@ -2589,7 +2589,7 @@ class SinglephaseInitTests(unittest.TestCase):
         # At this point:
         #  * alive in 1 interpreter (interp1)
         #  * module def still in _PyRuntime.imports.extensions
-        #  * mod init func ran again
+        #  * mod init func_ ran again
         #  * m_copy was copied from interp1 (was NULL)
         #  * module's global state was updated, not reset
 
@@ -2601,7 +2601,7 @@ class SinglephaseInitTests(unittest.TestCase):
         # At this point:
         #  * alive in 2 interpreters (interp1, interp2)
         #  * module def still in _PyRuntime.imports.extensions
-        #  * mod init func ran again
+        #  * mod init func_ ran again
         #  * m_copy was copied from interp2 (was from interp1)
         #  * module's global state was updated, not reset
 
@@ -2613,7 +2613,7 @@ class SinglephaseInitTests(unittest.TestCase):
         #  * alive in 0 interpreters
         #  * module def may or may not be loaded already
         #  * module def not in _PyRuntime.imports.extensions
-        #  * mod init func has not run yet (since reset, at least)
+        #  * mod init func_ has not run yet (since reset, at least)
         #  * m_copy not set (hasn't been loaded yet or already cleared)
         #  * module's global state has not been initialized yet
         #    (or already cleared)
@@ -2635,7 +2635,7 @@ class SinglephaseInitTests(unittest.TestCase):
         # At this point:
         #  * alive in 0 interpreters
         #  * module def in _PyRuntime.imports.extensions
-        #  * mod init func ran for the first time (since reset, at least)
+        #  * mod init func_ ran for the first time (since reset, at least)
         #  * m_copy is NULL (claered when the interpreter was destroyed)
         #  * module's global state was initialized, not reset
 
@@ -2647,7 +2647,7 @@ class SinglephaseInitTests(unittest.TestCase):
         # At this point:
         #  * alive in 1 interpreter (interp1)
         #  * module def still in _PyRuntime.imports.extensions
-        #  * mod init func ran again
+        #  * mod init func_ ran again
         #  * m_copy was copied from interp1 (was NULL)
         #  * module's global state was initialized, not reset
 
@@ -2659,7 +2659,7 @@ class SinglephaseInitTests(unittest.TestCase):
         # At this point:
         #  * alive in 2 interpreters (interp2, interp2)
         #  * module def still in _PyRuntime.imports.extensions
-        #  * mod init func ran again
+        #  * mod init func_ ran again
         #  * m_copy was copied from interp2 (was from interp1)
         #  * module's global state was initialized, not reset
 

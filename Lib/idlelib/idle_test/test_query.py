@@ -183,14 +183,14 @@ class HelpsourceBrowsefileTest(unittest.TestCase):
         # Func return is file dialog return, either '' or something.
         # Func return should override widget entry.
         # We need all 4 combinations to test all (most) code paths.
-        for path, func, result in (
+        for path, func_, result in (
                 ('', lambda a,b,c:'', ''),
                 ('', lambda a,b,c: __file__, __file__),
                 ('htest', lambda a,b,c:'', 'htest'),
                 ('htest', lambda a,b,c: __file__, __file__)):
             with self.subTest():
                 dialog.pathvar.set(path)
-                dialog.askfilename = func
+                dialog.askfilename = func_
                 dialog.browse_file()
                 self.assertEqual(dialog.pathvar.get(), result)
 

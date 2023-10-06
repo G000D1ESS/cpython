@@ -71,10 +71,10 @@ def copy_attr(info_add, name, mod, attr_name):
 
 def call_func(info_add, name, mod, func_name, *, formatter=None):
     try:
-        func = getattr(mod, func_name)
+        func_ = getattr(mod, func_name)
     except AttributeError:
         return
-    value = func()
+    value = func_()
     if formatter is not None:
         value = formatter(value)
     info_add(name, value)
@@ -221,7 +221,7 @@ def collect_os(info_add):
     def format_attr(attr, value):
         if attr in ('supports_follow_symlinks', 'supports_fd',
                     'supports_effective_ids'):
-            return str(sorted(func.__name__ for func in value))
+            return str(sorted(func_.__name__ for func_ in value))
         else:
             return value
 
@@ -234,7 +234,7 @@ def collect_os(info_add):
     )
     copy_attributes(info_add, os, 'os.%s', attributes, formatter=format_attr)
 
-    for func in (
+    for func_ in (
         'cpu_count',
         'getcwd',
         'getegid',
@@ -246,7 +246,7 @@ def collect_os(info_add):
         'getuid',
         'uname',
     ):
-        call_func(info_add, 'os.%s' % func, os, func)
+        call_func(info_add, 'os.%s' % func_, os, func_)
 
     def format_groups(groups):
         return ', '.join(map(str, groups))

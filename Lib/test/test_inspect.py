@@ -887,10 +887,10 @@ class TestBuggyCases(GetSourceBase):
         co = compile(src, mod.__file__, "exec")
         g, l = {}, {}
         eval(co, g, l)
-        func = l['f']
-        self.assertEqual(func.__code__.co_firstlineno, 1+2*mod_len)
+        func_ = l['f']
+        self.assertEqual(func_.__code__.co_firstlineno, 1+2*mod_len)
         with self.assertRaisesRegex(IOError, "lineno is out of bounds"):
-            inspect.findsource(func)
+            inspect.findsource(func_)
 
     def test_getsource_on_method(self):
         self.assertSourceEqual(mod2.ClassWithMethod.method, 118, 119)
@@ -1623,8 +1623,8 @@ class TestGetClosureVars(unittest.TestCase):
                 return x + y
             return add
 
-        def curry(func, arg1):
-            return lambda arg2: func(arg1, arg2)
+        def curry(func_, arg1):
+            return lambda arg2: func_(arg1, arg2)
 
         def less_than(a, b):
             return a < b
@@ -1636,8 +1636,8 @@ class TestGetClosureVars(unittest.TestCase):
             Y.g_ref = g
             return g(g)
 
-        def check_y_combinator(func):
-            self.assertEqual(_nonlocal_vars(func), {'f': Y.g_ref})
+        def check_y_combinator(func_):
+            self.assertEqual(_nonlocal_vars(func_), {'f': Y.g_ref})
 
         inc = make_adder(1)
         add_two = make_adder(2)
@@ -1646,7 +1646,7 @@ class TestGetClosureVars(unittest.TestCase):
         self.assertEqual(_nonlocal_vars(inc), {'x': 1})
         self.assertEqual(_nonlocal_vars(add_two), {'x': 2})
         self.assertEqual(_nonlocal_vars(greater_than_five),
-                         {'arg1': 5, 'func': less_than})
+                         {'arg1': 5, 'func_': less_than})
         self.assertEqual(_nonlocal_vars((lambda x: lambda y: x + y)(3)),
                          {'x': 3})
         Y(check_y_combinator)
@@ -1690,23 +1690,23 @@ class TestGetClosureVars(unittest.TestCase):
 
 class TestGetcallargsFunctions(unittest.TestCase):
 
-    def assertEqualCallArgs(self, func, call_params_string, locs=None):
-        locs = dict(locs or {}, func=func)
-        r1 = eval('func(%s)' % call_params_string, None, locs)
-        r2 = eval('inspect.getcallargs(func, %s)' % call_params_string, None,
+    def assertEqualCallArgs(self, func_, call_params_string, locs=None):
+        locs = dict(locs or {}, func_=func_)
+        r1 = eval('func_(%s)' % call_params_string, None, locs)
+        r2 = eval('inspect.getcallargs(func_, %s)' % call_params_string, None,
                   locs)
         self.assertEqual(r1, r2)
 
-    def assertEqualException(self, func, call_param_string, locs=None):
-        locs = dict(locs or {}, func=func)
+    def assertEqualException(self, func_, call_param_string, locs=None):
+        locs = dict(locs or {}, func_=func_)
         try:
-            eval('func(%s)' % call_param_string, None, locs)
+            eval('func_(%s)' % call_param_string, None, locs)
         except Exception as e:
             ex1 = e
         else:
             self.fail('Exception not raised')
         try:
-            eval('inspect.getcallargs(func, %s)' % call_param_string, None,
+            eval('inspect.getcallargs(func_, %s)' % call_param_string, None,
                  locs)
         except Exception as e:
             ex2 = e
@@ -1909,18 +1909,18 @@ class TestGetcallargsUnboundMethods(TestGetcallargsMethods):
         super(TestGetcallargsUnboundMethods, self).makeCallable(signature)
         return self.cls.method
 
-    def assertEqualCallArgs(self, func, call_params_string, locs=None):
+    def assertEqualCallArgs(self, func_, call_params_string, locs=None):
         return super(TestGetcallargsUnboundMethods, self).assertEqualCallArgs(
-            *self._getAssertEqualParams(func, call_params_string, locs))
+            *self._getAssertEqualParams(func_, call_params_string, locs))
 
-    def assertEqualException(self, func, call_params_string, locs=None):
+    def assertEqualException(self, func_, call_params_string, locs=None):
         return super(TestGetcallargsUnboundMethods, self).assertEqualException(
-            *self._getAssertEqualParams(func, call_params_string, locs))
+            *self._getAssertEqualParams(func_, call_params_string, locs))
 
-    def _getAssertEqualParams(self, func, call_params_string, locs=None):
+    def _getAssertEqualParams(self, func_, call_params_string, locs=None):
         assert 'inst' not in call_params_string
         locs = dict(locs or {}, inst=self.inst)
-        return (func, 'inst,' + call_params_string, locs)
+        return (func_, 'inst,' + call_params_string, locs)
 
 
 class TestGetattrStatic(unittest.TestCase):
@@ -2386,11 +2386,11 @@ class TestGetCoroutineState(unittest.TestCase):
             yield
 
         gencoro = gencoro()
-        async def func(a=None):
+        async def func_(a=None):
             b = 'spam'
             await gencoro
 
-        coro = func()
+        coro = func_()
         self.assertEqual(inspect.getcoroutinelocals(coro),
                          {'a': None, 'gencoro': gencoro})
         coro.send(None)
@@ -2515,8 +2515,8 @@ class MyParameter(inspect.Parameter):
 
 class TestSignatureObject(unittest.TestCase):
     @staticmethod
-    def signature(func, **kw):
-        sig = inspect.signature(func, **kw)
+    def signature(func_, **kw):
+        sig = inspect.signature(func_, **kw)
         return (tuple((param.name,
                        (... if param.default is param.empty else param.default),
                        (... if param.annotation is param.empty
@@ -2792,17 +2792,17 @@ class TestSignatureObject(unittest.TestCase):
                      "Signature information for builtins requires docstrings")
     def test_signature_on_decorated_builtins(self):
         import _testcapi
-        func = _testcapi.docstring_with_signature_with_defaults
+        func_ = _testcapi.docstring_with_signature_with_defaults
 
-        def decorator(func):
-            @functools.wraps(func)
+        def decorator(func_):
+            @functools.wraps(func_)
             def wrapper(*args, **kwargs) -> int:
-                return func(*args, **kwargs)
+                return func_(*args, **kwargs)
             return wrapper
 
-        decorated_func = decorator(func)
+        decorated_func = decorator(func_)
 
-        self.assertEqual(inspect.signature(func),
+        self.assertEqual(inspect.signature(func_),
                          inspect.signature(decorated_func))
 
         def wrapper_like(*args, **kwargs) -> int: pass
@@ -2826,7 +2826,7 @@ class TestSignatureObject(unittest.TestCase):
             inspect.signature(42)
 
     def test_signature_from_functionlike_object(self):
-        def func(a,b, *args, kwonly=True, kwonlyreq, **kwargs):
+        def func_(a,b, *args, kwonly=True, kwonlyreq, **kwargs):
             pass
 
         class funclike:
@@ -2834,29 +2834,29 @@ class TestSignatureObject(unittest.TestCase):
             # __code__, __annotations__, __defaults__, __name__,
             # and __kwdefaults__ attributes
 
-            def __init__(self, func):
-                self.__name__ = func.__name__
-                self.__code__ = func.__code__
-                self.__annotations__ = func.__annotations__
-                self.__defaults__ = func.__defaults__
-                self.__kwdefaults__ = func.__kwdefaults__
-                self.func = func
+            def __init__(self, func_):
+                self.__name__ = func_.__name__
+                self.__code__ = func_.__code__
+                self.__annotations__ = func_.__annotations__
+                self.__defaults__ = func_.__defaults__
+                self.__kwdefaults__ = func_.__kwdefaults__
+                self.func_ = func_
 
             def __call__(self, *args, **kwargs):
-                return self.func(*args, **kwargs)
+                return self.func_(*args, **kwargs)
 
-        sig_func = inspect.Signature.from_callable(func)
+        sig_func = inspect.Signature.from_callable(func_)
 
-        sig_funclike = inspect.Signature.from_callable(funclike(func))
+        sig_funclike = inspect.Signature.from_callable(funclike(func_))
         self.assertEqual(sig_funclike, sig_func)
 
-        sig_funclike = inspect.signature(funclike(func))
+        sig_funclike = inspect.signature(funclike(func_))
         self.assertEqual(sig_funclike, sig_func)
 
         # If object is not a duck type of function, then
         # signature will try to get a signature for its '__call__'
         # method
-        fl = funclike(func)
+        fl = funclike(func_)
         del fl.__defaults__
         self.assertEqual(self.signature(fl),
                          ((('args', ..., ..., "var_positional"),
@@ -2871,7 +2871,7 @@ class TestSignatureObject(unittest.TestCase):
             return _orig_isdesc(obj)
 
         with unittest.mock.patch('inspect.ismethoddescriptor', _isdesc):
-            builtin_func = funclike(func)
+            builtin_func = funclike(func_)
             # Make sure that our mock setup is working
             self.assertFalse(inspect.ismethoddescriptor(builtin_func))
             builtin_func._builtinmock = True
@@ -2882,18 +2882,18 @@ class TestSignatureObject(unittest.TestCase):
         # We only want to duck type function-like objects,
         # not classes.
 
-        def func(a,b, *args, kwonly=True, kwonlyreq, **kwargs):
+        def func_(a,b, *args, kwonly=True, kwonlyreq, **kwargs):
             pass
 
         class funclike:
             def __init__(self, marker):
                 pass
 
-            __name__ = func.__name__
-            __code__ = func.__code__
-            __annotations__ = func.__annotations__
-            __defaults__ = func.__defaults__
-            __kwdefaults__ = func.__kwdefaults__
+            __name__ = func_.__name__
+            __code__ = func_.__code__
+            __annotations__ = func_.__annotations__
+            __defaults__ = func_.__defaults__
+            __kwdefaults__ = func_.__kwdefaults__
 
         self.assertEqual(str(inspect.signature(funclike)), '(marker)')
 
@@ -3223,10 +3223,10 @@ class TestSignatureObject(unittest.TestCase):
         self.assertEqual(str(inspect.signature(foo)), '(a)')
 
     def test_signature_on_decorated(self):
-        def decorator(func):
-            @functools.wraps(func)
+        def decorator(func_):
+            @functools.wraps(func_)
             def wrapper(*args, **kwargs) -> int:
-                return func(*args, **kwargs)
+                return func_(*args, **kwargs)
             return wrapper
 
         class Foo:
@@ -3251,7 +3251,7 @@ class TestSignatureObject(unittest.TestCase):
                          ((('args', ..., ..., "var_positional"),
                            ('kwargs', ..., ..., "var_keyword")),
                           ...)) # functools.wraps will copy __annotations__
-                                # from "func" to "wrapper", hence no
+                                # from "func_" to "wrapper", hence no
                                 # return_annotation
 
         self.assertEqual(self.signature(bar),
@@ -3260,11 +3260,11 @@ class TestSignatureObject(unittest.TestCase):
                           ...))
 
         # Test that we handle method wrappers correctly
-        def decorator(func):
-            @functools.wraps(func)
+        def decorator(func_):
+            @functools.wraps(func_)
             def wrapper(*args, **kwargs) -> int:
-                return func(42, *args, **kwargs)
-            sig = inspect.signature(func)
+                return func_(42, *args, **kwargs)
+            sig = inspect.signature(func_)
             new_params = tuple(sig.parameters.values())[1:]
             wrapper.__signature__ = sig.replace(parameters=new_params)
             return wrapper
@@ -3745,16 +3745,16 @@ class TestSignatureObject(unittest.TestCase):
 
     def test_signature_annotations_with_local_namespaces(self):
         class Foo: ...
-        def func(foo: Foo) -> int: pass
+        def func_(foo: Foo) -> int: pass
         def func2(foo: Foo, bar: 'Bar') -> int: pass
 
         for signature_func in (inspect.signature, inspect.Signature.from_callable):
             with self.subTest(signature_func = signature_func):
-                sig1 = signature_func(func)
+                sig1 = signature_func(func_)
                 self.assertEqual(sig1.return_annotation, int)
                 self.assertEqual(sig1.parameters['foo'].annotation, Foo)
 
-                sig2 = signature_func(func, locals=locals())
+                sig2 = signature_func(func_, locals=locals())
                 self.assertEqual(sig2.return_annotation, int)
                 self.assertEqual(sig2.parameters['foo'].annotation, Foo)
 
@@ -3874,16 +3874,16 @@ class TestSignatureObject(unittest.TestCase):
             # __code__, __annotations__, __defaults__, __name__,
             # and __kwdefaults__ attributes
 
-            def __init__(self, func):
-                self.__name__ = func.__name__
-                self.__code__ = func.__code__
-                self.__annotations__ = func.__annotations__
-                self.__defaults__ = func.__defaults__
-                self.__kwdefaults__ = func.__kwdefaults__
-                self.func = func
+            def __init__(self, func_):
+                self.__name__ = func_.__name__
+                self.__code__ = func_.__code__
+                self.__annotations__ = func_.__annotations__
+                self.__defaults__ = func_.__defaults__
+                self.__kwdefaults__ = func_.__kwdefaults__
+                self.func_ = func_
 
             def __call__(self, *args, **kwargs):
-                return self.func(*args, **kwargs)
+                return self.func_(*args, **kwargs)
 
         def foo(): pass
         foo = funclike(foo)
@@ -4092,10 +4092,10 @@ class TestParameterObject(unittest.TestCase):
 
 class TestSignatureBind(unittest.TestCase):
     @staticmethod
-    def call(func, *args, **kwargs):
-        sig = inspect.signature(func)
+    def call(func_, *args, **kwargs):
+        sig = inspect.signature(func_)
         ba = sig.bind(*args, **kwargs)
-        return func(*ba.args, **ba.kwargs)
+        return func_(*ba.args, **ba.kwargs)
 
     def test_signature_bind_empty(self):
         def test():
@@ -4551,34 +4551,34 @@ class TestSignatureDefinitions(unittest.TestCase):
                 self.assertIsNone(obj.__text_signature__)
 
     def test_python_function_override_signature(self):
-        def func(*args, **kwargs):
+        def func_(*args, **kwargs):
             pass
-        func.__text_signature__ = '($self, a, b=1, *args, c, d=2, **kwargs)'
-        sig = inspect.signature(func)
+        func_.__text_signature__ = '($self, a, b=1, *args, c, d=2, **kwargs)'
+        sig = inspect.signature(func_)
         self.assertIsNotNone(sig)
         self.assertEqual(str(sig), '(self, /, a, b=1, *args, c, d=2, **kwargs)')
 
-        func.__text_signature__ = '($self, a, b=1, /, *args, c, d=2, **kwargs)'
-        sig = inspect.signature(func)
+        func_.__text_signature__ = '($self, a, b=1, /, *args, c, d=2, **kwargs)'
+        sig = inspect.signature(func_)
         self.assertEqual(str(sig), '(self, a, b=1, /, *args, c, d=2, **kwargs)')
 
-        func.__text_signature__ = '(self, a=1+2, b=4-3, c=1 | 3 | 16)'
-        sig = inspect.signature(func)
+        func_.__text_signature__ = '(self, a=1+2, b=4-3, c=1 | 3 | 16)'
+        sig = inspect.signature(func_)
         self.assertEqual(str(sig), '(self, a=3, b=1, c=19)')
 
-        func.__text_signature__ = '(self, a=1,\nb=2,\n\n\n   c=3)'
-        sig = inspect.signature(func)
+        func_.__text_signature__ = '(self, a=1,\nb=2,\n\n\n   c=3)'
+        sig = inspect.signature(func_)
         self.assertEqual(str(sig), '(self, a=1, b=2, c=3)')
 
-        func.__text_signature__ = '(self, x=does_not_exist)'
+        func_.__text_signature__ = '(self, x=does_not_exist)'
         with self.assertRaises(ValueError):
-            inspect.signature(func)
-        func.__text_signature__ = '(self, x=sys, y=inspect)'
+            inspect.signature(func_)
+        func_.__text_signature__ = '(self, x=sys, y=inspect)'
         with self.assertRaises(ValueError):
-            inspect.signature(func)
-        func.__text_signature__ = '(self, 123)'
+            inspect.signature(func_)
+        func_.__text_signature__ = '(self, 123)'
         with self.assertRaises(ValueError):
-            inspect.signature(func)
+            inspect.signature(func_)
 
     def test_base_class_have_text_signature(self):
         # see issue 43118
@@ -4608,21 +4608,21 @@ class NTimesUnwrappable:
 class TestUnwrap(unittest.TestCase):
 
     def test_unwrap_one(self):
-        def func(a, b):
+        def func_(a, b):
             return a + b
-        wrapper = functools.lru_cache(maxsize=20)(func)
-        self.assertIs(inspect.unwrap(wrapper), func)
+        wrapper = functools.lru_cache(maxsize=20)(func_)
+        self.assertIs(inspect.unwrap(wrapper), func_)
 
     def test_unwrap_several(self):
-        def func(a, b):
+        def func_(a, b):
             return a + b
-        wrapper = func
+        wrapper = func_
         for __ in range(10):
             @functools.wraps(wrapper)
             def wrapper():
                 pass
-        self.assertIsNot(wrapper.__wrapped__, func)
-        self.assertIs(inspect.unwrap(wrapper), func)
+        self.assertIsNot(wrapper.__wrapped__, func_)
+        self.assertIs(inspect.unwrap(wrapper), func_)
 
     def test_stop(self):
         def func1(a, b):
@@ -4653,11 +4653,11 @@ class TestUnwrap(unittest.TestCase):
             inspect.unwrap(func2)
 
     def test_unhashable(self):
-        def func(): pass
-        func.__wrapped__ = None
+        def func_(): pass
+        func_.__wrapped__ = None
         class C:
             __hash__ = None
-            __wrapped__ = func
+            __wrapped__ = func_
         self.assertIsNone(inspect.unwrap(C()))
 
     def test_recursion_limit(self):

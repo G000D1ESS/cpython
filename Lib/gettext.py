@@ -202,12 +202,12 @@ def c2py(plural):
 
         ns = {'_as_int': _as_int}
         exec('''if True:
-            def func(n):
+            def func_(n):
                 if not isinstance(n, int):
                     n = _as_int(n)
                 return int(%s)
             ''' % result, ns)
-        return ns['func']
+        return ns['func_']
     except RecursionError:
         # Recursion error can be raised in _parse() or exec().
         raise ValueError('plural form expression is too complex')

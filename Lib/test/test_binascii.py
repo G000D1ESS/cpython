@@ -376,24 +376,24 @@ class BinASCIITest(unittest.TestCase):
     def test_empty_string(self):
         # A test for SF bug #1022953.  Make sure SystemError is not raised.
         empty = self.type2test(b'')
-        for func in all_functions:
-            if func == 'crc_hqx':
+        for func_ in all_functions:
+            if func_ == 'crc_hqx':
                 # crc_hqx needs 2 arguments
                 binascii.crc_hqx(empty, 0)
                 continue
-            f = getattr(binascii, func)
+            f = getattr(binascii, func_)
             try:
                 f(empty)
             except Exception as err:
-                self.fail("{}({!r}) raises {!r}".format(func, empty, err))
+                self.fail("{}({!r}) raises {!r}".format(func_, empty, err))
 
     def test_unicode_b2a(self):
         # Unicode strings are not accepted by b2a_* functions.
-        for func in set(all_functions) - set(a2b_functions):
+        for func_ in set(all_functions) - set(a2b_functions):
             try:
-                self.assertRaises(TypeError, getattr(binascii, func), "test")
+                self.assertRaises(TypeError, getattr(binascii, func_), "test")
             except Exception as err:
-                self.fail('{}("test") raises {!r}'.format(func, err))
+                self.fail('{}("test") raises {!r}'.format(func_, err))
         # crc_hqx needs 2 arguments
         self.assertRaises(TypeError, binascii.crc_hqx, "test", 0)
 

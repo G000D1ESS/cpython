@@ -347,11 +347,11 @@ class Field:
     # with the default value, so the end result is a descriptor that
     # had __set_name__ called on it at the right time.
     def __set_name__(self, owner, name):
-        func = getattr(type(self.default), '__set_name__', None)
-        if func:
+        func_ = getattr(type(self.default), '__set_name__', None)
+        if func_:
             # There is a __set_name__ method on the descriptor, call
             # it.
-            func(self.default, owner, name)
+            func_(self.default, owner, name)
 
     __class_getitem__ = classmethod(GenericAlias)
 

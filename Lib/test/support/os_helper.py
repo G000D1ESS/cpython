@@ -325,9 +325,9 @@ def unlink(filename):
 
 
 if sys.platform.startswith("win"):
-    def _waitfor(func, pathname, waitall=False):
+    def _waitfor(func_, pathname, waitall=False):
         # Perform the operation
-        func(pathname)
+        func_(pathname)
         # Now setup the wait loop
         if waitall:
             dirname = pathname

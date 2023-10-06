@@ -162,35 +162,35 @@ class SimpleTypesTestCase(unittest.TestCase):
         import _ctypes_test
         from ctypes import CDLL, c_void_p, ArgumentError
 
-        func = CDLL(_ctypes_test.__file__)._testfunc_p_p
-        func.restype = c_void_p
+        func_ = CDLL(_ctypes_test.__file__)._testfunc_p_p
+        func_.restype = c_void_p
         # TypeError: has no from_param method
-        self.assertRaises(TypeError, setattr, func, "argtypes", (object,))
+        self.assertRaises(TypeError, setattr, func_, "argtypes", (object,))
 
         class Adapter:
             def from_param(cls, obj):
                 return None
 
-        func.argtypes = (Adapter(),)
-        self.assertEqual(func(None), None)
-        self.assertEqual(func(object()), None)
+        func_.argtypes = (Adapter(),)
+        self.assertEqual(func_(None), None)
+        self.assertEqual(func_(object()), None)
 
         class Adapter:
             def from_param(cls, obj):
                 return obj
 
-        func.argtypes = (Adapter(),)
+        func_.argtypes = (Adapter(),)
         # don't know how to convert parameter 1
-        self.assertRaises(ArgumentError, func, object())
-        self.assertEqual(func(c_void_p(42)), 42)
+        self.assertRaises(ArgumentError, func_, object())
+        self.assertEqual(func_(c_void_p(42)), 42)
 
         class Adapter:
             def from_param(cls, obj):
                 raise ValueError(obj)
 
-        func.argtypes = (Adapter(),)
+        func_.argtypes = (Adapter(),)
         # ArgumentError: argument 1: ValueError: 99
-        self.assertRaises(ArgumentError, func, 99)
+        self.assertRaises(ArgumentError, func_, 99)
 
     def test_abstract(self):
         from ctypes import (Array, Structure, Union, _Pointer,

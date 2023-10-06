@@ -569,17 +569,17 @@ def main():
         print(msg)
         print(usage)
         sys.exit(2)
-    func = encode
+    func_ = encode
     for o, a in opts:
-        if o == '-e': func = encode
-        if o == '-d': func = decode
-        if o == '-u': func = decode
+        if o == '-e': func_ = encode
+        if o == '-d': func_ = decode
+        if o == '-u': func_ = decode
         if o == '-h': print(usage); return
     if args and args[0] != '-':
         with open(args[0], 'rb') as f:
-            func(f, sys.stdout.buffer)
+            func_(f, sys.stdout.buffer)
     else:
-        func(sys.stdin.buffer, sys.stdout.buffer)
+        func_(sys.stdin.buffer, sys.stdout.buffer)
 
 
 if __name__ == '__main__':

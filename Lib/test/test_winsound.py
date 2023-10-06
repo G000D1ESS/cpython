@@ -17,17 +17,17 @@ winsound = import_helper.import_module('winsound')
 # actually plays, and it's incredibly flaky trying to figure out if a sound
 # even *should* play.  Instead of guessing, just call the function and assume
 # it either passed or raised the RuntimeError we expect in case of failure.
-def sound_func(func):
-    @functools.wraps(func)
+def sound_func(func_):
+    @functools.wraps(func_)
     def wrapper(*args, **kwargs):
         try:
-            ret = func(*args, **kwargs)
+            ret = func_(*args, **kwargs)
         except RuntimeError as e:
             if support.verbose:
-                print(func.__name__, 'failed:', e)
+                print(func_.__name__, 'failed:', e)
         else:
             if support.verbose:
-                print(func.__name__, 'returned')
+                print(func_.__name__, 'returned')
             return ret
     return wrapper
 

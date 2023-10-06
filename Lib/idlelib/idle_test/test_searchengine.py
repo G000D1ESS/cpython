@@ -287,9 +287,9 @@ class ForwardBackwardTest(unittest.TestCase):
         cls.failpat = re.compile('xyz')  # not in text
         cls.emptypat = re.compile(r'\w*')  # empty match possible
 
-    def make_search(self, func):
+    def make_search(self, func_):
         def search(pat, line, col, wrap, ok=0):
-            res = func(self.text, pat, line, col, wrap, ok)
+            res = func_(self.text, pat, line, col, wrap, ok)
             # res is (line, matchobject) or None
             return (res[0], res[1].span()) if res else res
         return search

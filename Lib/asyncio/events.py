@@ -286,7 +286,7 @@ class AbstractEventLoop:
     def call_soon_threadsafe(self, callback, *args, context=None):
         raise NotImplementedError
 
-    def run_in_executor(self, executor, func, *args):
+    def run_in_executor(self, executor, func_, *args):
         raise NotImplementedError
 
     def set_default_executor(self, executor):

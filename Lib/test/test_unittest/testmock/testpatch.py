@@ -1483,8 +1483,8 @@ class PatchTest(unittest.TestCase):
         @patch.object(Foo, 'missing', 1)
         def thing3(): pass
 
-        for func in thing1, thing2, thing3:
-            self.assertRaises(AttributeError, func)
+        for func_ in thing1, thing2, thing3:
+            self.assertRaises(AttributeError, func_)
             self.assertEqual(Foo.f, original_f)
             self.assertEqual(Foo.g, original_g)
 
@@ -1512,8 +1512,8 @@ class PatchTest(unittest.TestCase):
         @patch.object(Foo, 'foo', new_callable=crasher)
         def thing3(): pass
 
-        for func in thing1, thing2, thing3:
-            self.assertRaises(NameError, func)
+        for func_ in thing1, thing2, thing3:
+            self.assertRaises(NameError, func_)
             self.assertEqual(Foo.f, original_f)
             self.assertEqual(Foo.g, original_g)
             self.assertEqual(Foo.foo, original_foo)
@@ -1536,9 +1536,9 @@ class PatchTest(unittest.TestCase):
             patcher.additional_patchers = additionals
 
             @patcher
-            def func(): pass
+            def func_(): pass
 
-            self.assertRaises(AttributeError, func)
+            self.assertRaises(AttributeError, func_)
             self.assertEqual(Foo.f, original_f)
             self.assertEqual(Foo.g, original_g)
 
@@ -1564,9 +1564,9 @@ class PatchTest(unittest.TestCase):
             patcher.additional_patchers = additionals
 
             @patcher
-            def func(): pass
+            def func_(): pass
 
-            self.assertRaises(NameError, func)
+            self.assertRaises(NameError, func_)
             self.assertEqual(Foo.f, original_f)
             self.assertEqual(Foo.g, original_g)
             self.assertEqual(Foo.foo, original_foo)

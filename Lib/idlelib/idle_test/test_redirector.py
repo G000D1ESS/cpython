@@ -55,8 +55,8 @@ class WidgetRedirectorTest(unittest.TestCase):
 
     def setUp(self):
         self.redir = WidgetRedirector(self.text)
-        self.func = Func()
-        self.orig_insert = self.redir.register('insert', self.func)
+        self.func_ = Func()
+        self.orig_insert = self.redir.register('insert', self.func_)
         self.text.insert('insert', 'asdf')  # leaves self.text empty
 
     def tearDown(self):
@@ -69,10 +69,10 @@ class WidgetRedirectorTest(unittest.TestCase):
 
     def test_register(self):
         self.assertEqual(self.text.get('1.0', 'end'), '\n')
-        self.assertEqual(self.func.args, ('insert', 'asdf'))
+        self.assertEqual(self.func_.args, ('insert', 'asdf'))
         self.assertIn('insert', self.redir._operations)
         self.assertIn('insert', self.text.__dict__)
-        self.assertEqual(self.text.insert, self.func)
+        self.assertEqual(self.text.insert, self.func_)
 
     def test_original_command(self):
         self.assertEqual(self.orig_insert.operation, 'insert')
@@ -82,18 +82,18 @@ class WidgetRedirectorTest(unittest.TestCase):
 
     def test_unregister(self):
         self.assertIsNone(self.redir.unregister('invalid operation name'))
-        self.assertEqual(self.redir.unregister('insert'), self.func)
+        self.assertEqual(self.redir.unregister('insert'), self.func_)
         self.assertNotIn('insert', self.redir._operations)
         self.assertNotIn('insert', self.text.__dict__)
 
     def test_unregister_no_attribute(self):
         del self.text.insert
-        self.assertEqual(self.redir.unregister('insert'), self.func)
+        self.assertEqual(self.redir.unregister('insert'), self.func_)
 
     def test_dispatch_intercept(self):
-        self.func.__init__(True)
+        self.func_.__init__(True)
         self.assertTrue(self.redir.dispatch('insert', False))
-        self.assertFalse(self.func.args[0])
+        self.assertFalse(self.func_.args[0])
 
     def test_dispatch_bypass(self):
         self.orig_insert('insert', 'asdf')
@@ -102,7 +102,7 @@ class WidgetRedirectorTest(unittest.TestCase):
         self.assertEqual(self.text.get('1.0', 'end'), '\n')
 
     def test_dispatch_error(self):
-        self.func.__init__(TclError())
+        self.func_.__init__(TclError())
         self.assertEqual(self.redir.dispatch('insert', False), '')
         self.assertEqual(self.redir.dispatch('invalid'), '')
 
@@ -110,11 +110,11 @@ class WidgetRedirectorTest(unittest.TestCase):
         # Test that .__init__ causes redirection of tk calls
         # through redir.dispatch
         self.root.call(self.text._w, 'insert', 'hello')
-        self.assertEqual(self.func.args, ('hello',))
+        self.assertEqual(self.func_.args, ('hello',))
         self.assertEqual(self.text.get('1.0', 'end'), '\n')
         # Ensure that called through redir .dispatch and not through
         # self.text.insert by having mock raise TclError.
-        self.func.__init__(TclError())
+        self.func_.__init__(TclError())
         self.assertEqual(self.root.call(self.text._w, 'insert', 'boo'), '')
 
 

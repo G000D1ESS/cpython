@@ -51,7 +51,7 @@ class FixXrange(fixer_base.BaseFix):
                 list_call.append_child(n)
             return list_call
 
-    P1 = "power< func=NAME trailer< '(' node=any ')' > any* >"
+    P1 = "power< func_=NAME trailer< '(' node=any ')' > any* >"
     p1 = patcomp.compile_pattern(P1)
 
     P2 = """for_stmt< 'for' any 'in' node=any ':' any* >
@@ -68,6 +68,6 @@ class FixXrange(fixer_base.BaseFix):
                self.p1.match(node.parent.parent, results) and
                results["node"] is node):
             # list(d.keys()) -> list(d.keys()), etc.
-            return results["func"].value in consuming_calls
+            return results["func_"].value in consuming_calls
         # for ... in d.iterkeys() -> for ... in d.keys(), etc.
         return self.p2.match(node.parent, results) and results["node"] is node

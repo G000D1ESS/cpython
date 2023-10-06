@@ -488,8 +488,8 @@ class OpenerDirector:
         # could.  Otherwise, they return the response.
         handlers = chain.get(kind, ())
         for handler in handlers:
-            func = getattr(handler, meth_name)
-            result = func(*args)
+            func_ = getattr(handler, meth_name)
+            result = func_(*args)
             if result is not None:
                 return result
 

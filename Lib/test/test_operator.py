@@ -536,13 +536,13 @@ class OperatorTestCase:
     def test_call(self):
         operator = self.module
 
-        def func(*args, **kwargs): return args, kwargs
+        def func_(*args, **kwargs): return args, kwargs
 
-        self.assertEqual(operator.call(func), ((), {}))
-        self.assertEqual(operator.call(func, 0, 1), ((0, 1), {}))
-        self.assertEqual(operator.call(func, a=2, obj=3),
+        self.assertEqual(operator.call(func_), ((), {}))
+        self.assertEqual(operator.call(func_, 0, 1), ((0, 1), {}))
+        self.assertEqual(operator.call(func_, a=2, obj=3),
                          ((), {"a": 2, "obj": 3}))
-        self.assertEqual(operator.call(func, 0, 1, a=2, obj=3),
+        self.assertEqual(operator.call(func_, 0, 1, a=2, obj=3),
                          ((0, 1), {"a": 2, "obj": 3}))
 
     def test_dunder_is_original(self):

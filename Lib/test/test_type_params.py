@@ -11,97 +11,97 @@ from typing import Generic, Sequence, TypeVar, TypeVarTuple, ParamSpec, get_args
 
 class TypeParamsInvalidTest(unittest.TestCase):
     def test_name_collisions(self):
-        check_syntax_error(self, 'def func[**A, A](): ...', "duplicate type parameter 'A'")
-        check_syntax_error(self, 'def func[A, *A](): ...', "duplicate type parameter 'A'")
-        check_syntax_error(self, 'def func[*A, **A](): ...', "duplicate type parameter 'A'")
+        check_syntax_error(self, 'def func_[**A, A](): ...', "duplicate type parameter 'A'")
+        check_syntax_error(self, 'def func_[A, *A](): ...', "duplicate type parameter 'A'")
+        check_syntax_error(self, 'def func_[*A, **A](): ...', "duplicate type parameter 'A'")
 
         check_syntax_error(self, 'class C[**A, A](): ...', "duplicate type parameter 'A'")
         check_syntax_error(self, 'class C[A, *A](): ...', "duplicate type parameter 'A'")
         check_syntax_error(self, 'class C[*A, **A](): ...', "duplicate type parameter 'A'")
 
     def test_name_non_collision_02(self):
-        ns = run_code("""def func[A](A): return A""")
-        func = ns["func"]
-        self.assertEqual(func(1), 1)
-        A, = func.__type_params__
+        ns = run_code("""def func_[A](A): return A""")
+        func_ = ns["func_"]
+        self.assertEqual(func_(1), 1)
+        A, = func_.__type_params__
         self.assertEqual(A.__name__, "A")
 
     def test_name_non_collision_03(self):
-        ns = run_code("""def func[A](*A): return A""")
-        func = ns["func"]
-        self.assertEqual(func(1), (1,))
-        A, = func.__type_params__
+        ns = run_code("""def func_[A](*A): return A""")
+        func_ = ns["func_"]
+        self.assertEqual(func_(1), (1,))
+        A, = func_.__type_params__
         self.assertEqual(A.__name__, "A")
 
     def test_name_non_collision_04(self):
         # Mangled names should not cause a conflict.
         ns = run_code("""
             class ClassA:
-                def func[__A](self, __A): return __A
+                def func_[__A](self, __A): return __A
             """
         )
         cls = ns["ClassA"]
-        self.assertEqual(cls().func(1), 1)
-        A, = cls.func.__type_params__
+        self.assertEqual(cls().func_(1), 1)
+        A, = cls.func_.__type_params__
         self.assertEqual(A.__name__, "__A")
 
     def test_name_non_collision_05(self):
         ns = run_code("""
             class ClassA:
-                def func[_ClassA__A](self, __A): return __A
+                def func_[_ClassA__A](self, __A): return __A
             """
         )
         cls = ns["ClassA"]
-        self.assertEqual(cls().func(1), 1)
-        A, = cls.func.__type_params__
+        self.assertEqual(cls().func_(1), 1)
+        A, = cls.func_.__type_params__
         self.assertEqual(A.__name__, "_ClassA__A")
 
     def test_name_non_collision_06(self):
         ns = run_code("""
             class ClassA[X]:
-                def func(self, X): return X
+                def func_(self, X): return X
             """
         )
         cls = ns["ClassA"]
-        self.assertEqual(cls().func(1), 1)
+        self.assertEqual(cls().func_(1), 1)
         X, = cls.__type_params__
         self.assertEqual(X.__name__, "X")
 
     def test_name_non_collision_07(self):
         ns = run_code("""
             class ClassA[X]:
-                def func(self):
+                def func_(self):
                     X = 1
                     return X
             """
         )
         cls = ns["ClassA"]
-        self.assertEqual(cls().func(), 1)
+        self.assertEqual(cls().func_(), 1)
         X, = cls.__type_params__
         self.assertEqual(X.__name__, "X")
 
     def test_name_non_collision_08(self):
         ns = run_code("""
             class ClassA[X]:
-                def func(self):
+                def func_(self):
                     return [X for X in [1, 2]]
             """
         )
         cls = ns["ClassA"]
-        self.assertEqual(cls().func(), [1, 2])
+        self.assertEqual(cls().func_(), [1, 2])
         X, = cls.__type_params__
         self.assertEqual(X.__name__, "X")
 
     def test_name_non_collision_9(self):
         ns = run_code("""
             class ClassA[X]:
-                def func[X](self):
+                def func_[X](self):
                     ...
             """
         )
         cls = ns["ClassA"]
         outer_X, = cls.__type_params__
-        inner_X, = cls.func.__type_params__
+        inner_X, = cls.func_.__type_params__
         self.assertEqual(outer_X.__name__, "X")
         self.assertEqual(inner_X.__name__, "X")
         self.assertIsNot(outer_X, inner_X)
@@ -181,8 +181,8 @@ class TypeParamsNonlocalTest(unittest.TestCase):
 
     def test_nonlocal_allowed(self):
         code = """
-            def func[T]():
-                T = "func"
+            def func_[T]():
+                T = "func_"
                 def inner():
                     nonlocal T
                     T = "inner"
@@ -190,8 +190,8 @@ class TypeParamsNonlocalTest(unittest.TestCase):
                 assert T == "inner"
         """
         ns = run_code(code)
-        func = ns["func"]
-        T, = func.__type_params__
+        func_ = ns["func_"]
+        T, = func_.__type_params__
         self.assertEqual(T.__name__, "T")
 
 
@@ -235,17 +235,17 @@ class TypeParamsAccessTest(unittest.TestCase):
 
     def test_function_access_01(self):
         ns = run_code("""
-            def func[A, B](a: dict[A, B]):
+            def func_[A, B](a: dict[A, B]):
                 ...
             """
         )
-        func = ns["func"]
-        A, B = func.__type_params__
-        self.assertEqual(func.__annotations__["a"], dict[A, B])
+        func_ = ns["func_"]
+        A, B = func_.__type_params__
+        self.assertEqual(func_.__annotations__["a"], dict[A, B])
 
     def test_function_access_02(self):
         code = """
-            def func[A](a = list[A]()):
+            def func_[A](a = list[A]()):
                 ...
             """
 
@@ -257,7 +257,7 @@ class TypeParamsAccessTest(unittest.TestCase):
             def my_decorator(a):
                 ...
             @my_decorator(A)
-            def func[A]():
+            def func_[A]():
                 ...
             """
 
@@ -268,14 +268,14 @@ class TypeParamsAccessTest(unittest.TestCase):
         ns = run_code("""
             class ClassA:
                 x = int
-                def func[T](self, a: x, b: T):
+                def func_[T](self, a: x, b: T):
                     ...
             """
         )
         cls = ns["ClassA"]
-        self.assertIs(cls.func.__annotations__["a"], int)
-        T, = cls.func.__type_params__
-        self.assertIs(cls.func.__annotations__["b"], T)
+        self.assertIs(cls.func_.__annotations__["a"], int)
+        T, = cls.func_.__type_params__
+        self.assertIs(cls.func_.__annotations__["b"], T)
 
     def test_nested_access_01(self):
         ns = run_code("""
@@ -363,10 +363,10 @@ class TypeParamsAccessTest(unittest.TestCase):
         self.assertEqual(getter(), "inner")
 
     def test_reference_previous_typevar(self):
-        def func[S, T: Sequence[S]]():
+        def func_[S, T: Sequence[S]]():
             pass
 
-        S, T = func.__type_params__
+        S, T = func_.__type_params__
         self.assertEqual(T.__bound__, Sequence[S])
 
     def test_super(self):
@@ -394,9 +394,9 @@ class TypeParamsAccessTest(unittest.TestCase):
         class Base[T]: ...
         class Child[T](Base[lambda: (int, outer_var, T)]): ...
         base, _ = types.get_original_bases(Child)
-        func, = get_args(base)
+        func_, = get_args(base)
         T, = Child.__type_params__
-        self.assertEqual(func(), (int, "outer", T))
+        self.assertEqual(func_(), (int, "outer", T))
 
     def test_comprehension_01(self):
         type Alias[T: ([T for T in (T, [1])[1]], T)] = [T for T in T.__name__]
@@ -406,11 +406,11 @@ class TypeParamsAccessTest(unittest.TestCase):
 
     def test_comprehension_02(self):
         type Alias[T: [lambda: T for T in (T, [1])[1]]] = [lambda: T for T in T.__name__]
-        func, = Alias.__value__
-        self.assertEqual(func(), "T")
+        func_, = Alias.__value__
+        self.assertEqual(func_(), "T")
         T, = Alias.__type_params__
-        func, = T.__bound__
-        self.assertEqual(func(), 1)
+        func_, = T.__bound__
+        self.assertEqual(func_(), 1)
 
     def test_gen_exp_in_nested_class(self):
         code = """
@@ -518,11 +518,11 @@ class TypeParamsLazyEvaluationTest(unittest.TestCase):
         class Foo[T]:
             pass
 
-        def func[T]():
+        def func_[T]():
             pass
 
         self.assertEqual(Foo.__qualname__, "TypeParamsLazyEvaluationTest.test_qualname.<locals>.Foo")
-        self.assertEqual(func.__qualname__, "TypeParamsLazyEvaluationTest.test_qualname.<locals>.func")
+        self.assertEqual(func_.__qualname__, "TypeParamsLazyEvaluationTest.test_qualname.<locals>.func_")
         self.assertEqual(global_generic_func.__qualname__, "global_generic_func")
         self.assertEqual(GlobalGenericClass.__qualname__, "GlobalGenericClass")
 
@@ -735,15 +735,15 @@ class TypeParamsComplexCallsTest(unittest.TestCase):
     def test_defaults(self):
         # Generic functions with both defaults and kwdefaults trigger a specific code path
         # in the compiler.
-        def func[T](a: T = "a", *, b: T = "b"):
+        def func_[T](a: T = "a", *, b: T = "b"):
             return (a, b)
 
-        T, = func.__type_params__
-        self.assertIs(func.__annotations__["a"], T)
-        self.assertIs(func.__annotations__["b"], T)
-        self.assertEqual(func(), ("a", "b"))
-        self.assertEqual(func(1), (1, "b"))
-        self.assertEqual(func(b=2), ("a", 2))
+        T, = func_.__type_params__
+        self.assertIs(func_.__annotations__["a"], T)
+        self.assertIs(func_.__annotations__["b"], T)
+        self.assertEqual(func_(), ("a", "b"))
+        self.assertEqual(func_(1), (1, "b"))
+        self.assertEqual(func_(b=2), ("a", 2))
 
     def test_complex_base(self):
         class Base:
@@ -789,7 +789,7 @@ class TypeParamsTraditionalTypeVarsTest(unittest.TestCase):
         # flagged as an error by type checkers.
         from typing import TypeVar
         S = TypeVar("S")
-        def func[T](a: T, b: S) -> T | S:
+        def func_[T](a: T, b: S) -> T | S:
             return a
 
 
@@ -960,13 +960,13 @@ class TypeParamsTypeParamsDunder(unittest.TestCase):
 
     def test_typeparams_dunder_function_03(self):
         code = """
-            def func[A]():
+            def func_[A]():
                 pass
-            func.__type_params__ = ()
+            func_.__type_params__ = ()
         """
 
         ns = run_code(code)
-        self.assertEqual(ns["func"].__type_params__, ())
+        self.assertEqual(ns["func_"].__type_params__, ())
 
 
 

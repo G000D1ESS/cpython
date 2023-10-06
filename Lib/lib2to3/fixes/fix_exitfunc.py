@@ -23,7 +23,7 @@ class FixExitfunc(fixer_base.BaseFix):
               |
                   expr_stmt<
                       power< 'sys' trailer< '.' 'exitfunc' > >
-                  '=' func=any >
+                  '=' func_=any >
               )
               """
 
@@ -41,12 +41,12 @@ class FixExitfunc(fixer_base.BaseFix):
                 self.sys_import = results["sys_import"]
             return
 
-        func = results["func"].clone()
-        func.prefix = ""
+        func_ = results["func_"].clone()
+        func_.prefix = ""
         register = pytree.Node(syms.power,
                                Attr(Name("atexit"), Name("register"))
                                )
-        call = Call(register, [func], node.prefix)
+        call = Call(register, [func_], node.prefix)
         node.replace(call)
 
         if self.sys_import is None:

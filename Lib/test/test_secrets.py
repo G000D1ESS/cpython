@@ -78,16 +78,16 @@ class Token_Tests(unittest.TestCase):
 
     def test_token_defaults(self):
         # Test that token_* functions handle default size correctly.
-        for func in (secrets.token_bytes, secrets.token_hex,
+        for func_ in (secrets.token_bytes, secrets.token_hex,
                      secrets.token_urlsafe):
-            with self.subTest(func=func):
-                name = func.__name__
+            with self.subTest(func_=func_):
+                name = func_.__name__
                 try:
-                    func()
+                    func_()
                 except TypeError:
                     self.fail("%s cannot be called with no argument" % name)
                 try:
-                    func(None)
+                    func_(None)
                 except TypeError:
                     self.fail("%s cannot be called with None" % name)
         size = secrets.DEFAULT_ENTROPY

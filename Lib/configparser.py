@@ -1303,11 +1303,11 @@ class ConverterMapping(MutableMapping):
         if k == 'get':
             raise ValueError('Incompatible key: cannot use "" as a name')
         self._data[key] = value
-        func = functools.partial(self._parser._get_conv, conv=value)
-        func.converter = value
-        setattr(self._parser, k, func)
+        func_ = functools.partial(self._parser._get_conv, conv=value)
+        func_.converter = value
+        setattr(self._parser, k, func_)
         for proxy in self._parser.values():
-            getter = functools.partial(proxy.get, _impl=func)
+            getter = functools.partial(proxy.get, _impl=func_)
             setattr(proxy, k, getter)
 
     def __delitem__(self, key):

@@ -663,12 +663,12 @@ class CompressObjectTestCase(BaseCompressTestCase, unittest.TestCase):
         # Test copying a compression object
         data0 = HAMLET_SCENE
         data1 = bytes(str(HAMLET_SCENE, "ascii").swapcase(), "ascii")
-        for func in lambda c: c.copy(), copy.copy, copy.deepcopy:
+        for func_ in lambda c: c.copy(), copy.copy, copy.deepcopy:
             c0 = zlib.compressobj(zlib.Z_BEST_COMPRESSION)
             bufs0 = []
             bufs0.append(c0.compress(data0))
 
-            c1 = func(c0)
+            c1 = func_(c0)
             bufs1 = bufs0[:]
 
             bufs0.append(c0.compress(data0))
@@ -700,12 +700,12 @@ class CompressObjectTestCase(BaseCompressTestCase, unittest.TestCase):
         # Test type of return value
         self.assertIsInstance(comp, bytes)
 
-        for func in lambda c: c.copy(), copy.copy, copy.deepcopy:
+        for func_ in lambda c: c.copy(), copy.copy, copy.deepcopy:
             d0 = zlib.decompressobj()
             bufs0 = []
             bufs0.append(d0.decompress(comp[:32]))
 
-            d1 = func(d0)
+            d1 = func_(d0)
             bufs1 = bufs0[:]
 
             bufs0.append(d0.decompress(comp[32:]))

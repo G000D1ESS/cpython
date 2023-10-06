@@ -21,31 +21,31 @@ class PointersTestCase(unittest.TestCase):
 
     def test_pass_pointers(self):
         dll = CDLL(_ctypes_test.__file__)
-        func = dll._testfunc_p_p
+        func_ = dll._testfunc_p_p
         if sizeof(c_longlong) == sizeof(c_void_p):
-            func.restype = c_longlong
+            func_.restype = c_longlong
         else:
-            func.restype = c_long
+            func_.restype = c_long
 
         i = c_int(12345678)
-##        func.argtypes = (POINTER(c_int),)
-        address = func(byref(i))
+##        func_.argtypes = (POINTER(c_int),)
+        address = func_(byref(i))
         self.assertEqual(c_int.from_address(address).value, 12345678)
 
-        func.restype = POINTER(c_int)
-        res = func(pointer(i))
+        func_.restype = POINTER(c_int)
+        res = func_(pointer(i))
         self.assertEqual(res.contents.value, 12345678)
         self.assertEqual(res[0], 12345678)
 
     def test_change_pointers(self):
         dll = CDLL(_ctypes_test.__file__)
-        func = dll._testfunc_p_p
+        func_ = dll._testfunc_p_p
 
         i = c_int(87654)
-        func.restype = POINTER(c_int)
-        func.argtypes = (POINTER(c_int),)
+        func_.restype = POINTER(c_int)
+        func_.argtypes = (POINTER(c_int),)
 
-        res = func(pointer(i))
+        res = func_(pointer(i))
         self.assertEqual(res[0], 87654)
         self.assertEqual(res.contents.value, 87654)
 
@@ -69,13 +69,13 @@ class PointersTestCase(unittest.TestCase):
 
         self.result = []
 
-        def func(arg):
+        def func_(arg):
             for i in range(10):
 ##                print arg[i],
                 self.result.append(arg[i])
 ##            print
             return 0
-        callback = PROTOTYPE(func)
+        callback = PROTOTYPE(func_)
 
         dll = CDLL(_ctypes_test.__file__)
         # This function expects a function pointer,
@@ -144,17 +144,17 @@ class PointersTestCase(unittest.TestCase):
     def test_charpp(self):
         """Test that a character pointer-to-pointer is correctly passed"""
         dll = CDLL(_ctypes_test.__file__)
-        func = dll._testfunc_c_p_p
-        func.restype = c_char_p
+        func_ = dll._testfunc_c_p_p
+        func_.restype = c_char_p
         argv = (c_char_p * 2)()
         argc = c_int( 2 )
         argv[0] = b'hello'
         argv[1] = b'world'
-        result = func( byref(argc), argv )
+        result = func_( byref(argc), argv )
         self.assertEqual(result, b'world')
 
     def test_bug_1467852(self):
-        # http://sourceforge.net/tracker/?func=detail&atid=532154&aid=1467852&group_id=71702
+        # http://sourceforge.net/tracker/?func_=detail&atid=532154&aid=1467852&group_id=71702
         x = c_int(5)
         dummy = []
         for i in range(32000):
@@ -166,7 +166,7 @@ class PointersTestCase(unittest.TestCase):
         pp[0] = q         # <==
         self.assertEqual(p[0], 6)
     def test_c_void_p(self):
-        # http://sourceforge.net/tracker/?func=detail&aid=1518190&group_id=5470&atid=105470
+        # http://sourceforge.net/tracker/?func_=detail&aid=1518190&group_id=5470&atid=105470
         if sizeof(c_void_p) == 4:
             self.assertEqual(c_void_p(0xFFFFFFFF).value,
                                  c_void_p(-1).value)

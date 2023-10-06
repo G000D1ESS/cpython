@@ -27,7 +27,7 @@ class Worker(threading.Thread):
     def run(self):
         self.function(*self.args)
 
-for name, func, args in [
+for name, func_, args in [
         # Bug 147376:  TemporaryFile hung on Windows, starting in Python 2.4.
         ("tempfile.TemporaryFile", lambda: tempfile.TemporaryFile().close(), ()),
 
@@ -36,7 +36,7 @@ for name, func, args in [
         ]:
 
     try:
-        t = Worker(func, args)
+        t = Worker(func_, args)
         t.start()
         t.join(TIMEOUT)
         if t.is_alive():

@@ -313,8 +313,8 @@ def __forwardmethods(fromClass, toClass, toPart, exclude = ()):
         else:
             _dict[ex] = _dict_1[ex]
 
-    for method, func in _dict.items():
-        d = {'method': method, 'func': func}
+    for method, func_ in _dict.items():
+        d = {'method': method, 'func_': func_}
         if isinstance(toPart, str):
             execString = \
                 __stringBody % {'method' : method, 'attribute' : toPart}

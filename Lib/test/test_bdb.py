@@ -112,8 +112,8 @@ class Bdb(_bdb.Bdb):
             else:
                 module = importlib.import_module(filename[:-3])
                 globals_ = module.__dict__
-            func = eval(funcname, globals_)
-            code = func.__code__
+            func_ = eval(funcname, globals_)
+            code = func_.__code__
             filename = code.co_filename
             lineno = code.co_firstlineno
             funcname = code.co_name
@@ -472,16 +472,16 @@ def run_test(modules, set_list, skip=None):
     from test.test_bdb import run_test, break_in_func
 
     code = '''
-        def func():
+        def func_():
             lno = 3
 
         def main():
-            func()
+            func_()
             lno = 7
     '''
 
     set_list = [
-                break_in_func('func', 'test_module.py'),
+                break_in_func('func_', 'test_module.py'),
                 ('continue', ),
                 ('step', ),
                 ('step', ),
@@ -496,12 +496,12 @@ def run_test(modules, set_list, skip=None):
 
     1: ('line', 2, 'tfunc_import'),    ('next',),
     2: ('line', 3, 'tfunc_import'),    ('step',),
-    3: ('call', 5, 'main'),            ('break', ('test_module.py', None, False, None, 'func')),
+    3: ('call', 5, 'main'),            ('break', ('test_module.py', None, False, None, 'func_')),
     4: ('None', 5, 'main'),            ('continue',),
-    5: ('line', 3, 'func', ({1: 1}, [])), ('step',),
+    5: ('line', 3, 'func_', ({1: 1}, [])), ('step',),
       BpNum Temp Enb Hits Ignore Where
       1     no   yes 1    0      at test_module.py:2
-    6: ('return', 3, 'func'),          ('step',),
+    6: ('return', 3, 'func_'),          ('step',),
     7: ('line', 7, 'main'),            ('step',),
     8: ('return', 7, 'main'),          ('quit',),
 
@@ -791,151 +791,151 @@ class BreakpointTestCase(BaseTestCase):
 
     def test_temporary_bp(self):
         code = """
-            def func():
+            def func_():
                 lno = 3
 
             def main():
                 for i in range(2):
-                    func()
+                    func_()
         """
         modules = { TEST_MODULE: code }
         with create_modules(modules):
             self.expect_set = [
                 ('line', 2, 'tfunc_import'),
-                    break_in_func('func', TEST_MODULE_FNAME, True),
+                    break_in_func('func_', TEST_MODULE_FNAME, True),
                 ('None', 2, 'tfunc_import'),
-                    break_in_func('func', TEST_MODULE_FNAME, True),
+                    break_in_func('func_', TEST_MODULE_FNAME, True),
                 ('None', 2, 'tfunc_import'),       ('continue', ),
-                ('line', 3, 'func', ({1:1}, [1])), ('continue', ),
-                ('line', 3, 'func', ({2:1}, [2])), ('quit', ),
+                ('line', 3, 'func_', ({1:1}, [1])), ('continue', ),
+                ('line', 3, 'func_', ({2:1}, [2])), ('quit', ),
             ]
             with TracerRun(self) as tracer:
                 tracer.runcall(tfunc_import)
 
     def test_disabled_temporary_bp(self):
         code = """
-            def func():
+            def func_():
                 lno = 3
 
             def main():
                 for i in range(3):
-                    func()
+                    func_()
         """
         modules = { TEST_MODULE: code }
         with create_modules(modules):
             self.expect_set = [
                 ('line', 2, 'tfunc_import'),
-                    break_in_func('func', TEST_MODULE_FNAME),
+                    break_in_func('func_', TEST_MODULE_FNAME),
                 ('None', 2, 'tfunc_import'),
-                    break_in_func('func', TEST_MODULE_FNAME, True),
+                    break_in_func('func_', TEST_MODULE_FNAME, True),
                 ('None', 2, 'tfunc_import'),       ('disable', (2, )),
                 ('None', 2, 'tfunc_import'),       ('continue', ),
-                ('line', 3, 'func', ({1:1}, [])),  ('enable', (2, )),
-                ('None', 3, 'func'),               ('disable', (1, )),
-                ('None', 3, 'func'),               ('continue', ),
-                ('line', 3, 'func', ({2:1}, [2])), ('enable', (1, )),
-                ('None', 3, 'func'),               ('continue', ),
-                ('line', 3, 'func', ({1:2}, [])),  ('quit', ),
+                ('line', 3, 'func_', ({1:1}, [])),  ('enable', (2, )),
+                ('None', 3, 'func_'),               ('disable', (1, )),
+                ('None', 3, 'func_'),               ('continue', ),
+                ('line', 3, 'func_', ({2:1}, [2])), ('enable', (1, )),
+                ('None', 3, 'func_'),               ('continue', ),
+                ('line', 3, 'func_', ({1:2}, [])),  ('quit', ),
             ]
             with TracerRun(self) as tracer:
                 tracer.runcall(tfunc_import)
 
     def test_bp_condition(self):
         code = """
-            def func(a):
+            def func_(a):
                 lno = 3
 
             def main():
                 for i in range(3):
-                    func(i)
+                    func_(i)
         """
         modules = { TEST_MODULE: code }
         with create_modules(modules):
             self.expect_set = [
                 ('line', 2, 'tfunc_import'),
-                    break_in_func('func', TEST_MODULE_FNAME, False, 'a == 2'),
+                    break_in_func('func_', TEST_MODULE_FNAME, False, 'a == 2'),
                 ('None', 2, 'tfunc_import'),       ('continue', ),
-                ('line', 3, 'func', ({1:3}, [])),  ('quit', ),
+                ('line', 3, 'func_', ({1:3}, [])),  ('quit', ),
             ]
             with TracerRun(self) as tracer:
                 tracer.runcall(tfunc_import)
 
     def test_bp_exception_on_condition_evaluation(self):
         code = """
-            def func(a):
+            def func_(a):
                 lno = 3
 
             def main():
-                func(0)
+                func_(0)
         """
         modules = { TEST_MODULE: code }
         with create_modules(modules):
             self.expect_set = [
                 ('line', 2, 'tfunc_import'),
-                    break_in_func('func', TEST_MODULE_FNAME, False, '1 / 0'),
+                    break_in_func('func_', TEST_MODULE_FNAME, False, '1 / 0'),
                 ('None', 2, 'tfunc_import'),       ('continue', ),
-                ('line', 3, 'func', ({1:1}, [])),  ('quit', ),
+                ('line', 3, 'func_', ({1:1}, [])),  ('quit', ),
             ]
             with TracerRun(self) as tracer:
                 tracer.runcall(tfunc_import)
 
     def test_bp_ignore_count(self):
         code = """
-            def func():
+            def func_():
                 lno = 3
 
             def main():
                 for i in range(2):
-                    func()
+                    func_()
         """
         modules = { TEST_MODULE: code }
         with create_modules(modules):
             self.expect_set = [
                 ('line', 2, 'tfunc_import'),
-                    break_in_func('func', TEST_MODULE_FNAME),
+                    break_in_func('func_', TEST_MODULE_FNAME),
                 ('None', 2, 'tfunc_import'),      ('ignore', (1, )),
                 ('None', 2, 'tfunc_import'),      ('continue', ),
-                ('line', 3, 'func', ({1:2}, [])), ('quit', ),
+                ('line', 3, 'func_', ({1:2}, [])), ('quit', ),
             ]
             with TracerRun(self) as tracer:
                 tracer.runcall(tfunc_import)
 
     def test_ignore_count_on_disabled_bp(self):
         code = """
-            def func():
+            def func_():
                 lno = 3
 
             def main():
                 for i in range(3):
-                    func()
+                    func_()
         """
         modules = { TEST_MODULE: code }
         with create_modules(modules):
             self.expect_set = [
                 ('line', 2, 'tfunc_import'),
-                    break_in_func('func', TEST_MODULE_FNAME),
+                    break_in_func('func_', TEST_MODULE_FNAME),
                 ('None', 2, 'tfunc_import'),
-                    break_in_func('func', TEST_MODULE_FNAME),
+                    break_in_func('func_', TEST_MODULE_FNAME),
                 ('None', 2, 'tfunc_import'),      ('ignore', (1, )),
                 ('None', 2, 'tfunc_import'),      ('disable', (1, )),
                 ('None', 2, 'tfunc_import'),      ('continue', ),
-                ('line', 3, 'func', ({2:1}, [])), ('enable', (1, )),
-                ('None', 3, 'func'),              ('continue', ),
-                ('line', 3, 'func', ({2:2}, [])), ('continue', ),
-                ('line', 3, 'func', ({1:2}, [])), ('quit', ),
+                ('line', 3, 'func_', ({2:1}, [])), ('enable', (1, )),
+                ('None', 3, 'func_'),              ('continue', ),
+                ('line', 3, 'func_', ({2:2}, [])), ('continue', ),
+                ('line', 3, 'func_', ({1:2}, [])), ('quit', ),
             ]
             with TracerRun(self) as tracer:
                 tracer.runcall(tfunc_import)
 
     def test_clear_two_bp_on_same_line(self):
         code = """
-            def func():
+            def func_():
                 lno = 3
                 lno = 4
 
             def main():
                 for i in range(3):
-                    func()
+                    func_()
         """
         modules = { TEST_MODULE: code }
         with create_modules(modules):
@@ -944,10 +944,10 @@ class BreakpointTestCase(BaseTestCase):
                 ('None', 2, 'tfunc_import'),      ('break', (TEST_MODULE_FNAME, 3)),
                 ('None', 2, 'tfunc_import'),      ('break', (TEST_MODULE_FNAME, 4)),
                 ('None', 2, 'tfunc_import'),      ('continue', ),
-                ('line', 3, 'func', ({1:1}, [])), ('continue', ),
-                ('line', 4, 'func', ({3:1}, [])), ('clear', (TEST_MODULE_FNAME, 3)),
-                ('None', 4, 'func'),              ('continue', ),
-                ('line', 4, 'func', ({3:2}, [])), ('quit', ),
+                ('line', 3, 'func_', ({1:1}, [])), ('continue', ),
+                ('line', 4, 'func_', ({3:1}, [])), ('clear', (TEST_MODULE_FNAME, 3)),
+                ('None', 4, 'func_'),              ('continue', ),
+                ('line', 4, 'func_', ({3:2}, [])), ('quit', ),
             ]
             with TracerRun(self) as tracer:
                 tracer.runcall(tfunc_import)
@@ -1044,13 +1044,13 @@ class IssuesTestCase(BaseTestCase):
         # Check that the tracer does step into the caller frame when the
         # trace function is not set in that frame.
         code_1 = """
-            from test_module_for_bdb_2 import func
+            from test_module_for_bdb_2 import func_
             def main():
-                func()
+                func_()
                 lno = 5
         """
         code_2 = """
-            def func():
+            def func_():
                 lno = 3
         """
         modules = {
@@ -1060,10 +1060,10 @@ class IssuesTestCase(BaseTestCase):
         with create_modules(modules):
             self.expect_set = [
                 ('line', 2, 'tfunc_import'),
-                    break_in_func('func', 'test_module_for_bdb_2.py'),
+                    break_in_func('func_', 'test_module_for_bdb_2.py'),
                 ('None', 2, 'tfunc_import'),      ('continue', ),
-                ('line', 3, 'func', ({1:1}, [])), ('step', ),
-                ('return', 3, 'func'),            ('step', ),
+                ('line', 3, 'func_', ({1:1}, [])), ('step', ),
+                ('return', 3, 'func_'),            ('step', ),
                 ('line', 5, 'main'),              ('quit', ),
             ]
             with TracerRun(self) as tracer:

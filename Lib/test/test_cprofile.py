@@ -81,8 +81,8 @@ class CProfileTest(ProfileTest):
         pr.disable()
         pr.create_stats()
 
-        for func, (cc, nc, _, _, _) in pr.stats.items():
-            if func[2] == "<genexpr>":
+        for func_, (cc, nc, _, _, _) in pr.stats.items():
+            if func_[2] == "<genexpr>":
                 self.assertEqual(cc, 2)
                 self.assertEqual(nc, 2)
 

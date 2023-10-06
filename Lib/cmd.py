@@ -211,10 +211,10 @@ class Cmd:
             return self.default(line)
         else:
             try:
-                func = getattr(self, 'do_' + cmd)
+                func_ = getattr(self, 'do_' + cmd)
             except AttributeError:
                 return self.default(line)
-            return func(arg)
+            return func_(arg)
 
     def emptyline(self):
         """Called when an empty line is entered in response to the prompt.
@@ -294,7 +294,7 @@ class Cmd:
         if arg:
             # XXX check arg syntax
             try:
-                func = getattr(self, 'help_' + arg)
+                func_ = getattr(self, 'help_' + arg)
             except AttributeError:
                 try:
                     doc=getattr(self, 'do_' + arg).__doc__
@@ -305,7 +305,7 @@ class Cmd:
                     pass
                 self.stdout.write("%s\n"%str(self.nohelp % (arg,)))
                 return
-            func()
+            func_()
         else:
             names = self.get_names()
             cmds_doc = []

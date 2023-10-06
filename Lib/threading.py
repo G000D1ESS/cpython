@@ -57,47 +57,47 @@ del _thread
 _profile_hook = None
 _trace_hook = None
 
-def setprofile(func):
+def setprofile(func_):
     """Set a profile function for all threads started from the threading module.
 
-    The func will be passed to sys.setprofile() for each thread, before its
+    The func_ will be passed to sys.setprofile() for each thread, before its
     run() method is called.
     """
     global _profile_hook
-    _profile_hook = func
+    _profile_hook = func_
 
-def setprofile_all_threads(func):
+def setprofile_all_threads(func_):
     """Set a profile function for all threads started from the threading module
     and all Python threads that are currently executing.
 
-    The func will be passed to sys.setprofile() for each thread, before its
+    The func_ will be passed to sys.setprofile() for each thread, before its
     run() method is called.
     """
-    setprofile(func)
-    _sys._setprofileallthreads(func)
+    setprofile(func_)
+    _sys._setprofileallthreads(func_)
 
 def getprofile():
     """Get the profiler function as set by threading.setprofile()."""
     return _profile_hook
 
-def settrace(func):
+def settrace(func_):
     """Set a trace function for all threads started from the threading module.
 
-    The func will be passed to sys.settrace() for each thread, before its run()
+    The func_ will be passed to sys.settrace() for each thread, before its run()
     method is called.
     """
     global _trace_hook
-    _trace_hook = func
+    _trace_hook = func_
 
-def settrace_all_threads(func):
+def settrace_all_threads(func_):
     """Set a trace function for all threads started from the threading module
     and all Python threads that are currently executing.
 
-    The func will be passed to sys.settrace() for each thread, before its run()
+    The func_ will be passed to sys.settrace() for each thread, before its run()
     method is called.
     """
-    settrace(func)
-    _sys._settraceallthreads(func)
+    settrace(func_)
+    _sys._settraceallthreads(func_)
 
 def gettrace():
     """Get the trace function as set by threading.settrace()."""
@@ -1532,10 +1532,10 @@ def enumerate():
 _threading_atexits = []
 _SHUTTING_DOWN = False
 
-def _register_atexit(func, *arg, **kwargs):
-    """CPython internal: register *func* to be called before joining threads.
+def _register_atexit(func_, *arg, **kwargs):
+    """CPython internal: register *func_* to be called before joining threads.
 
-    The registered *func* is called with its arguments just before all
+    The registered *func_* is called with its arguments just before all
     non-daemon threads are joined in `_shutdown()`. It provides a similar
     purpose to `atexit.register()`, but its functions are called prior to
     threading shutdown instead of interpreter shutdown.
@@ -1545,7 +1545,7 @@ def _register_atexit(func, *arg, **kwargs):
     if _SHUTTING_DOWN:
         raise RuntimeError("can't register atexit after shutdown")
 
-    call = functools.partial(func, *arg, **kwargs)
+    call = functools.partial(func_, *arg, **kwargs)
     _threading_atexits.append(call)
 
 

@@ -615,11 +615,11 @@ class UninitialisedConnectionTests(unittest.TestCase):
             lambda: self.cx.cursor(),
             lambda: self.cx.close(),
         )
-        for func in funcs:
-            with self.subTest(func=func):
+        for func_ in funcs:
+            with self.subTest(func_=func_):
                 self.assertRaisesRegex(sqlite.ProgrammingError,
                                        "Base Connection.__init__ not called",
-                                       func)
+                                       func_)
 
 
 @unittest.skipUnless(hasattr(sqlite.Connection, "serialize"),

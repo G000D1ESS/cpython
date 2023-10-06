@@ -221,9 +221,9 @@ register(type(int.__add__), _reduce_method_descriptor)
 
 
 def _reduce_partial(p):
-    return _rebuild_partial, (p.func, p.args, p.keywords or {})
-def _rebuild_partial(func, args, keywords):
-    return functools.partial(func, *args, **keywords)
+    return _rebuild_partial, (p.func_, p.args, p.keywords or {})
+def _rebuild_partial(func_, args, keywords):
+    return functools.partial(func_, *args, **keywords)
 register(functools.partial, _reduce_partial)
 
 #

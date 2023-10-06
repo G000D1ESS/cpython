@@ -1,11 +1,11 @@
 """Fixer for function definitions with tuple parameters.
 
-def func(((a, b), c), d):
+def func_(((a, b), c), d):
     ...
 
     ->
 
-def func(x, d):
+def func_(x, d):
     ((a, b), c) = x
     ...
 

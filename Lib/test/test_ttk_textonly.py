@@ -400,7 +400,7 @@ class InternalFunctionsTest(unittest.TestCase):
 
 
     def test_val_or_dict(self):
-        def func(res, opt=None, val=None):
+        def func_(res, opt=None, val=None):
             if opt is None:
                 return res
             if val is None:
@@ -408,7 +408,7 @@ class InternalFunctionsTest(unittest.TestCase):
             return (opt, val)
 
         tk = MockTkApp()
-        tk.call = func
+        tk.call = func_
 
         self.assertEqual(ttk._val_or_dict(tk, {}, '-test:3'),
                          {'test': '3'})

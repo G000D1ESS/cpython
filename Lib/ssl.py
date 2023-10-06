@@ -935,10 +935,10 @@ class SSLObject:
         return self._sslobj.verify_client_post_handshake()
 
 
-def _sslcopydoc(func):
+def _sslcopydoc(func_):
     """Copy docstring from SSLObject to SSLSocket"""
-    func.__doc__ = getattr(SSLObject, func.__name__).__doc__
-    return func
+    func_.__doc__ = getattr(SSLObject, func_.__name__).__doc__
+    return func_
 
 
 class SSLSocket(socket):

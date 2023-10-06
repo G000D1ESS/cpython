@@ -486,8 +486,8 @@ class TestSupport(unittest.TestCase):
         support.reap_children()
 
     @support.requires_subprocess()
-    def check_options(self, args, func, expected=None):
-        code = f'from test.support import {func}; print(repr({func}()))'
+    def check_options(self, args, func_, expected=None):
+        code = f'from test.support import {func_}; print(repr({func_}()))'
         cmd = [sys.executable, *args, '-c', code]
         env = {key: value for key, value in os.environ.items()
                if not key.startswith('PYTHON')}

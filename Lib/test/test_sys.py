@@ -1443,13 +1443,13 @@ class SizeofTest(unittest.TestCase):
         # sys.floatinfo
         check(sys.float_info, vsize('') + self.P * len(sys.float_info))
         # frame
-        def func():
+        def func_():
             return sys._getframe()
-        x = func()
+        x = func_()
         check(x, size('3Pi3c7P2ic??2P'))
         # function
-        def func(): pass
-        check(func, size('15Pi'))
+        def func_(): pass
+        check(func_, size('15Pi'))
         class c():
             @staticmethod
             def foo():

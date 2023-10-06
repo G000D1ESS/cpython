@@ -82,11 +82,11 @@ class MathServer(SimpleXMLRPCServer):
             # We are forcing the 'export_' prefix on methods that are
             # callable through XML-RPC to prevent potential security
             # problems
-            func = getattr(self, 'export_' + method)
+            func_ = getattr(self, 'export_' + method)
         except AttributeError:
             raise Exception('method "%s" is not supported' % method)
         else:
-            return func(*params)
+            return func_(*params)
 
     def export_add(self, x, y):
         return x + y
@@ -392,12 +392,12 @@ class SimpleXMLRPCDispatcher:
 
         try:
             # call the matching registered function
-            func = self.funcs[method]
+            func_ = self.funcs[method]
         except KeyError:
             pass
         else:
-            if func is not None:
-                return func(*params)
+            if func_ is not None:
+                return func_(*params)
             raise Exception('method "%s" is not supported' % method)
 
         if self.instance is not None:
@@ -407,7 +407,7 @@ class SimpleXMLRPCDispatcher:
 
             # call the instance's method directly
             try:
-                func = resolve_dotted_attribute(
+                func_ = resolve_dotted_attribute(
                     self.instance,
                     method,
                     self.allow_dotted_names
@@ -415,8 +415,8 @@ class SimpleXMLRPCDispatcher:
             except AttributeError:
                 pass
             else:
-                if func is not None:
-                    return func(*params)
+                if func_ is not None:
+                    return func_(*params)
 
         raise Exception('method "%s" is not supported' % method)
 

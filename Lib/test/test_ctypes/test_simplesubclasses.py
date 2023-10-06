@@ -17,25 +17,25 @@ class Test(unittest.TestCase):
         # Test if the return value of a callback is ignored
         # if restype is None
         proto = CFUNCTYPE(None)
-        def func():
+        def func_():
             return (1, "abc", None)
 
-        cb = proto(func)
+        cb = proto(func_)
         self.assertEqual(None, cb())
 
 
     def test_int_callback(self):
         args = []
-        def func(arg):
+        def func_(arg):
             args.append(arg)
             return arg
 
-        cb = CFUNCTYPE(None, MyInt)(func)
+        cb = CFUNCTYPE(None, MyInt)(func_)
 
         self.assertEqual(None, cb(42))
         self.assertEqual(type(args[-1]), MyInt)
 
-        cb = CFUNCTYPE(c_int, c_int)(func)
+        cb = CFUNCTYPE(c_int, c_int)(func_)
 
         self.assertEqual(42, cb(42))
         self.assertEqual(type(args[-1]), int)

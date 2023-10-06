@@ -58,9 +58,9 @@ def _is_async_obj(obj):
     return iscoroutinefunction(obj) or inspect.isawaitable(obj)
 
 
-def _is_async_func(func):
-    if getattr(func, '__code__', None):
-        return iscoroutinefunction(func)
+def _is_async_func(func_):
+    if getattr(func_, '__code__', None):
+        return iscoroutinefunction(func_)
     else:
         return False
 
@@ -87,62 +87,62 @@ def _extract_mock(obj):
         return obj
 
 
-def _get_signature_object(func, as_instance, eat_self):
+def _get_signature_object(func_, as_instance, eat_self):
     """
     Given an arbitrary, possibly callable object, try to create a suitable
     signature object.
-    Return a (reduced func, signature) tuple, or None.
+    Return a (reduced func_, signature) tuple, or None.
     """
-    if isinstance(func, type) and not as_instance:
+    if isinstance(func_, type) and not as_instance:
         # If it's a type and should be modelled as a type, use __init__.
-        func = func.__init__
+        func_ = func_.__init__
         # Skip the `self` argument in __init__
         eat_self = True
-    elif isinstance(func, (classmethod, staticmethod)):
-        if isinstance(func, classmethod):
+    elif isinstance(func_, (classmethod, staticmethod)):
+        if isinstance(func_, classmethod):
             # Skip the `cls` argument of a class method
             eat_self = True
         # Use the original decorated method to extract the correct function signature
-        func = func.__func__
-    elif not isinstance(func, FunctionTypes):
+        func_ = func_.__func__
+    elif not isinstance(func_, FunctionTypes):
         # If we really want to model an instance of the passed type,
         # __call__ should be looked up, not __init__.
         try:
-            func = func.__call__
+            func_ = func_.__call__
         except AttributeError:
             return None
     if eat_self:
-        sig_func = partial(func, None)
+        sig_func = partial(func_, None)
     else:
-        sig_func = func
+        sig_func = func_
     try:
-        return func, inspect.signature(sig_func)
+        return func_, inspect.signature(sig_func)
     except ValueError:
         # Certain callable types are not supported by inspect.signature()
         return None
 
 
-def _check_signature(func, mock, skipfirst, instance=False):
-    sig = _get_signature_object(func, instance, skipfirst)
+def _check_signature(func_, mock, skipfirst, instance=False):
+    sig = _get_signature_object(func_, instance, skipfirst)
     if sig is None:
         return
-    func, sig = sig
+    func_, sig = sig
     def checksig(self, /, *args, **kwargs):
         sig.bind(*args, **kwargs)
-    _copy_func_details(func, checksig)
+    _copy_func_details(func_, checksig)
     type(mock)._mock_check_sig = checksig
     type(mock).__signature__ = sig
 
 
-def _copy_func_details(func, funcopy):
-    # we explicitly don't copy func.__dict__ into this copy as it would
+def _copy_func_details(func_, funcopy):
+    # we explicitly don't copy func_.__dict__ into this copy as it would
     # expose original attributes that should be mocked
     for attribute in (
         '__name__', '__doc__', '__text_signature__',
         '__module__', '__defaults__', '__kwdefaults__',
     ):
         try:
-            setattr(funcopy, attribute, getattr(func, attribute))
+            setattr(funcopy, attribute, getattr(func_, attribute))
         except AttributeError:
             pass
 
@@ -187,10 +187,10 @@ def _set_signature(mock, original, instance=False):
     result = _get_signature_object(original, instance, skipfirst)
     if result is None:
         return mock
-    func, sig = result
+    func_, sig = result
     def checksig(*args, **kwargs):
         sig.bind(*args, **kwargs)
-    _copy_func_details(func, checksig)
+    _copy_func_details(func_, checksig)
 
     name = original.__name__
     if not name.isidentifier():
@@ -1336,12 +1336,12 @@ class _patch(object):
         return patcher
 
 
-    def __call__(self, func):
-        if isinstance(func, type):
-            return self.decorate_class(func)
-        if inspect.iscoroutinefunction(func):
-            return self.decorate_async_callable(func)
-        return self.decorate_callable(func)
+    def __call__(self, func_):
+        if isinstance(func_, type):
+            return self.decorate_class(func_)
+        if inspect.iscoroutinefunction(func_):
+            return self.decorate_async_callable(func_)
+        return self.decorate_callable(func_)
 
 
     def decorate_class(self, klass):
@@ -1373,35 +1373,35 @@ class _patch(object):
             yield (args, keywargs)
 
 
-    def decorate_callable(self, func):
+    def decorate_callable(self, func_):
         # NB. Keep the method in sync with decorate_async_callable()
-        if hasattr(func, 'patchings'):
-            func.patchings.append(self)
-            return func
+        if hasattr(func_, 'patchings'):
+            func_.patchings.append(self)
+            return func_
 
-        @wraps(func)
+        @wraps(func_)
         def patched(*args, **keywargs):
             with self.decoration_helper(patched,
                                         args,
                                         keywargs) as (newargs, newkeywargs):
-                return func(*newargs, **newkeywargs)
+                return func_(*newargs, **newkeywargs)
 
         patched.patchings = [self]
         return patched
 
 
-    def decorate_async_callable(self, func):
+    def decorate_async_callable(self, func_):
         # NB. Keep the method in sync with decorate_callable()
-        if hasattr(func, 'patchings'):
-            func.patchings.append(self)
-            return func
+        if hasattr(func_, 'patchings'):
+            func_.patchings.append(self)
+            return func_
 
-        @wraps(func)
+        @wraps(func_)
         async def patched(*args, **keywargs):
             with self.decoration_helper(patched,
                                         args,
                                         keywargs) as (newargs, newkeywargs):
-                return await func(*newargs, **newkeywargs)
+                return await func_(*newargs, **newkeywargs)
 
         patched.patchings = [self]
         return patched
@@ -1995,10 +1995,10 @@ _non_defaults = {
 }
 
 
-def _get_method(name, func):
+def _get_method(name, func_):
     "Turns a callable object (like a mock) into a real function"
     def method(self, /, *args, **kw):
-        return func(self, *args, **kw)
+        return func_(self, *args, **kw)
     method.__name__ = name
     return method
 
@@ -2392,7 +2392,7 @@ class AsyncMockMixin(Base):
 
     def reset_mock(self, /, *args, **kwargs):
         """
-        See :func:`.Mock.reset_mock()`
+        See :func_:`.Mock.reset_mock()`
         """
         super().reset_mock(*args, **kwargs)
         self.await_count = 0

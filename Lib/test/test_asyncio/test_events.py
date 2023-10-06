@@ -1769,7 +1769,7 @@ class EventLoopTestsMixin:
         async def test():
             pass
 
-        func = lambda: False
+        func_ = lambda: False
         coro = test()
         self.addCleanup(coro.close)
 
@@ -1780,23 +1780,23 @@ class EventLoopTestsMixin:
             fut = self.loop.create_future()
             self.loop.run_until_complete(fut)
         with self.assertRaises(RuntimeError):
-            self.loop.call_soon(func)
+            self.loop.call_soon(func_)
         with self.assertRaises(RuntimeError):
-            self.loop.call_soon_threadsafe(func)
+            self.loop.call_soon_threadsafe(func_)
         with self.assertRaises(RuntimeError):
-            self.loop.call_later(1.0, func)
+            self.loop.call_later(1.0, func_)
         with self.assertRaises(RuntimeError):
-            self.loop.call_at(self.loop.time() + .0, func)
+            self.loop.call_at(self.loop.time() + .0, func_)
         with self.assertRaises(RuntimeError):
             self.loop.create_task(coro)
         with self.assertRaises(RuntimeError):
-            self.loop.add_signal_handler(signal.SIGTERM, func)
+            self.loop.add_signal_handler(signal.SIGTERM, func_)
 
         # run_in_executor test is tricky: the method is a coroutine,
         # but run_until_complete cannot be called on closed loop.
         # Thus iterate once explicitly.
         with self.assertRaises(RuntimeError):
-            it = self.loop.run_in_executor(None, func).__await__()
+            it = self.loop.run_in_executor(None, func_).__await__()
             next(it)
 
 
@@ -2805,12 +2805,12 @@ class GetEventLoopTestsMixin:
                 asyncio.get_running_loop()
             self.assertIs(asyncio._get_running_loop(), None)
 
-            async def func():
+            async def func_():
                 self.assertIs(asyncio.get_event_loop(), loop)
                 self.assertIs(asyncio.get_running_loop(), loop)
                 self.assertIs(asyncio._get_running_loop(), loop)
 
-            loop.run_until_complete(func())
+            loop.run_until_complete(func_())
 
             asyncio.set_event_loop(loop)
             with self.assertRaises(TestError):
@@ -2848,12 +2848,12 @@ class GetEventLoopTestsMixin:
                 asyncio.get_running_loop()
             self.assertIs(asyncio._get_running_loop(), None)
 
-            async def func():
+            async def func_():
                 self.assertIs(asyncio.get_event_loop(), loop)
                 self.assertIs(asyncio.get_running_loop(), loop)
                 self.assertIs(asyncio._get_running_loop(), loop)
 
-            loop.run_until_complete(func())
+            loop.run_until_complete(func_())
 
             asyncio.set_event_loop(loop)
             self.assertIs(asyncio.get_event_loop(), loop)

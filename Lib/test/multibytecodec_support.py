@@ -50,12 +50,12 @@ class TestBase:
     def test_errorhandle(self):
         for source, scheme, expected in self.codectests:
             if isinstance(source, bytes):
-                func = self.decode
+                func_ = self.decode
             else:
-                func = self.encode
+                func_ = self.encode
             if expected:
-                result = func(source, scheme)[0]
-                if func is self.decode:
+                result = func_(source, scheme)[0]
+                if func_ is self.decode:
                     self.assertTrue(type(result) is str, type(result))
                     self.assertEqual(result, expected,
                                      '%a.decode(%r, %r)=%a != %a'
@@ -68,7 +68,7 @@ class TestBase:
                                      % (source, self.encoding, scheme, result,
                                         expected))
             else:
-                self.assertRaises(UnicodeError, func, source, scheme)
+                self.assertRaises(UnicodeError, func_, source, scheme)
 
     def test_xmlcharrefreplace(self):
         if self.has_iso10646:
@@ -234,9 +234,9 @@ class TestBase:
                             [64, 128, 256, 512, 1024]:
                 istream = self.reader(BytesIO(self.tstring[0]))
                 ostream = UTF8Writer(BytesIO())
-                func = getattr(istream, name)
+                func_ = getattr(istream, name)
                 while 1:
-                    data = func(sizehint)
+                    data = func_(sizehint)
                     if not data:
                         break
                     if name == "readlines":
@@ -254,12 +254,12 @@ class TestBase:
                             [64, 128, 256, 512, 1024]:
                 istream = UTF8Reader(BytesIO(self.tstring[1]))
                 ostream = self.writer(BytesIO())
-                func = getattr(istream, name)
+                func_ = getattr(istream, name)
                 while 1:
                     if sizehint is not None:
-                        data = func(sizehint)
+                        data = func_(sizehint)
                     else:
-                        data = func()
+                        data = func_()
 
                     if not data:
                         break
@@ -353,26 +353,26 @@ class TestBase_Mapping(unittest.TestCase):
     def test_errorhandle(self):
         for source, scheme, expected in self.codectests:
             if isinstance(source, bytes):
-                func = source.decode
+                func_ = source.decode
             else:
-                func = source.encode
+                func_ = source.encode
             if expected:
                 if isinstance(source, bytes):
-                    result = func(self.encoding, scheme)
+                    result = func_(self.encoding, scheme)
                     self.assertTrue(type(result) is str, type(result))
                     self.assertEqual(result, expected,
                                      '%a.decode(%r, %r)=%a != %a'
                                      % (source, self.encoding, scheme, result,
                                         expected))
                 else:
-                    result = func(self.encoding, scheme)
+                    result = func_(self.encoding, scheme)
                     self.assertTrue(type(result) is bytes, type(result))
                     self.assertEqual(result, expected,
                                      '%a.encode(%r, %r)=%a != %a'
                                      % (source, self.encoding, scheme, result,
                                         expected))
             else:
-                self.assertRaises(UnicodeError, func, self.encoding, scheme)
+                self.assertRaises(UnicodeError, func_, self.encoding, scheme)
 
 def load_teststring(name):
     dir = os.path.join(os.path.dirname(__file__), 'cjkencodings')

@@ -29,7 +29,7 @@ def separate(pattern):
 
 def replace(match):
     """
-    Perform the replacements for a match from :func:`separate`.
+    Perform the replacements for a match from :func_:`separate`.
     """
 
     return match.group('set') or (

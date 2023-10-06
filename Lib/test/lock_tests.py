@@ -29,13 +29,13 @@ class Bunch(object):
     """
     A bunch of threads.
     """
-    def __init__(self, func, nthread, wait_before_exit=False):
+    def __init__(self, func_, nthread, wait_before_exit=False):
         """
-        Construct a bunch of `nthread` threads running the same function `func`.
+        Construct a bunch of `nthread` threads running the same function `func_`.
         If `wait_before_exit` is True, the threads won't terminate until
         do_finish() is called.
         """
-        self.func = func
+        self.func_ = func_
         self.nthread = nthread
         self.started = []
         self.finished = []
@@ -47,7 +47,7 @@ class Bunch(object):
         tid = threading.get_ident()
         self.started.append(tid)
         try:
-            self.func()
+            self.func_()
         except BaseException as exc:
             self.exceptions.append(exc)
         finally:
@@ -85,7 +85,7 @@ class Bunch(object):
         exceptions = self.exceptions
         self.exceptions = None
         if exceptions:
-            raise ExceptionGroup(f"{self.func} threads raised exceptions",
+            raise ExceptionGroup(f"{self.func_} threads raised exceptions",
                                  exceptions)
 
     def do_finish(self):
@@ -779,7 +779,7 @@ class BaseSemaphoreTests(BaseTestCase):
         results2 = []
         phase_num = 0
 
-        def func():
+        def func_():
             sem_results.append(sem.acquire())
             results1.append(phase_num)
 
@@ -792,7 +792,7 @@ class BaseSemaphoreTests(BaseTestCase):
                     break
 
         N = 10
-        with Bunch(func, N):
+        with Bunch(func_, N):
             # Phase 0
             count1 = sem_value - 1
             wait_count(count1)
@@ -833,7 +833,7 @@ class BaseSemaphoreTests(BaseTestCase):
         results1 = []
         results2 = []
         phase_num = 0
-        def func():
+        def func_():
             sem.acquire()
             results1.append(phase_num)
 
@@ -845,7 +845,7 @@ class BaseSemaphoreTests(BaseTestCase):
                 if len(results1) + len(results2) >= count:
                     break
 
-        with Bunch(func, 10):
+        with Bunch(func_, 10):
             # Phase 0
             count1 = sem_value - 1
             wait_count(count1)

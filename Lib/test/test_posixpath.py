@@ -756,8 +756,8 @@ class PathLikeTests(unittest.TestCase):
         with open(self.file_name, 'xb', 0) as file:
             file.write(b"test_posixpath.PathLikeTests")
 
-    def assertPathEqual(self, func):
-        self.assertEqual(func(self.file_path), func(self.file_name))
+    def assertPathEqual(self, func_):
+        self.assertEqual(func_(self.file_path), func_(self.file_name))
 
     def test_path_normcase(self):
         self.assertPathEqual(self.path.normcase)

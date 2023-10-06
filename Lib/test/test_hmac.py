@@ -27,13 +27,13 @@ except ImportError:
     sha256_module = None
 
 
-def ignore_warning(func):
-    @functools.wraps(func)
+def ignore_warning(func_):
+    @functools.wraps(func_)
     def wrapper(*args, **kwargs):
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore",
                                     category=DeprecationWarning)
-            return func(*args, **kwargs)
+            return func_(*args, **kwargs)
     return wrapper
 
 
@@ -110,8 +110,8 @@ class TestVectorsTestCase(unittest.TestCase):
             h.update(data)
             self.assertEqual(h.hexdigest().upper(), digest.upper())
 
-            func = getattr(_hashopenssl, f"openssl_{hashname}")
-            h = c_hmac_new(key, data, digestmod=func)
+            func_ = getattr(_hashopenssl, f"openssl_{hashname}")
+            h = c_hmac_new(key, data, digestmod=func_)
             self.assert_hmac_internals(
                 h, digest, hashname, digest_size, block_size
             )

@@ -196,9 +196,9 @@ def get_original_stdout():
     return _original_stdout or sys.stdout
 
 
-def _force_run(path, func, *args):
+def _force_run(path, func_, *args):
     try:
-        return func(*args)
+        return func_(*args)
     except FileNotFoundError as err:
         # chmod() won't fix a missing file.
         if verbose >= 2:
@@ -207,9 +207,9 @@ def _force_run(path, func, *args):
     except OSError as err:
         if verbose >= 2:
             print('%s: %s' % (err.__class__.__name__, err))
-            print('re-run %s%r' % (func.__name__, args))
+            print('re-run %s%r' % (func_.__name__, args))
         os.chmod(path, stat.S_IRWXU)
-        return func(*args)
+        return func_(*args)
 
 
 # Check whether a gui is actually available
@@ -361,8 +361,8 @@ def requires_mac_ver(*min_version):
     For example, @requires_mac_ver(10, 5) raises SkipTest if the OS X version
     is lesser than 10.5.
     """
-    def decorator(func):
-        @functools.wraps(func)
+    def decorator(func_):
+        @functools.wraps(func_)
         def wrapper(*args, **kw):
             if sys.platform == 'darwin':
                 import platform
@@ -377,7 +377,7 @@ def requires_mac_ver(*min_version):
                         raise unittest.SkipTest(
                             "Mac OS X %s or higher required, not %s"
                             % (min_version_txt, version_txt))
-            return func(*args, **kw)
+            return func_(*args, **kw)
         wrapper.min_version = min_version
         return wrapper
     return decorator
@@ -863,7 +863,7 @@ def run_with_locale(catstr, *locales):
 # resetting it afterwards.
 
 def run_with_tz(tz):
-    def decorator(func):
+    def decorator(func_):
         def inner(*args, **kwds):
             try:
                 tzset = time.tzset
@@ -878,7 +878,7 @@ def run_with_tz(tz):
 
             # now run the function, resetting the tz on exceptions
             try:
-                return func(*args, **kwds)
+                return func_(*args, **kwds)
             finally:
                 if orig_tz is None:
                     del os.environ['TZ']
@@ -886,8 +886,8 @@ def run_with_tz(tz):
                     os.environ['TZ'] = orig_tz
                 time.tzset()
 
-        inner.__name__ = func.__name__
-        inner.__doc__ = func.__doc__
+        inner.__name__ = func_.__name__
+        inner.__doc__ = func_.__doc__
         return inner
     return decorator
 
@@ -1075,17 +1075,17 @@ def check_impl_detail(**guards):
     return guards.get(sys.implementation.name, default)
 
 
-def no_tracing(func):
+def no_tracing(func_):
     """Decorator to temporarily turn off tracing for the duration of a test."""
     if not hasattr(sys, 'gettrace'):
-        return func
+        return func_
     else:
-        @functools.wraps(func)
+        @functools.wraps(func_)
         def wrapper(*args, **kwargs):
             original_trace = sys.gettrace()
             try:
                 sys.settrace(None)
-                return func(*args, **kwargs)
+                return func_(*args, **kwargs)
             finally:
                 sys.settrace(original_trace)
         return wrapper
@@ -1236,13 +1236,13 @@ def set_match_tests(accept_patterns=None, ignore_patterns=None):
 
 def _compile_match_function(patterns):
     if not patterns:
-        func = None
+        func_ = None
         # set_match_tests(None) behaves as set_match_tests(())
         patterns = ()
     elif all(map(_is_full_match_test, patterns)):
         # Simple case: all patterns are full test identifier.
         # The test.bisect_cmd utility only uses such full test identifiers.
-        func = set(patterns).__contains__
+        func_ = set(patterns).__contains__
     else:
         import fnmatch
         regex = '|'.join(map(fnmatch.translate, patterns))
@@ -1261,9 +1261,9 @@ def _compile_match_function(patterns):
                 # into: 'test', 'test_os', 'FileTests' and 'test_access'.
                 return any(map(regex_match, test_id.split(".")))
 
-        func = match_test_regex
+        func_ = match_test_regex
 
-    return patterns, func
+    return patterns, func_
 
 
 def run_unittest(*classes):

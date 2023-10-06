@@ -103,11 +103,11 @@ class TestTranforms(BytecodeTestCase):
             x = False
             return x
 
-        for func, elem in ((f, None), (g, True), (h, False)):
-            with self.subTest(func=func):
-                self.assertNotInBytecode(func, 'LOAD_GLOBAL')
-                self.assertInBytecode(func, 'LOAD_CONST', elem)
-                self.check_lnotab(func)
+        for func_, elem in ((f, None), (g, True), (h, False)):
+            with self.subTest(func_=func_):
+                self.assertNotInBytecode(func_, 'LOAD_GLOBAL')
+                self.assertInBytecode(func_, 'LOAD_CONST', elem)
+                self.check_lnotab(func_)
 
         def f():
             'Adding a docstring made this test fail in Py2.5.0'

@@ -103,15 +103,15 @@ class TestFilemode:
         # test that just one function returns true
         testname = "S_IS" + name
         for funcname in self.format_funcs:
-            func = getattr(self.statmod, funcname, None)
-            if func is None:
+            func_ = getattr(self.statmod, funcname, None)
+            if func_ is None:
                 if funcname == testname:
                     raise ValueError(funcname)
                 continue
             if funcname == testname:
-                self.assertTrue(func(mode))
+                self.assertTrue(func_(mode))
             else:
-                self.assertFalse(func(mode))
+                self.assertFalse(func_(mode))
 
     @os_helper.skip_unless_working_chmod
     def test_mode(self):
@@ -225,9 +225,9 @@ class TestFilemode:
             modvalue = getattr(self.statmod, key)
             self.assertIsInstance(modvalue, int)
         for key in self.format_funcs:
-            func = getattr(self.statmod, key)
-            self.assertTrue(callable(func))
-            self.assertEqual(func(0), 0)
+            func_ = getattr(self.statmod, key)
+            self.assertTrue(callable(func_))
+            self.assertEqual(func_(0), 0)
 
     @unittest.skipUnless(sys.platform == "win32",
                          "FILE_ATTRIBUTE_* constants are Win32 specific")

@@ -17,10 +17,10 @@ def _is_debug_mode():
 _is_coroutine = object()
 
 
-def iscoroutinefunction(func):
-    """Return True if func is a decorated coroutine function."""
-    return (inspect.iscoroutinefunction(func) or
-            getattr(func, '_is_coroutine', None) is _is_coroutine)
+def iscoroutinefunction(func_):
+    """Return True if func_ is a decorated coroutine function."""
+    return (inspect.iscoroutinefunction(func_) or
+            getattr(func_, '_is_coroutine', None) is _is_coroutine)
 
 
 # Prioritize native coroutine check to speed-up

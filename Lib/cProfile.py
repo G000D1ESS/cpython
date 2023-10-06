@@ -59,18 +59,18 @@ class Profile(_lsprof.Profiler):
         callersdicts = {}
         # call information
         for entry in entries:
-            func = label(entry.code)
+            func_ = label(entry.code)
             nc = entry.callcount         # ncalls column of pstats (before '/')
             cc = nc - entry.reccallcount # ncalls column of pstats (after '/')
             tt = entry.inlinetime        # tottime column of pstats
             ct = entry.totaltime         # cumtime column of pstats
             callers = {}
             callersdicts[id(entry.code)] = callers
-            self.stats[func] = cc, nc, tt, ct, callers
+            self.stats[func_] = cc, nc, tt, ct, callers
         # subcall information
         for entry in entries:
             if entry.calls:
-                func = label(entry.code)
+                func_ = label(entry.code)
                 for subentry in entry.calls:
                     try:
                         callers = callersdicts[id(subentry.code)]
@@ -80,13 +80,13 @@ class Profile(_lsprof.Profiler):
                     cc = nc - subentry.reccallcount
                     tt = subentry.inlinetime
                     ct = subentry.totaltime
-                    if func in callers:
-                        prev = callers[func]
+                    if func_ in callers:
+                        prev = callers[func_]
                         nc += prev[0]
                         cc += prev[1]
                         tt += prev[2]
                         ct += prev[3]
-                    callers[func] = nc, cc, tt, ct
+                    callers[func_] = nc, cc, tt, ct
 
     # The following two methods can be called by clients to use
     # a profiler to profile a statement, given as a string.
@@ -105,10 +105,10 @@ class Profile(_lsprof.Profiler):
         return self
 
     # This method is more useful to profile a single function call.
-    def runcall(self, func, /, *args, **kw):
+    def runcall(self, func_, /, *args, **kw):
         self.enable()
         try:
-            return func(*args, **kw)
+            return func_(*args, **kw)
         finally:
             self.disable()
 

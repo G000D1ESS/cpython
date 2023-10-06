@@ -389,15 +389,15 @@ class CDLL(object):
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):
             raise AttributeError(name)
-        func = self.__getitem__(name)
-        setattr(self, name, func)
-        return func
+        func_ = self.__getitem__(name)
+        setattr(self, name, func_)
+        return func_
 
     def __getitem__(self, name_or_ordinal):
-        func = self._FuncPtr((name_or_ordinal, self))
+        func_ = self._FuncPtr((name_or_ordinal, self))
         if not isinstance(name_or_ordinal, int):
-            func.__name__ = name_or_ordinal
-        return func
+            func_.__name__ = name_or_ordinal
+        return func_
 
 class PyDLL(CDLL):
     """This class represents the Python library itself.  It allows

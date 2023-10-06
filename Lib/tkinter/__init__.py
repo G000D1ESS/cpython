@@ -844,41 +844,41 @@ class Misc:
         if not name: return None
         return self._nametowidget(name)
 
-    def after(self, ms, func=None, *args):
+    def after(self, ms, func_=None, *args):
         """Call function once after given time.
 
         MS specifies the time in milliseconds. FUNC gives the
         function which shall be called. Additional parameters
         are given as parameters to the function call.  Return
         identifier to cancel scheduling with after_cancel."""
-        if func is None:
+        if func_ is None:
             # I'd rather use time.sleep(ms*0.001)
             self.tk.call('after', ms)
             return None
         else:
             def callit():
                 try:
-                    func(*args)
+                    func_(*args)
                 finally:
                     try:
                         self.deletecommand(name)
                     except TclError:
                         pass
             try:
-                callit.__name__ = func.__name__
+                callit.__name__ = func_.__name__
             except AttributeError:
                 # Required for callable classes (bpo-44404)
-                callit.__name__ = type(func).__name__
+                callit.__name__ = type(func_).__name__
             name = self._register(callit)
             return self.tk.call('after', ms, name)
 
-    def after_idle(self, func, *args):
+    def after_idle(self, func_, *args):
         """Call FUNC once if the Tcl main loop has no event to
         process.
 
         Return an identifier to cancel the scheduling with
         after_cancel."""
-        return self.after('idle', func, *args)
+        return self.after('idle', func_, *args)
 
     def after_cancel(self, id):
         """Cancel scheduling of function identified with ID.
@@ -1388,12 +1388,12 @@ class Misc:
         else:
             self.tk.call('bindtags', self._w, tagList)
 
-    def _bind(self, what, sequence, func, add, needcleanup=1):
+    def _bind(self, what, sequence, func_, add, needcleanup=1):
         """Internal function."""
-        if isinstance(func, str):
-            self.tk.call(what + (sequence, func))
-        elif func:
-            funcid = self._register(func, self._substitute,
+        if isinstance(func_, str):
+            self.tk.call(what + (sequence, func_))
+        elif func_:
+            funcid = self._register(func_, self._substitute,
                         needcleanup)
             cmd = ('%sif {"[%s %s]" == "break"} break\n'
                    %
@@ -1406,7 +1406,7 @@ class Misc:
         else:
             return self.tk.splitlist(self.tk.call(what))
 
-    def bind(self, sequence=None, func=None, add=None):
+    def bind(self, sequence=None, func_=None, add=None):
         """Bind to this widget at event SEQUENCE a call to function FUNC.
 
         SEQUENCE is a string of concatenated event
@@ -1445,7 +1445,7 @@ class Misc:
         If FUNC or SEQUENCE is omitted the bound function or list
         of bound events are returned."""
 
-        return self._bind(('bind', self._w), sequence, func, add)
+        return self._bind(('bind', self._w), sequence, func_, add)
 
     def unbind(self, sequence, funcid=None):
         """Unbind for this widget for event SEQUENCE  the
@@ -1454,18 +1454,18 @@ class Misc:
         if funcid:
             self.deletecommand(funcid)
 
-    def bind_all(self, sequence=None, func=None, add=None):
+    def bind_all(self, sequence=None, func_=None, add=None):
         """Bind to all widgets at an event SEQUENCE a call to function FUNC.
         An additional boolean parameter ADD specifies whether FUNC will
         be called additionally to the other bound function or whether
         it will replace the previous function. See bind for the return value."""
-        return self._bind(('bind', 'all'), sequence, func, add, 0)
+        return self._bind(('bind', 'all'), sequence, func_, add, 0)
 
     def unbind_all(self, sequence):
         """Unbind for all widgets for event SEQUENCE all functions."""
         self.tk.call('bind', 'all' , sequence, '')
 
-    def bind_class(self, className, sequence=None, func=None, add=None):
+    def bind_class(self, className, sequence=None, func_=None, add=None):
         """Bind to widgets with bindtag CLASSNAME at event
         SEQUENCE a call of function FUNC. An additional
         boolean parameter ADD specifies whether FUNC will be
@@ -1473,7 +1473,7 @@ class Misc:
         whether it will replace the previous function. See bind for
         the return value."""
 
-        return self._bind(('bind', className), sequence, func, add, 0)
+        return self._bind(('bind', className), sequence, func_, add, 0)
 
     def unbind_class(self, className, sequence):
         """Unbind for all widgets with bindtag CLASSNAME for event SEQUENCE
@@ -1566,19 +1566,19 @@ class Misc:
 
     _nametowidget = nametowidget
 
-    def _register(self, func, subst=None, needcleanup=1):
+    def _register(self, func_, subst=None, needcleanup=1):
         """Return a newly created Tcl function. If this
         function is called, the Python function FUNC will
         be executed. An optional function SUBST can
         be given which will be executed before FUNC."""
-        f = CallWrapper(func, subst, self).__call__
+        f = CallWrapper(func_, subst, self).__call__
         name = repr(id(f))
         try:
-            func = func.__func__
+            func_ = func_.__func__
         except AttributeError:
             pass
         try:
-            name = name + func.__name__
+            name = name + func_.__name__
         except AttributeError:
             pass
         self.tk.createcommand(name, f)
@@ -1934,9 +1934,9 @@ class CallWrapper:
     """Internal class. Stores function to call when some user
     defined Tcl function is called e.g. after an event occurred."""
 
-    def __init__(self, func, subst, widget):
+    def __init__(self, func_, subst, widget):
         """Store FUNC, SUBST and WIDGET as members."""
-        self.func = func
+        self.func_ = func_
         self.subst = subst
         self.widget = widget
 
@@ -1945,7 +1945,7 @@ class CallWrapper:
         try:
             if self.subst:
                 args = self.subst(*args)
-            return self.func(*args)
+            return self.func_(*args)
         except SystemExit:
             raise
         except:
@@ -2242,14 +2242,14 @@ class Wm:
 
     positionfrom = wm_positionfrom
 
-    def wm_protocol(self, name=None, func=None):
+    def wm_protocol(self, name=None, func_=None):
         """Bind function FUNC to command NAME for this widget.
         Return the function bound to NAME if None is given. NAME could be
         e.g. "WM_SAVE_YOURSELF" or "WM_DELETE_WINDOW"."""
-        if callable(func):
-            command = self._register(func)
+        if callable(func_):
+            command = self._register(func_)
         else:
-            command = func
+            command = func_
         return self.tk.call(
             'wm', 'protocol', self._w, name, command)
 
@@ -2794,14 +2794,14 @@ class Canvas(Widget, XView, YView):
         if funcid:
             self.deletecommand(funcid)
 
-    def tag_bind(self, tagOrId, sequence=None, func=None, add=None):
+    def tag_bind(self, tagOrId, sequence=None, func_=None, add=None):
         """Bind to all items with TAGORID at event SEQUENCE a call to function FUNC.
 
         An additional boolean parameter ADD specifies whether FUNC will be
         called additionally to the other bound function or whether it will
         replace the previous function. See bind for the return value."""
         return self._bind((self._w, 'bind', tagOrId),
-                  sequence, func, add)
+                  sequence, func_, add)
 
     def canvasx(self, screenx, gridspacing=None):
         """Return the canvas x coordinate of pixel position SCREENX rounded
@@ -3903,14 +3903,14 @@ class Text(Widget, XView, YView):
         if funcid:
             self.deletecommand(funcid)
 
-    def tag_bind(self, tagName, sequence, func, add=None):
+    def tag_bind(self, tagName, sequence, func_, add=None):
         """Bind to all characters with TAGNAME at event SEQUENCE a call to function FUNC.
 
         An additional boolean parameter ADD specifies whether FUNC will be
         called additionally to the other bound function or whether it will
         replace the previous function. See bind for the return value."""
         return self._bind((self._w, 'tag', 'bind', tagName),
-                  sequence, func, add)
+                  sequence, func_, add)
 
     def tag_cget(self, tagName, option):
         """Return the value of OPTION for tag TAGNAME."""

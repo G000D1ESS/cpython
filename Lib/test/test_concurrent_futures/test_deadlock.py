@@ -112,13 +112,13 @@ class ExecutorDeadlockTest:
         self.fail(f"Executor deadlock:\n\n{tb}")
 
 
-    def _check_crash(self, error, func, *args, ignore_stderr=False):
+    def _check_crash(self, error, func_, *args, ignore_stderr=False):
         # test for deadlock caused by crashes in a pool
         self.executor.shutdown(wait=True)
 
         executor = self.executor_type(
             max_workers=2, mp_context=self.get_context())
-        res = executor.submit(func, *args)
+        res = executor.submit(func_, *args)
 
         if ignore_stderr:
             cm = support.captured_stderr()
@@ -156,15 +156,15 @@ class ExecutorDeadlockTest:
         self._check_crash(BrokenProcessPool, id, CrashAtUnpickle())
 
     def test_crash_during_func_exec_on_worker(self):
-        # Check problem occurring during func execution on workers
+        # Check problem occurring during func_ execution on workers
         self._check_crash(BrokenProcessPool, _crash)
 
     def test_exit_during_func_exec_on_worker(self):
-        # Check problem occurring during func execution on workers
+        # Check problem occurring during func_ execution on workers
         self._check_crash(SystemExit, _exit)
 
     def test_error_during_func_exec_on_worker(self):
-        # Check problem occurring during func execution on workers
+        # Check problem occurring during func_ execution on workers
         self._check_crash(RuntimeError, _raise_error, RuntimeError)
 
     def test_crash_during_result_pickle_on_worker(self):

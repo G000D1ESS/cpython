@@ -1670,14 +1670,14 @@ def test_pdb_issue_gh_94215():
     Check that frame_setlineno() does not leak references.
 
     >>> def test_function():
-    ...    def func():
+    ...    def func_():
     ...        def inner(v): pass
     ...        inner(
     ...             42
     ...        )
     ...
     ...    import pdb; pdb.Pdb(nosigint=True, readrc=False).set_trace()
-    ...    func()
+    ...    func_()
 
     >>> reset_Breakpoint()
     >>> with PdbTestInput([  # doctest: +NORMALIZE_WHITESPACE
@@ -1695,37 +1695,37 @@ def test_pdb_issue_gh_94215():
     ... ]):
     ...     test_function()
     > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(9)test_function()
-    -> func()
+    -> func_()
     (Pdb) step
     --Call--
-    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(2)func()
-    -> def func():
+    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(2)func_()
+    -> def func_():
     (Pdb) next
-    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(3)func()
+    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(3)func_()
     -> def inner(v): pass
     (Pdb) next
-    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(4)func()
+    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(4)func_()
     -> inner(
     (Pdb) jump 3
-    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(3)func()
+    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(3)func_()
     -> def inner(v): pass
     (Pdb) next
-    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(4)func()
+    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(4)func_()
     -> inner(
     (Pdb) next
-    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(5)func()
+    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(5)func_()
     -> 42
     (Pdb) jump 3
-    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(3)func()
+    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(3)func_()
     -> def inner(v): pass
     (Pdb) next
-    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(4)func()
+    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(4)func_()
     -> inner(
     (Pdb) next
-    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(5)func()
+    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(5)func_()
     -> 42
     (Pdb) jump 3
-    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(3)func()
+    > <doctest test.test_pdb.test_pdb_issue_gh_94215[0]>(3)func_()
     -> def inner(v): pass
     (Pdb) continue
     """
@@ -2459,15 +2459,15 @@ def bœr():
 
     def test_gh_94215_crash(self):
         script = """\
-            def func():
+            def func_():
                 def inner(v): pass
                 inner(
                     42
                 )
-            func()
+            func_()
         """
         commands = textwrap.dedent("""
-            break func
+            break func_
             continue
             next
             next
@@ -2478,7 +2478,7 @@ def bœr():
 
     def test_gh_93696_frozen_list(self):
         frozen_src = """
-        def func():
+        def func_():
             x = "Sentinel string for gh-93696"
             print(x)
         """
@@ -2495,13 +2495,13 @@ def bœr():
             func_code = dummy_mod.co_consts[0]
 
             mod = type(sys)("gh93696")
-            mod.func = type(lambda: None)(func_code, mod.__dict__)
+            mod.func_ = type(lambda: None)(func_code, mod.__dict__)
             mod.__file__ = 'gh93696.py'
 
             return mod
 
         mod = _create_fake_frozen_module()
-        mod.func()
+        mod.func_()
         """
         commands = """
             break 20

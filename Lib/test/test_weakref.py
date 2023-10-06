@@ -2033,15 +2033,15 @@ class FinalizeTestCase(unittest.TestCase):
         a = self.A()
 
         res = []
-        f = weakref.finalize(a, fin, 1, 2, func=3, obj=4)
-        self.assertEqual(f.peek(), (a, fin, (1, 2), {'func': 3, 'obj': 4}))
+        f = weakref.finalize(a, fin, 1, 2, func_=3, obj=4)
+        self.assertEqual(f.peek(), (a, fin, (1, 2), {'func_': 3, 'obj': 4}))
         f()
-        self.assertEqual(res, [((1, 2), {'func': 3, 'obj': 4})])
+        self.assertEqual(res, [((1, 2), {'func_': 3, 'obj': 4})])
 
         with self.assertRaises(TypeError):
-            weakref.finalize(a, func=fin, arg=1)
+            weakref.finalize(a, func_=fin, arg=1)
         with self.assertRaises(TypeError):
-            weakref.finalize(obj=a, func=fin, arg=1)
+            weakref.finalize(obj=a, func_=fin, arg=1)
         self.assertRaises(TypeError, weakref.finalize, a)
         self.assertRaises(TypeError, weakref.finalize)
 

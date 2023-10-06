@@ -52,15 +52,15 @@ def threading_cleanup(*original_values):
         support.gc_collect()
 
 
-def reap_threads(func):
+def reap_threads(func_):
     """Use this function when threads are being used.  This will
     ensure that the threads are cleaned up even when the test fails.
     """
-    @functools.wraps(func)
+    @functools.wraps(func_)
     def decorator(*args):
         key = threading_setup()
         try:
-            return func(*args)
+            return func_(*args)
         finally:
             threading_cleanup(*key)
     return decorator

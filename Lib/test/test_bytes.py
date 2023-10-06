@@ -25,16 +25,16 @@ from test.support.script_helper import assert_python_failure
 
 
 if sys.flags.bytes_warning:
-    def check_bytes_warnings(func):
-        @functools.wraps(func)
+    def check_bytes_warnings(func_):
+        @functools.wraps(func_)
         def wrapper(*args, **kw):
             with warnings_helper.check_warnings(('', BytesWarning)):
-                return func(*args, **kw)
+                return func_(*args, **kw)
         return wrapper
 else:
     # no-op
-    def check_bytes_warnings(func):
-        return func
+    def check_bytes_warnings(func_):
+        return func_
 
 
 class Indexable:

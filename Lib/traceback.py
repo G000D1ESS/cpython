@@ -170,11 +170,11 @@ def _format_final_exc_line(etype, value):
         line = "%s: %s\n" % (etype, valuestr)
     return line
 
-def _safe_string(value, what, func=str):
+def _safe_string(value, what, func_=str):
     try:
-        return func(value)
+        return func_(value)
     except:
-        return f'<{what} {func.__name__}() failed>'
+        return f'<{what} {func_.__name__}() failed>'
 
 # --
 
@@ -283,7 +283,7 @@ class FrameSummary:
         self._line = line
         if lookup_line:
             self.line
-        self.locals = {k: _safe_string(v, 'local', func=repr)
+        self.locals = {k: _safe_string(v, 'local', func_=repr)
             for k, v in locals.items()} if locals else None
         self.end_lineno = end_lineno
         self.colno = colno
@@ -873,7 +873,7 @@ class TracebackException:
                 note = _safe_string(note, 'note')
                 yield from [l + '\n' for l in note.split('\n')]
         elif self.__notes__ is not None:
-            yield "{}\n".format(_safe_string(self.__notes__, '__notes__', func=repr))
+            yield "{}\n".format(_safe_string(self.__notes__, '__notes__', func_=repr))
 
     def _format_syntax_error(self, stype):
         """Format SyntaxError exceptions (internal helper)."""

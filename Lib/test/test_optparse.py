@@ -77,7 +77,7 @@ Args were %(args)s.""" % locals ())
         return (options, positional_args)
 
     def assertRaises(self,
-                     func,
+                     func_,
                      args,
                      kwargs,
                      expected_exception,
@@ -88,9 +88,9 @@ Args were %(args)s.""" % locals ())
         that exception.
 
         Arguments:
-          func -- the function to call
-          args -- positional arguments to `func`
-          kwargs -- keyword arguments to `func`
+          func_ -- the function to call
+          args -- positional arguments to `func_`
+          kwargs -- keyword arguments to `func_`
           expected_exception -- exception that should be raised
           expected_message -- expected exception message (or pattern
             if a compiled regex object)
@@ -103,7 +103,7 @@ Args were %(args)s.""" % locals ())
             kwargs = {}
 
         try:
-            func(*args, **kwargs)
+            func_(*args, **kwargs)
         except expected_exception as err:
             actual_message = str(err)
             if isinstance(expected_message, re.Pattern):
@@ -127,7 +127,7 @@ actual exception message:
             return err
         else:
             self.fail("""expected exception %(expected_exception)s not raised
-called %(func)r
+called %(func_)r
 with args %(args)r
 and kwargs %(kwargs)r
 """ % locals ())
@@ -176,9 +176,9 @@ and kwargs %(kwargs)r
         else:
             self.assertFalse("expected parser.exit()")
 
-    def assertTypeError(self, func, expected_message, *args):
-        """Assert that TypeError is raised when executing func."""
-        self.assertRaises(func, args, None, TypeError, expected_message)
+    def assertTypeError(self, func_, expected_message, *args):
+        """Assert that TypeError is raised when executing func_."""
+        self.assertRaises(func_, args, None, TypeError, expected_message)
 
     def assertHelp(self, parser, expected_help):
         actual_help = parser.format_help()
@@ -1298,9 +1298,9 @@ class ConflictBase(BaseTest):
 
 class TestConflict(ConflictBase):
     """Use the default conflict resolution for Optik 1.2: error."""
-    def assertTrueconflict_error(self, func):
+    def assertTrueconflict_error(self, func_):
         err = self.assertRaises(
-            func, ("-v", "--version"), {'action' : "callback",
+            func_, ("-v", "--version"), {'action' : "callback",
                                         'callback' : self.show_version,
                                         'help' : "show version"},
             OptionConflictError,

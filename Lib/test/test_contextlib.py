@@ -242,10 +242,10 @@ def woohoo():
 
     def _create_contextmanager_attribs(self):
         def attribs(**kw):
-            def decorate(func):
+            def decorate(func_):
                 for k,v in kw.items():
-                    setattr(func,k,v)
-                return func
+                    setattr(func_,k,v)
+                return func_
             return decorate
         @contextmanager
         @attribs(foo='bar')
@@ -271,9 +271,9 @@ def woohoo():
     def test_keywords(self):
         # Ensure no keyword arguments are inhibited
         @contextmanager
-        def woohoo(self, func, args, kwds):
-            yield (self, func, args, kwds)
-        with woohoo(self=11, func=22, args=33, kwds=44) as target:
+        def woohoo(self, func_, args, kwds):
+            yield (self, func_, args, kwds)
+        with woohoo(self=11, func_=22, args=33, kwds=44) as target:
             self.assertEqual(target, (11, 22, 33, 44))
 
     def test_nokeepref(self):

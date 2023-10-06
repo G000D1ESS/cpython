@@ -1035,8 +1035,8 @@ class PathLikeTests(NtpathTestCase):
         with open(self.file_name, 'xb', 0) as file:
             file.write(b"test_ntpath.PathLikeTests")
 
-    def _check_function(self, func):
-        self.assertPathEqual(func(self.file_path), func(self.file_name))
+    def _check_function(self, func_):
+        self.assertPathEqual(func_(self.file_path), func_(self.file_name))
 
     def test_path_normcase(self):
         self._check_function(self.path.normcase)

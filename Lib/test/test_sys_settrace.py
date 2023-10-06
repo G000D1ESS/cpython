@@ -367,23 +367,23 @@ class TraceTestCase(unittest.TestCase):
                 "\n".join(difflib.ndiff([str(x) for x in expected_events],
                                         [str(x) for x in events])))
 
-    def run_and_compare(self, func, events):
+    def run_and_compare(self, func_, events):
         tracer = self.make_tracer()
         sys.settrace(tracer.trace)
-        func()
+        func_()
         sys.settrace(None)
-        self.compare_events(func.__code__.co_firstlineno,
+        self.compare_events(func_.__code__.co_firstlineno,
                             tracer.events, events)
 
-    def run_test(self, func):
-        self.run_and_compare(func, func.events)
+    def run_test(self, func_):
+        self.run_and_compare(func_, func_.events)
 
-    def run_test2(self, func):
+    def run_test2(self, func_):
         tracer = self.make_tracer()
-        func(tracer.trace)
+        func_(tracer.trace)
         sys.settrace(None)
-        self.compare_events(func.__code__.co_firstlineno,
-                            tracer.events, func.events)
+        self.compare_events(func_.__code__.co_firstlineno,
+                            tracer.events, func_.events)
 
     def test_set_and_retrieve_none(self):
         sys.settrace(None)
@@ -496,15 +496,15 @@ class TraceTestCase(unittest.TestCase):
 
     def test_17_none_f_trace(self):
         # Issue 20041: fix TypeError when f_trace is set to None.
-        def func():
+        def func_():
             sys._getframe().f_trace = None
             lineno = 2
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line')])
 
     def test_18_except_with_name(self):
-        def func():
+        def func_():
             try:
                 try:
                     raise Exception
@@ -515,7 +515,7 @@ class TraceTestCase(unittest.TestCase):
             except Exception:
                 pass
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -528,7 +528,7 @@ class TraceTestCase(unittest.TestCase):
              (9, 'return')])
 
     def test_19_except_with_finally(self):
-        def func():
+        def func_():
             try:
                 try:
                     raise Exception
@@ -537,7 +537,7 @@ class TraceTestCase(unittest.TestCase):
             except Exception:
                 b = 23
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -677,11 +677,11 @@ class TraceTestCase(unittest.TestCase):
                             tracer.events, events)
 
     def test_21_repeated_pass(self):
-        def func():
+        def func_():
             pass
             pass
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -690,14 +690,14 @@ class TraceTestCase(unittest.TestCase):
     def test_loop_in_try_except(self):
         # https://bugs.python.org/issue41670
 
-        def func():
+        def func_():
             try:
                 for i in []: pass
                 return 1
             except:
                 return 2
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -706,7 +706,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_try_except_no_exception(self):
 
-        def func():
+        def func_():
             try:
                 2
             except:
@@ -717,12 +717,12 @@ class TraceTestCase(unittest.TestCase):
                     8
                 else:
                     10
-                if func.__name__ == 'Fred':
+                if func_.__name__ == 'Fred':
                     12
             finally:
                 14
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -735,7 +735,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_try_exception_in_else(self):
 
-        def func():
+        def func_():
             try:
                 try:
                     3
@@ -751,7 +751,7 @@ class TraceTestCase(unittest.TestCase):
             finally:
                 14
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -767,13 +767,13 @@ class TraceTestCase(unittest.TestCase):
 
     def test_nested_loops(self):
 
-        def func():
+        def func_():
             for i in range(2):
                 for j in range(2):
                     a = i + j
             return a == 1
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -793,7 +793,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_if_break(self):
 
-        def func():
+        def func_():
             seq = [1, 0]
             while seq:
                 n = seq.pop()
@@ -803,7 +803,7 @@ class TraceTestCase(unittest.TestCase):
                 n = 99
             return n        # line 8
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -818,7 +818,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_break_through_finally(self):
 
-        def func():
+        def func_():
             a, c, d, i = 1, 1, 1, 99
             try:
                 for i in range(3):
@@ -833,7 +833,7 @@ class TraceTestCase(unittest.TestCase):
                 d = 12                              # line 12
             assert a == 5 and c == 10 and d == 1    # line 13
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -853,7 +853,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_continue_through_finally(self):
 
-        def func():
+        def func_():
             a, b, c, d, i = 1, 1, 1, 1, 99
             try:
                 for i in range(2):
@@ -868,7 +868,7 @@ class TraceTestCase(unittest.TestCase):
                 d = 12                              # line 12
             assert (a, b, c, d) == (5, 8, 10, 1)    # line 13
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -889,13 +889,13 @@ class TraceTestCase(unittest.TestCase):
 
     def test_return_through_finally(self):
 
-        def func():
+        def func_():
             try:
                 return 2
             finally:
                 4
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -904,7 +904,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_try_except_with_wrong_type(self):
 
-        def func():
+        def func_():
             try:
                 2/0
             except IndexError:
@@ -912,7 +912,7 @@ class TraceTestCase(unittest.TestCase):
             finally:
                 return 6
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -925,7 +925,7 @@ class TraceTestCase(unittest.TestCase):
 
         # See gh-105658
         condition = True
-        def func():
+        def func_():
             try:
                 try:
                     raise Exception
@@ -937,7 +937,7 @@ class TraceTestCase(unittest.TestCase):
                 result = 3
             return result
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -952,7 +952,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_break_to_continue1(self):
 
-        def func():
+        def func_():
             TRUE = 1
             x = [1]
             while x:
@@ -961,7 +961,7 @@ class TraceTestCase(unittest.TestCase):
                     break
                 continue
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -975,7 +975,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_break_to_continue2(self):
 
-        def func():
+        def func_():
             TRUE = 1
             x = [1]
             while x:
@@ -985,7 +985,7 @@ class TraceTestCase(unittest.TestCase):
                 else:
                     continue
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -998,14 +998,14 @@ class TraceTestCase(unittest.TestCase):
 
     def test_break_to_break(self):
 
-        def func():
+        def func_():
             TRUE = 1
             while TRUE:
                 while TRUE:
                     break
                 break
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1016,7 +1016,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_nested_ifs(self):
 
-        def func():
+        def func_():
             a = b = 1
             if a == 1:
                 if b == 1:
@@ -1026,7 +1026,7 @@ class TraceTestCase(unittest.TestCase):
             else:
                 z = 8
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1036,7 +1036,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_nested_ifs_with_and(self):
 
-        def func():
+        def func_():
             if A:
                 if B:
                     if C:
@@ -1050,7 +1050,7 @@ class TraceTestCase(unittest.TestCase):
         A = B = True
         C = False
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1059,7 +1059,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_nested_try_if(self):
 
-        def func():
+        def func_():
             x = "hello"
             try:
                 3/0
@@ -1068,7 +1068,7 @@ class TraceTestCase(unittest.TestCase):
                     raise ValueError()   # line 6
             f = 7
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1087,12 +1087,12 @@ class TraceTestCase(unittest.TestCase):
             def __exit__(*args):
                 pass
 
-        def func():
+        def func_():
             with C():
                 if False:
                     pass
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (-5, 'call'),
@@ -1107,14 +1107,14 @@ class TraceTestCase(unittest.TestCase):
 
     def test_if_false_in_try_except(self):
 
-        def func():
+        def func_():
             try:
                 if False:
                     pass
             except Exception:
                 X
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1122,14 +1122,14 @@ class TraceTestCase(unittest.TestCase):
 
     def test_implicit_return_in_class(self):
 
-        def func():
+        def func_():
             class A:
                 if 3 < 9:
                     a = 1
                 else:
                     a = 2
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (1, 'call'),
@@ -1140,7 +1140,7 @@ class TraceTestCase(unittest.TestCase):
              (1, 'return')])
 
     def test_try_in_try(self):
-        def func():
+        def func_():
             try:
                 try:
                     pass
@@ -1149,7 +1149,7 @@ class TraceTestCase(unittest.TestCase):
             except Exception:
                 pass
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1158,7 +1158,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_try_in_try_with_exception(self):
 
-        def func():
+        def func_():
             try:
                 try:
                     raise TypeError
@@ -1167,7 +1167,7 @@ class TraceTestCase(unittest.TestCase):
             except TypeError:
                 7
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1178,7 +1178,7 @@ class TraceTestCase(unittest.TestCase):
              (7, 'line'),
              (7, 'return')])
 
-        def func():
+        def func_():
             try:
                 try:
                     raise ValueError
@@ -1187,7 +1187,7 @@ class TraceTestCase(unittest.TestCase):
             except TypeError:
                 7
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1198,7 +1198,7 @@ class TraceTestCase(unittest.TestCase):
              (5, 'return')])
 
     def test_if_in_if_in_if(self):
-        def func(a=0, p=1, z=1):
+        def func_(a=0, p=1, z=1):
             if p:
                 if a:
                     if z:
@@ -1208,7 +1208,7 @@ class TraceTestCase(unittest.TestCase):
             else:
                 pass
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1270,11 +1270,11 @@ class TraceTestCase(unittest.TestCase):
                     pass
             return x
 
-        def func():
+        def func_():
             for i in range(2):
                 foo(i)
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1298,7 +1298,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_no_tracing_of_named_except_cleanup(self):
 
-        def func():
+        def func_():
             x = 0
             try:
                 1/x
@@ -1307,7 +1307,7 @@ class TraceTestCase(unittest.TestCase):
                     raise
             return "done"
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
         [(0, 'call'),
             (1, 'line'),
             (2, 'line'),
@@ -1326,14 +1326,14 @@ class TraceTestCase(unittest.TestCase):
             def __exit__(self, *excinfo):
                 pass
 
-        def func():
+        def func_():
             try:
                 with NullCtx():
                     1/0
             except ZeroDivisionError:
                 pass
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1352,7 +1352,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_try_except_star_no_exception(self):
 
-        def func():
+        def func_():
             try:
                 2
             except* Exception:
@@ -1363,12 +1363,12 @@ class TraceTestCase(unittest.TestCase):
                     8
                 else:
                     10
-                if func.__name__ == 'Fred':
+                if func_.__name__ == 'Fred':
                     12
             finally:
                 14
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1381,7 +1381,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_try_except_star_named_no_exception(self):
 
-        def func():
+        def func_():
             try:
                 2
             except* Exception as e:
@@ -1391,7 +1391,7 @@ class TraceTestCase(unittest.TestCase):
             finally:
                 8
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1401,7 +1401,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_try_except_star_exception_caught(self):
 
-        def func():
+        def func_():
             try:
                 raise ValueError(2)
             except* ValueError:
@@ -1411,7 +1411,7 @@ class TraceTestCase(unittest.TestCase):
             finally:
                 8
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1423,7 +1423,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_try_except_star_named_exception_caught(self):
 
-        def func():
+        def func_():
             try:
                 raise ValueError(2)
             except* ValueError as e:
@@ -1433,7 +1433,7 @@ class TraceTestCase(unittest.TestCase):
             finally:
                 8
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1445,7 +1445,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_try_except_star_exception_not_caught(self):
 
-        def func():
+        def func_():
             try:
                 try:
                     raise ValueError(3)
@@ -1454,7 +1454,7 @@ class TraceTestCase(unittest.TestCase):
             except ValueError:
                 7
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1467,7 +1467,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_try_except_star_named_exception_not_caught(self):
 
-        def func():
+        def func_():
             try:
                 try:
                     raise ValueError(3)
@@ -1476,7 +1476,7 @@ class TraceTestCase(unittest.TestCase):
             except ValueError:
                 7
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1489,7 +1489,7 @@ class TraceTestCase(unittest.TestCase):
 
     def test_try_except_star_nested(self):
 
-        def func():
+        def func_():
             try:
                 try:
                     raise ExceptionGroup(
@@ -1510,7 +1510,7 @@ class TraceTestCase(unittest.TestCase):
                     18
             return 0
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1537,12 +1537,12 @@ class TraceTestCase(unittest.TestCase):
     def test_notrace_lambda(self):
         #Regression test for issue 46314
 
-        def func():
+        def func_():
             1
             lambda x: 2
             3
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (2, 'line'),
@@ -1551,14 +1551,14 @@ class TraceTestCase(unittest.TestCase):
 
     def test_class_creation_with_docstrings(self):
 
-        def func():
+        def func_():
             class Class_1:
                 ''' the docstring. 2'''
                 def __init__(self):
                     ''' Another docstring. 4'''
                     self.a = 5
 
-        self.run_and_compare(func,
+        self.run_and_compare(func_,
             [(0, 'call'),
              (1, 'line'),
              (1, 'call'),
@@ -1569,7 +1569,7 @@ class TraceTestCase(unittest.TestCase):
              (1, 'return')])
 
     def test_class_creation_with_decorator(self):
-        def func():
+        def func_():
             def decorator(arg):
                 def _dec(c):
                     return c
@@ -1582,7 +1582,7 @@ class TraceTestCase(unittest.TestCase):
             class MyObject:
                 pass
 
-        self.run_and_compare(func, [
+        self.run_and_compare(func_, [
             (0, 'call'),
             (1, 'line'),
             (6, 'line'),
@@ -1624,7 +1624,7 @@ class TraceTestCase(unittest.TestCase):
         def gen():
             yield 1
 
-        def func():
+        def func_():
             for _ in (
                 gen()
             ):
@@ -1648,15 +1648,15 @@ class TraceTestCase(unittest.TestCase):
 
         events = []
         # Turning on and off tracing must be on same line to avoid unwanted LINE events.
-        _testcapi.settrace_to_record(events); func(); sys.settrace(None)
-        start_line = func.__code__.co_firstlineno
+        _testcapi.settrace_to_record(events); func_(); sys.settrace(None)
+        start_line = func_.__code__.co_firstlineno
         events = [
             (line-start_line, EVENT_NAMES[what])
             for (what, line, arg) in events
         ]
         self.assertEqual(events, EXPECTED_EVENTS)
 
-        self.run_and_compare(func, EXPECTED_EVENTS)
+        self.run_and_compare(func_, EXPECTED_EVENTS)
 
     def test_settrace_error(self):
 
@@ -1955,9 +1955,9 @@ class JumpTestCase(unittest.TestCase):
                        "Expected: " + repr(expected) + "\n" +
                        "Received: " + repr(received))
 
-    def run_test(self, func, jumpFrom, jumpTo, expected, error=None,
+    def run_test(self, func_, jumpFrom, jumpTo, expected, error=None,
                  event='line', decorated=False, warning=None):
-        wrapped = func
+        wrapped = func_
         while hasattr(wrapped, '__wrapped__'):
             wrapped = wrapped.__wrapped__
 
@@ -1970,14 +1970,14 @@ class JumpTestCase(unittest.TestCase):
                 stack.enter_context(self.assertRaisesRegex(*error))
             if warning is not None:
                 stack.enter_context(self.assertWarnsRegex(*warning))
-            func(output)
+            func_(output)
 
         sys.settrace(None)
         self.compare_jump_output(expected, output)
 
-    def run_async_test(self, func, jumpFrom, jumpTo, expected, error=None,
+    def run_async_test(self, func_, jumpFrom, jumpTo, expected, error=None,
                  event='line', decorated=False, warning=None):
-        wrapped = func
+        wrapped = func_
         while hasattr(wrapped, '__wrapped__'):
             wrapped = wrapped.__wrapped__
 
@@ -1990,7 +1990,7 @@ class JumpTestCase(unittest.TestCase):
                 stack.enter_context(self.assertRaisesRegex(*error))
             if warning is not None:
                 stack.enter_context(self.assertWarnsRegex(*warning))
-            asyncio.run(func(output))
+            asyncio.run(func_(output))
 
         sys.settrace(None)
         asyncio.set_event_loop_policy(None)
@@ -2000,10 +2000,10 @@ class JumpTestCase(unittest.TestCase):
         """Decorator that creates a test that makes a jump
         from one place to another in the following code.
         """
-        def decorator(func):
-            @wraps(func)
+        def decorator(func_):
+            @wraps(func_)
             def test(self):
-                self.run_test(func, jumpFrom, jumpTo, expected,
+                self.run_test(func_, jumpFrom, jumpTo, expected,
                               error=error, event=event, decorated=True, warning=warning)
             return test
         return decorator
@@ -2012,10 +2012,10 @@ class JumpTestCase(unittest.TestCase):
         """Decorator that creates a test that makes a jump
         from one place to another in the following asynchronous code.
         """
-        def decorator(func):
-            @wraps(func)
+        def decorator(func_):
+            @wraps(func_)
             def test(self):
-                self.run_async_test(func, jumpFrom, jumpTo, expected,
+                self.run_async_test(func_, jumpFrom, jumpTo, expected,
                               error=error, event=event, decorated=True, warning=warning)
             return test
         return decorator
@@ -2903,10 +2903,10 @@ class TestExtendedArgs(unittest.TestCase):
         self.addCleanup(sys.settrace, sys.gettrace())
         sys.settrace(None)
 
-    def count_traces(self, func):
+    def count_traces(self, func_):
         # warmup
         for _ in range(20):
-            func()
+            func_()
 
         counts = {"call": 0, "line": 0, "return": 0}
         def trace(frame, event, arg):
@@ -2914,7 +2914,7 @@ class TestExtendedArgs(unittest.TestCase):
             return trace
 
         sys.settrace(trace)
-        func()
+        func_()
         sys.settrace(None)
 
         return counts
@@ -2995,13 +2995,13 @@ class TestSetLocalTrace(TraceTestCase):
     def test_with_branches(self):
 
         def tracefunc(frame, event, arg):
-            if frame.f_code.co_name == "func":
+            if frame.f_code.co_name == "func_":
                 frame.f_trace = tracefunc
                 line = frame.f_lineno - frame.f_code.co_firstlineno
                 events.append((line, event))
             return tracefunc
 
-        def func(arg = 1):
+        def func_(arg = 1):
             N = 1
             if arg >= 2:
                 not_reached = 3
@@ -3027,7 +3027,7 @@ class TestSetLocalTrace(TraceTestCase):
         events = []
         sys.settrace(tracefunc)
         sys._getframe().f_trace = tracefunc
-        func()
+        func_()
         self.assertEqual(events, EXPECTED_EVENTS)
         sys.settrace(None)
 

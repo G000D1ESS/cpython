@@ -1614,9 +1614,9 @@ class _BasePathTest(object):
                         "%r and %r don't point to the same file" %
                         (path_a, path_b))
 
-    def assertFileNotFound(self, func, *args, **kwargs):
+    def assertFileNotFound(self, func_, *args, **kwargs):
         with self.assertRaises(FileNotFoundError) as cm:
-            func(*args, **kwargs)
+            func_(*args, **kwargs)
         self.assertEqual(cm.exception.errno, errno.ENOENT)
 
     def assertEqualNormCase(self, path_a, path_b):

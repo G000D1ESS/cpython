@@ -365,17 +365,17 @@ class EmbeddingTests(EmbeddingTestsMixin, unittest.TestCase):
                         return True
                 return False
 
-            func = importlib._bootstrap._handle_fromlist
+            func_ = importlib._bootstrap._handle_fromlist
 
             # "copy" the code to un-specialize it:
-            func.__code__ = func.__code__.replace()
+            func_.__code__ = func_.__code__.replace()
 
-            assert not is_specialized(func), "specialized instructions found"
+            assert not is_specialized(func_), "specialized instructions found"
 
             for i in range(test.test_dis.ADAPTIVE_WARMUP_DELAY):
-                func(importlib._bootstrap, ["x"], lambda *args: None)
+                func_(importlib._bootstrap, ["x"], lambda *args: None)
 
-            assert is_specialized(func), "no specialized instructions found"
+            assert is_specialized(func_), "no specialized instructions found"
 
             print("Tests passed")
         """)
@@ -1566,10 +1566,10 @@ class InitConfigTests(EmbeddingTestsMixin, unittest.TestCase):
         _testinternalcapi = import_helper.import_module('_testinternalcapi')
 
         def get_func(name):
-            func = getattr(ctypes.pythonapi, name)
-            func.argtypes = ()
-            func.restype = ctypes.c_wchar_p
-            return func
+            func_ = getattr(ctypes.pythonapi, name)
+            func_.argtypes = ()
+            func_.restype = ctypes.c_wchar_p
+            return func_
 
         Py_GetPath = get_func('Py_GetPath')
         Py_GetPrefix = get_func('Py_GetPrefix')

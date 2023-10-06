@@ -794,8 +794,8 @@ def _get_machine_win32():
 class _Processor:
     @classmethod
     def get(cls):
-        func = getattr(cls, f'get_{sys.platform}', cls.from_subprocess)
-        return func() or ''
+        func_ = getattr(cls, f'get_{sys.platform}', cls.from_subprocess)
+        return func_() or ''
 
     def get_win32():
         try:

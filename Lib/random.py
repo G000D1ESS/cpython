@@ -947,12 +947,12 @@ randbytes = _inst.randbytes
 ## ------------------------------------------------------
 ## ----------------- test program -----------------------
 
-def _test_generator(n, func, args):
+def _test_generator(n, func_, args):
     from statistics import stdev, fmean as mean
     from time import perf_counter
 
     t0 = perf_counter()
-    data = [func(*args) for i in _repeat(None, n)]
+    data = [func_(*args) for i in _repeat(None, n)]
     t1 = perf_counter()
 
     xbar = mean(data)
@@ -960,7 +960,7 @@ def _test_generator(n, func, args):
     low = min(data)
     high = max(data)
 
-    print(f'{t1 - t0:.3f} sec, {n} times {func.__name__}{args!r}')
+    print(f'{t1 - t0:.3f} sec, {n} times {func_.__name__}{args!r}')
     print('avg %g, stddev %g, min %g, max %g\n' % (xbar, sigma, low, high))
 
 

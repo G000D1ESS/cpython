@@ -2181,24 +2181,24 @@ class Test_ModuleStateAccess(unittest.TestCase):
 class TestInternalFrameApi(unittest.TestCase):
 
     @staticmethod
-    def func():
+    def func_():
         return sys._getframe()
 
     def test_code(self):
-        frame = self.func()
+        frame = self.func_()
         code = _testinternalcapi.iframe_getcode(frame)
-        self.assertIs(code, self.func.__code__)
+        self.assertIs(code, self.func_.__code__)
 
     def test_lasti(self):
-        frame = self.func()
+        frame = self.func_()
         lasti = _testinternalcapi.iframe_getlasti(frame)
         self.assertGreater(lasti, 0)
-        self.assertLess(lasti, len(self.func.__code__.co_code))
+        self.assertLess(lasti, len(self.func_.__code__.co_code))
 
     def test_line(self):
-        frame = self.func()
+        frame = self.func_()
         line = _testinternalcapi.iframe_getline(frame)
-        firstline = self.func.__code__.co_firstlineno
+        firstline = self.func_.__code__.co_firstlineno
         self.assertEqual(line, firstline + 2)
 
 
@@ -2206,7 +2206,7 @@ SUFFICIENT_TO_DEOPT_AND_SPECIALIZE = 100
 
 class Test_Pep523API(unittest.TestCase):
 
-    def do_test(self, func, names):
+    def do_test(self, func_, names):
         actual_calls = []
         start = SUFFICIENT_TO_DEOPT_AND_SPECIALIZE
         count = start + SUFFICIENT_TO_DEOPT_AND_SPECIALIZE
@@ -2214,7 +2214,7 @@ class Test_Pep523API(unittest.TestCase):
             for i in range(count):
                 if i == start:
                     _testinternalcapi.set_eval_frame_record(actual_calls)
-                func()
+                func_()
         finally:
             _testinternalcapi.set_eval_frame_default()
         expected_calls = names * SUFFICIENT_TO_DEOPT_AND_SPECIALIZE
@@ -2226,36 +2226,36 @@ class Test_Pep523API(unittest.TestCase):
         class C:
             def __getitem__(self, other):
                 return None
-        def func():
+        def func_():
             C()[42]
-        names = ["func", "__getitem__"]
-        self.do_test(func, names)
+        names = ["func_", "__getitem__"]
+        self.do_test(func_, names)
 
     def test_inlined_call(self):
         def inner(x=42):
             pass
-        def func():
+        def func_():
             inner()
             inner(42)
-        names = ["func", "inner", "inner"]
-        self.do_test(func, names)
+        names = ["func_", "inner", "inner"]
+        self.do_test(func_, names)
 
     def test_inlined_call_function_ex(self):
         def inner(x):
             pass
-        def func():
+        def func_():
             inner(*[42])
-        names = ["func", "inner"]
-        self.do_test(func, names)
+        names = ["func_", "inner"]
+        self.do_test(func_, names)
 
     def test_inlined_for_iter(self):
         def gen():
             yield 42
-        def func():
+        def func_():
             for _ in gen():
                 pass
-        names = ["func", "gen", "gen", "gen"]
-        self.do_test(func, names)
+        names = ["func_", "gen", "gen", "gen"]
+        self.do_test(func_, names)
 
     def test_inlined_load_attr(self):
         class C:
@@ -2265,21 +2265,21 @@ class Test_Pep523API(unittest.TestCase):
         class D:
             def __getattribute__(self, name):
                 return 42
-        def func():
+        def func_():
             C().a
             D().a
-        names = ["func", "a", "__getattribute__"]
-        self.do_test(func, names)
+        names = ["func_", "a", "__getattribute__"]
+        self.do_test(func_, names)
 
     def test_inlined_send(self):
         def inner():
             yield 42
         def outer():
             yield from inner()
-        def func():
+        def func_():
             list(outer())
-        names = ["func", "outer", "outer", "inner", "inner", "outer", "inner"]
-        self.do_test(func, names)
+        names = ["func_", "outer", "outer", "inner", "inner", "outer", "inner"]
+        self.do_test(func_, names)
 
 
 if __name__ == "__main__":

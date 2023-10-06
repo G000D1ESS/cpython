@@ -531,10 +531,10 @@ class MockInstanceOf:
         return isinstance(other, self._type)
 
 
-def get_function_source(func):
-    source = format_helpers._get_function_source(func)
+def get_function_source(func_):
+    source = format_helpers._get_function_source(func_)
     if source is None:
-        raise ValueError("unable to get the source of %r" % (func,))
+        raise ValueError("unable to get the source of %r" % (func_,))
     return source
 
 

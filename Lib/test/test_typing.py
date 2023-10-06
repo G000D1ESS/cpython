@@ -5071,23 +5071,23 @@ class FinalTests(BaseTestCase):
 
 class FinalDecoratorTests(BaseTestCase):
     def test_final_unmodified(self):
-        def func(x): ...
-        self.assertIs(func, final(func))
+        def func_(x): ...
+        self.assertIs(func_, final(func_))
 
     def test_dunder_final(self):
         @final
-        def func(): ...
+        def func_(): ...
         @final
         class Cls: ...
-        self.assertIs(True, func.__final__)
+        self.assertIs(True, func_.__final__)
         self.assertIs(True, Cls.__final__)
 
         class Wrapper:
-            __slots__ = ("func",)
-            def __init__(self, func):
-                self.func = func
+            __slots__ = ("func_",)
+            def __init__(self, func_):
+                self.func_ = func_
             def __call__(self, *args, **kwargs):
-                return self.func(*args, **kwargs)
+                return self.func_(*args, **kwargs)
 
         # Check that no error is thrown if the attribute
         # is not writable.
@@ -5741,8 +5741,8 @@ class ForwardRefTests(BaseTestCase):
     def test_meta_no_type_check(self):
 
         @no_type_check_decorator
-        def magic_decorator(func):
-            return func
+        def magic_decorator(func_):
+            return func_
 
         self.assertEqual(magic_decorator.__name__, 'magic_decorator')
 
@@ -6040,7 +6040,7 @@ gth = get_type_hints
 
 class ForRefExample:
     @ann_module.dec
-    def func(self: 'ForRefExample'):
+    def func_(self: 'ForRefExample'):
         pass
 
     @ann_module.dec
@@ -6154,7 +6154,7 @@ class GetTypeHintTests(BaseTestCase):
 
     def test_get_type_hints_wrapped_decoratored_func(self):
         expects = {'self': ForRefExample}
-        self.assertEqual(gth(ForRefExample.func), expects)
+        self.assertEqual(gth(ForRefExample.func_), expects)
         self.assertEqual(gth(ForRefExample.nested), expects)
 
     def test_get_type_hints_annotated(self):
@@ -8460,11 +8460,11 @@ class ParamSpecTests(BaseTestCase):
     def test_stringized(self):
         P = ParamSpec('P')
         class C(Generic[P]):
-            func: Callable["P", int]
+            func_: Callable["P", int]
             def foo(self, *args: "P.args", **kwargs: "P.kwargs"):
                 pass
 
-        self.assertEqual(gth(C, globals(), locals()), {"func": Callable[P, int]})
+        self.assertEqual(gth(C, globals(), locals()), {"func_": Callable[P, int]})
         self.assertEqual(
             gth(C.foo, globals(), locals()), {"args": P.args, "kwargs": P.kwargs}
         )

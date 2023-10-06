@@ -15,12 +15,12 @@ except ImportError:
     hamt = None
 
 
-def isolated_context(func):
+def isolated_context(func_):
     """Needed to make reftracking test mode work."""
-    @functools.wraps(func)
+    @functools.wraps(func_)
     def wrapper(*args, **kwargs):
         ctx = contextvars.Context()
-        return ctx.run(func, *args, **kwargs)
+        return ctx.run(func_, *args, **kwargs)
     return wrapper
 
 
@@ -106,12 +106,12 @@ class ContextTest(unittest.TestCase):
     def test_context_run_2(self):
         ctx = contextvars.Context()
 
-        def func(*args, **kwargs):
+        def func_(*args, **kwargs):
             kwargs['spam'] = 'foo'
             args += ('bar',)
             return args, kwargs
 
-        for f in (func, functools.partial(func)):
+        for f in (func_, functools.partial(func_)):
             # partial doesn't support FASTCALL
 
             self.assertEqual(ctx.run(f), (('bar',), {'spam': 'foo'}))
@@ -134,15 +134,15 @@ class ContextTest(unittest.TestCase):
     def test_context_run_3(self):
         ctx = contextvars.Context()
 
-        def func(*args, **kwargs):
+        def func_(*args, **kwargs):
             1 / 0
 
         with self.assertRaises(ZeroDivisionError):
-            ctx.run(func)
+            ctx.run(func_)
         with self.assertRaises(ZeroDivisionError):
-            ctx.run(func, 1, 2)
+            ctx.run(func_, 1, 2)
         with self.assertRaises(ZeroDivisionError):
-            ctx.run(func, 1, 2, a=123)
+            ctx.run(func_, 1, 2, a=123)
 
     @isolated_context
     def test_context_run_4(self):
@@ -173,13 +173,13 @@ class ContextTest(unittest.TestCase):
         ctx = contextvars.Context()
         var = contextvars.ContextVar('var')
 
-        def func():
+        def func_():
             self.assertIsNone(var.get(None))
             var.set('spam')
             1 / 0
 
         with self.assertRaises(ZeroDivisionError):
-            ctx.run(func)
+            ctx.run(func_)
 
         self.assertIsNone(var.get(None))
 

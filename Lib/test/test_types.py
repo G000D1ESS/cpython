@@ -1281,9 +1281,9 @@ class ClassCreationTests(unittest.TestCase):
 
     def test_new_class_exec_body(self):
         Meta = self.Meta
-        def func(ns):
+        def func_(ns):
             ns["x"] = 0
-        C = types.new_class("C", (), {"metaclass": Meta, "z": 2}, func)
+        C = types.new_class("C", (), {"metaclass": Meta, "z": 2}, func_)
         self.assertIsInstance(C, Meta)
         self.assertEqual(C.x, 0)
         self.assertEqual(C.y, 1)
@@ -1306,12 +1306,12 @@ class ClassCreationTests(unittest.TestCase):
 
     def test_new_class_meta_with_base(self):
         Meta = self.Meta
-        def func(ns):
+        def func_(ns):
             ns["x"] = 0
         C = types.new_class(name="C",
                             bases=(int,),
                             kwds=dict(metaclass=Meta, z=2),
-                            exec_body=func)
+                            exec_body=func_)
         self.assertTrue(issubclass(C, int))
         self.assertIsInstance(C, Meta)
         self.assertEqual(C.x, 0)
@@ -1595,12 +1595,12 @@ class ClassCreationTests(unittest.TestCase):
             pass
 
         marker = object()
-        def func(*args, **kwargs):
+        def func_(*args, **kwargs):
             return marker
 
-        X = types.new_class("X", (), {"metaclass": func})
-        Y = types.new_class("Y", (object,), {"metaclass": func})
-        Z = types.new_class("Z", (A,), {"metaclass": func})
+        X = types.new_class("X", (), {"metaclass": func_})
+        Y = types.new_class("Y", (object,), {"metaclass": func_})
+        Z = types.new_class("Z", (A,), {"metaclass": func_})
         self.assertIs(marker, X)
         self.assertIs(marker, Y)
         self.assertIs(marker, Z)

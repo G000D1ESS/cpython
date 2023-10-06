@@ -861,13 +861,13 @@ class BaseEventLoopTests(test_utils.TestCase):
         with self.assertRaises(KeyboardInterrupt):
             self.loop.run_until_complete(raise_keyboard_interrupt())
 
-        def func():
+        def func_():
             self.loop.stop()
-            func.called = True
-        func.called = False
-        self.loop.call_soon(self.loop.call_soon, func)
+            func_.called = True
+        func_.called = False
+        self.loop.call_soon(self.loop.call_soon, func_)
         self.loop.run_forever()
-        self.assertTrue(func.called)
+        self.assertTrue(func_.called)
 
     def test_single_selecter_event_callback_after_stopping(self):
         # Python issue #25593: A stopped event loop may cause event callbacks
@@ -1904,18 +1904,18 @@ class BaseEventLoopWithSelectorTests(test_utils.TestCase):
         coro_func = simple_coroutine
         coro_obj = coro_func()
         self.addCleanup(coro_obj.close)
-        for func in (coro_func, coro_obj):
+        for func_ in (coro_func, coro_obj):
             with self.assertRaises(TypeError):
-                self.loop.call_soon(func)
+                self.loop.call_soon(func_)
             with self.assertRaises(TypeError):
-                self.loop.call_soon_threadsafe(func)
+                self.loop.call_soon_threadsafe(func_)
             with self.assertRaises(TypeError):
-                self.loop.call_later(60, func)
+                self.loop.call_later(60, func_)
             with self.assertRaises(TypeError):
-                self.loop.call_at(self.loop.time() + 60, func)
+                self.loop.call_at(self.loop.time() + 60, func_)
             with self.assertRaises(TypeError):
                 self.loop.run_until_complete(
-                    self.loop.run_in_executor(None, func))
+                    self.loop.run_in_executor(None, func_))
 
     @mock.patch('asyncio.base_events.logger')
     def test_log_slow_callbacks(self, m_logger):

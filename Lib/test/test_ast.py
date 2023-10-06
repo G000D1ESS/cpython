@@ -1157,7 +1157,7 @@ class ASTHelpers_Test(unittest.TestCase):
     def test_dump(self):
         node = ast.parse('spam(eggs, "and cheese")')
         self.assertEqual(ast.dump(node),
-            "Module(body=[Expr(value=Call(func=Name(id='spam', ctx=Load()), "
+            "Module(body=[Expr(value=Call(func_=Name(id='spam', ctx=Load()), "
             "args=[Name(id='eggs', ctx=Load()), Constant(value='and cheese')], "
             "keywords=[]))], type_ignores=[])"
         )
@@ -1166,7 +1166,7 @@ class ASTHelpers_Test(unittest.TestCase):
             "Constant('and cheese')], []))], [])"
         )
         self.assertEqual(ast.dump(node, include_attributes=True),
-            "Module(body=[Expr(value=Call(func=Name(id='spam', ctx=Load(), "
+            "Module(body=[Expr(value=Call(func_=Name(id='spam', ctx=Load(), "
             "lineno=1, col_offset=0, end_lineno=1, end_col_offset=4), "
             "args=[Name(id='eggs', ctx=Load(), lineno=1, col_offset=5, "
             "end_lineno=1, end_col_offset=9), Constant(value='and cheese', "
@@ -1182,7 +1182,7 @@ Module(
    body=[
       Expr(
          value=Call(
-            func=Name(id='spam', ctx=Load()),
+            func_=Name(id='spam', ctx=Load()),
             args=[
                Name(id='eggs', ctx=Load()),
                Constant(value='and cheese')],
@@ -1204,7 +1204,7 @@ Module(
    body=[
       Expr(
          value=Call(
-            func=Name(
+            func_=Name(
                id='spam',
                ctx=Load(),
                lineno=1,
@@ -1288,12 +1288,12 @@ Module(
         self.assertEqual(src, ast.fix_missing_locations(src))
         self.maxDiff = None
         self.assertEqual(ast.dump(src, include_attributes=True),
-            "Module(body=[Expr(value=Call(func=Name(id='write', ctx=Load(), "
+            "Module(body=[Expr(value=Call(func_=Name(id='write', ctx=Load(), "
             "lineno=1, col_offset=0, end_lineno=1, end_col_offset=5), "
             "args=[Constant(value='spam', lineno=1, col_offset=6, end_lineno=1, "
             "end_col_offset=12)], keywords=[], lineno=1, col_offset=0, end_lineno=1, "
             "end_col_offset=13), lineno=1, col_offset=0, end_lineno=1, "
-            "end_col_offset=13), Expr(value=Call(func=Name(id='spam', ctx=Load(), "
+            "end_col_offset=13), Expr(value=Call(func_=Name(id='spam', ctx=Load(), "
             "lineno=1, col_offset=0, end_lineno=1, end_col_offset=0), "
             "args=[Constant(value='eggs', lineno=1, col_offset=0, end_lineno=1, "
             "end_col_offset=0)], keywords=[], lineno=1, col_offset=0, end_lineno=1, "
@@ -1320,7 +1320,7 @@ Module(
             'col_offset=0, end_lineno=4, end_col_offset=5))'
         )
         src = ast.Call(
-            func=ast.Name("test", ast.Load()), args=[], keywords=[], lineno=1
+            func_=ast.Name("test", ast.Load()), args=[], keywords=[], lineno=1
         )
         self.assertEqual(ast.increment_lineno(src).lineno, 2)
         self.assertIsNone(ast.increment_lineno(src).end_lineno)
@@ -1340,7 +1340,7 @@ Module(
     def test_iter_fields(self):
         node = ast.parse('foo()', mode='eval')
         d = dict(ast.iter_fields(node.body))
-        self.assertEqual(d.pop('func').id, 'foo')
+        self.assertEqual(d.pop('func_').id, 'foo')
         self.assertEqual(d, {'keywords': [], 'args': []})
 
     def test_iter_child_nodes(self):
@@ -1910,15 +1910,15 @@ class ASTValidatorTests(unittest.TestCase):
         self.expr(comp)
 
     def test_call(self):
-        func = ast.Name("x", ast.Load())
+        func_ = ast.Name("x", ast.Load())
         args = [ast.Name("y", ast.Load())]
         keywords = [ast.keyword("w", ast.Name("z", ast.Load()))]
         call = ast.Call(ast.Name("x", ast.Store()), args, keywords)
         self.expr(call, "must have Load context")
-        call = ast.Call(func, [None], keywords)
+        call = ast.Call(func_, [None], keywords)
         self.expr(call, "None disallowed")
         bad_keywords = [ast.keyword("w", ast.Name("z", ast.Store()))]
-        call = ast.Call(func, args, bad_keywords)
+        call = ast.Call(func_, args, bad_keywords)
         self.expr(call, "must have Load context")
 
     def test_num(self):
@@ -2324,7 +2324,7 @@ class EndPositionTests(unittest.TestCase):
 
     def test_func_def(self):
         s = dedent('''
-            def func(x: int,
+            def func_(x: int,
                      *args: str,
                      z: float = 0,
                      **kwargs: Any) -> bool:
@@ -2339,16 +2339,16 @@ class EndPositionTests(unittest.TestCase):
         self._check_content(s, fdef.args.kwarg.annotation, 'Any')
 
     def test_call(self):
-        s = 'func(x, y=2, **kw)'
+        s = 'func_(x, y=2, **kw)'
         call = self._parse_value(s)
-        self._check_content(s, call.func, 'func')
+        self._check_content(s, call.func_, 'func_')
         self._check_content(s, call.keywords[0].value, '2')
         self._check_content(s, call.keywords[1].value, 'kw')
 
     def test_call_noargs(self):
         s = 'x[0]()'
         call = self._parse_value(s)
-        self._check_content(s, call.func, 'x[0]')
+        self._check_content(s, call.func_, 'x[0]')
         self._check_end_pos(call, 1, 6)
 
     def test_class_def(self):
@@ -2517,7 +2517,7 @@ class EndPositionTests(unittest.TestCase):
         self._check_end_pos(tm, 3, 1)
 
     def test_attribute_spaces(self):
-        s = 'func(x. y .z)'
+        s = 'func_(x. y .z)'
         call = self._parse_value(s)
         self._check_content(s, call, s)
         self._check_content(s, call.args[0], 'x. y .z')
@@ -2726,8 +2726,8 @@ class NodeTransformerTests(ASTTestMixin, BaseNodeVisitorCases, unittest.TestCase
         self.assertASTEqual(result_ast, expected_ast)
 
     def test_node_remove_single(self):
-        code = 'def func(arg) -> SomeType: ...'
-        expected = 'def func(arg): ...'
+        code = 'def func_(arg) -> SomeType: ...'
+        expected = 'def func_(arg): ...'
 
         # Since `FunctionDef.returns` is defined as a single value, we test
         # the `if isinstance(old_value, AST):` branch here.
@@ -2742,12 +2742,12 @@ class NodeTransformerTests(ASTTestMixin, BaseNodeVisitorCases, unittest.TestCase
 
     def test_node_remove_from_list(self):
         code = """
-        def func(arg):
+        def func_(arg):
             print(arg)
             yield arg
         """
         expected = """
-        def func(arg):
+        def func_(arg):
             print(arg)
         """
 
@@ -2785,39 +2785,39 @@ class NodeTransformerTests(ASTTestMixin, BaseNodeVisitorCases, unittest.TestCase
 
     def test_node_mutate(self):
         code = """
-        def func(arg):
+        def func_(arg):
             print(arg)
         """
         expected = """
-        def func(arg):
+        def func_(arg):
             log(arg)
         """
 
         class PrintToLog(ast.NodeTransformer):
             def visit_Call(self, node: ast.Call):
                 self.generic_visit(node)
-                if isinstance(node.func, ast.Name) and node.func.id == 'print':
-                    node.func.id = 'log'
+                if isinstance(node.func_, ast.Name) and node.func_.id == 'print':
+                    node.func_.id = 'log'
                 return node
 
         self.assertASTTransformation(PrintToLog, code, expected)
 
     def test_node_replace(self):
         code = """
-        def func(arg):
+        def func_(arg):
             print(arg)
         """
         expected = """
-        def func(arg):
+        def func_(arg):
             logger.log(arg, debug=True)
         """
 
         class PrintToLog(ast.NodeTransformer):
             def visit_Call(self, node: ast.Call):
                 self.generic_visit(node)
-                if isinstance(node.func, ast.Name) and node.func.id == 'print':
+                if isinstance(node.func_, ast.Name) and node.func_.id == 'print':
                     return ast.Call(
-                        func=ast.Attribute(
+                        func_=ast.Attribute(
                             ast.Name('logger', ctx=ast.Load()),
                             attr='log',
                             ctx=ast.Load(),

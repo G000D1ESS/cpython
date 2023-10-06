@@ -92,8 +92,8 @@ def literal_eval(node_or_string):
             return list(map(_convert, node.elts))
         elif isinstance(node, Set):
             return set(map(_convert, node.elts))
-        elif (isinstance(node, Call) and isinstance(node.func, Name) and
-              node.func.id == 'set' and node.args == node.keywords == []):
+        elif (isinstance(node, Call) and isinstance(node.func_, Name) and
+              node.func_.id == 'set' and node.args == node.keywords == []):
             return set()
         elif isinstance(node, Dict):
             if len(node.keys) != len(node.values):
@@ -1552,8 +1552,8 @@ class _Unparser(NodeVisitor):
         self.write(node.attr)
 
     def visit_Call(self, node):
-        self.set_precedence(_Precedence.ATOM, node.func)
-        self.traverse(node.func)
+        self.set_precedence(_Precedence.ATOM, node.func_)
+        self.traverse(node.func_)
         with self.delimit("(", ")"):
             comma = False
             for e in node.args:

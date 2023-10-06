@@ -401,12 +401,12 @@ class Profile:
 
     def snapshot_stats(self):
         self.stats = {}
-        for func, (cc, ns, tt, ct, callers) in self.timings.items():
+        for func_, (cc, ns, tt, ct, callers) in self.timings.items():
             callers = callers.copy()
             nc = 0
             for callcnt in callers.values():
                 nc += callcnt
-            self.stats[func] = cc, nc, tt, ct, callers
+            self.stats[func_] = cc, nc, tt, ct, callers
 
 
     # The following two methods can be called by clients to use
@@ -427,11 +427,11 @@ class Profile:
         return self
 
     # This method is more useful to profile a single function call.
-    def runcall(self, func, /, *args, **kw):
-        self.set_cmd(repr(func))
+    def runcall(self, func_, /, *args, **kw):
+        self.set_cmd(repr(func_))
         sys.setprofile(self.dispatcher)
         try:
-            return func(*args, **kw)
+            return func_(*args, **kw)
         finally:
             sys.setprofile(None)
 

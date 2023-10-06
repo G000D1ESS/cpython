@@ -43,7 +43,7 @@ class IsolatedAsyncioTestCase(TestCase):
     async def asyncTearDown(self):
         pass
 
-    def addAsyncCleanup(self, func, /, *args, **kwargs):
+    def addAsyncCleanup(self, func_, /, *args, **kwargs):
         # A trivial trampoline to addCleanup()
         # the function exists because it has a different semantics
         # and signature:
@@ -51,12 +51,12 @@ class IsolatedAsyncioTestCase(TestCase):
         # but addAsyncCleanup() accepts coroutines
         #
         # We intentionally don't add inspect.iscoroutinefunction() check
-        # for func argument because there is no way
+        # for func_ argument because there is no way
         # to check for async function reliably:
-        # 1. It can be "async def func()" itself
+        # 1. It can be "async def func_()" itself
         # 2. Class can implement "async def __call__()" method
-        # 3. Regular "def func()" that returns awaitable object
-        self.addCleanup(*(func, *args), **kwargs)
+        # 3. Regular "def func_()" that returns awaitable object
+        self.addCleanup(*(func_, *args), **kwargs)
 
     async def enterAsyncContext(self, cm):
         """Enters the supplied asynchronous context manager.
@@ -98,23 +98,23 @@ class IsolatedAsyncioTestCase(TestCase):
     def _callCleanup(self, function, *args, **kwargs):
         self._callMaybeAsync(function, *args, **kwargs)
 
-    def _callAsync(self, func, /, *args, **kwargs):
+    def _callAsync(self, func_, /, *args, **kwargs):
         assert self._asyncioRunner is not None, 'asyncio runner is not initialized'
-        assert inspect.iscoroutinefunction(func), f'{func!r} is not an async function'
+        assert inspect.iscoroutinefunction(func_), f'{func_!r} is not an async function'
         return self._asyncioRunner.run(
-            func(*args, **kwargs),
+            func_(*args, **kwargs),
             context=self._asyncioTestContext
         )
 
-    def _callMaybeAsync(self, func, /, *args, **kwargs):
+    def _callMaybeAsync(self, func_, /, *args, **kwargs):
         assert self._asyncioRunner is not None, 'asyncio runner is not initialized'
-        if inspect.iscoroutinefunction(func):
+        if inspect.iscoroutinefunction(func_):
             return self._asyncioRunner.run(
-                func(*args, **kwargs),
+                func_(*args, **kwargs),
                 context=self._asyncioTestContext,
             )
         else:
-            return self._asyncioTestContext.run(func, *args, **kwargs)
+            return self._asyncioTestContext.run(func_, *args, **kwargs)
 
     def _setupAsyncioRunner(self):
         assert self._asyncioRunner is None, 'asyncio runner is already initialized'

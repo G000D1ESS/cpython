@@ -649,13 +649,13 @@ class TestSpecifics(unittest.TestCase):
         exec(memoryview(b"ax = 123")[1:-1], namespace)
         self.assertEqual(namespace['x'], 12)
 
-    def check_constant(self, func, expected):
-        for const in func.__code__.co_consts:
+    def check_constant(self, func_, expected):
+        for const in func_.__code__.co_consts:
             if repr(const) == repr(expected):
                 break
         else:
             self.fail("unable to find constant %r in %r"
-                      % (expected, func.__code__.co_consts))
+                      % (expected, func_.__code__.co_consts))
 
     # Merging equal constants is not a strict requirement for the Python
     # semantics, it's a more an implementation detail.
@@ -864,8 +864,8 @@ class TestSpecifics(unittest.TestCase):
         funcs = [unused_block_if, unused_block_while,
                  unused_block_if_else, unused_block_while_else]
 
-        for func in funcs:
-            opcodes = list(dis.get_instructions(func))
+        for func_ in funcs:
+            opcodes = list(dis.get_instructions(func_))
             self.assertLessEqual(len(opcodes), 3)
             self.assertEqual('RETURN_CONST', opcodes[-1].opname)
             self.assertEqual(None, opcodes[-1].argval)
@@ -882,8 +882,8 @@ class TestSpecifics(unittest.TestCase):
         funcs = [break_in_while, continue_in_while]
 
         # Check that we did not raise but we also don't generate bytecode
-        for func in funcs:
-            opcodes = list(dis.get_instructions(func))
+        for func_ in funcs:
+            opcodes = list(dis.get_instructions(func_))
             self.assertEqual(2, len(opcodes))
             self.assertEqual('RETURN_CONST', opcodes[1].opname)
             self.assertEqual(None, opcodes[1].argval)
@@ -904,9 +904,9 @@ class TestSpecifics(unittest.TestCase):
         funcs = [and_true, and_false, or_true, or_false]
 
         # Check that condition is removed.
-        for func in funcs:
-            with self.subTest(func=func):
-                opcodes = list(dis.get_instructions(func))
+        for func_ in funcs:
+            with self.subTest(func_=func_):
+                opcodes = list(dis.get_instructions(func_))
                 self.assertLessEqual(len(opcodes), 3)
                 self.assertIn('LOAD_', opcodes[-2].opname)
                 self.assertEqual('RETURN_VALUE', opcodes[-1].opname)
@@ -937,9 +937,9 @@ class TestSpecifics(unittest.TestCase):
         for source in sources:
             namespace = {}
             exec(textwrap.dedent(source), namespace)
-            func = namespace['foo']
-            with self.subTest(func=func.__name__):
-                opcodes = list(dis.get_instructions(func))
+            func_ = namespace['foo']
+            with self.subTest(func_=func_.__name__):
+                opcodes = list(dis.get_instructions(func_))
                 instructions = [opcode.opname for opcode in opcodes]
                 self.assertNotIn('LOAD_METHOD', instructions)
                 self.assertIn('LOAD_ATTR', instructions)
@@ -982,9 +982,9 @@ class TestSpecifics(unittest.TestCase):
         def save_caller_frame():
             nonlocal frame
             frame = sys._getframe(1)
-        for func, lastline in zip(funcs, lastlines, strict=True):
-            with self.subTest(func=func):
-                func(save_caller_frame)
+        for func_, lastline in zip(funcs, lastlines, strict=True):
+            with self.subTest(func_=func_):
+                func_(save_caller_frame)
                 self.assertEqual(frame.f_lineno-frame.f_code.co_firstlineno, lastline)
 
     def test_lineno_after_no_code(self):
@@ -994,9 +994,9 @@ class TestSpecifics(unittest.TestCase):
         def no_code2():
             a: int
 
-        for func in (no_code1, no_code2):
-            with self.subTest(func=func):
-                code = func.__code__
+        for func_ in (no_code1, no_code2):
+            with self.subTest(func_=func_):
+                code = func_.__code__
                 [(start, end, line)] = code.co_lines()
                 self.assertEqual(start, 0)
                 self.assertEqual(end, len(code.co_code))
@@ -1050,9 +1050,9 @@ class TestSpecifics(unittest.TestCase):
         func_lines = [ load_attr_lines, load_method_lines,
                  store_attr_lines, aug_store_attr_lines]
 
-        for func, lines in zip(funcs, func_lines, strict=True):
-            with self.subTest(func=func):
-                code_lines = self.get_code_lines(func.__code__)
+        for func_, lines in zip(funcs, func_lines, strict=True):
+            with self.subTest(func_=func_):
+                code_lines = self.get_code_lines(func_.__code__)
                 self.assertEqual(lines, code_lines)
 
     def test_line_number_genexp(self):
@@ -1145,9 +1145,9 @@ class TestSpecifics(unittest.TestCase):
     @support.cpython_only
     def test_uses_slice_instructions(self):
 
-        def check_op_count(func, op, expected):
+        def check_op_count(func_, op, expected):
             actual = 0
-            for instr in dis.Bytecode(func):
+            for instr in dis.Bytecode(func_):
                 if instr.opname == op:
                     actual += 1
             self.assertEqual(actual, expected)
@@ -1911,12 +1911,12 @@ class TestStackSizeStability(unittest.TestCase):
     def check_stack_size(self, snippet, async_=False):
         def compile_snippet(i):
             ns = {}
-            script = """def func():\n""" + i * snippet
+            script = """def func_():\n""" + i * snippet
             if async_:
                 script = "async " + script
             code = compile(script, "<script>", "exec")
             exec(code, ns, ns)
-            return ns['func'].__code__
+            return ns['func_'].__code__
 
         sizes = [compile_snippet(i).co_stacksize for i in range(2, 5)]
         if len(set(sizes)) != 1:

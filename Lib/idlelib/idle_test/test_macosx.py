@@ -60,20 +60,20 @@ class IsTypeTkTest(unittest.TestCase):
     def test_is_calls_init(self, mockinit):
         "Test that each isTypeTk calls _init_tk_type when _tk_type is None."
         macosx._tk_type = None
-        for func, whentrue in self.isfuncs:
-            with self.subTest(func=func):
-                func()
+        for func_, whentrue in self.isfuncs:
+            with self.subTest(func_=func_):
+                func_()
                 self.assertTrue(mockinit.called)
                 mockinit.reset_mock()
 
     def test_isfuncs(self):
         "Test that each isTypeTk return correct bool."
-        for func, whentrue in self.isfuncs:
+        for func_, whentrue in self.isfuncs:
             for tktype in alltypes:
-                with self.subTest(func=func, whentrue=whentrue, tktype=tktype):
+                with self.subTest(func_=func_, whentrue=whentrue, tktype=tktype):
                     macosx._tk_type = tktype
                     (self.assertTrue if tktype in whentrue else self.assertFalse)\
-                                     (func())
+                                     (func_())
 
 
 class SetupTest(unittest.TestCase):
@@ -84,9 +84,9 @@ class SetupTest(unittest.TestCase):
         requires('gui')
         cls.root = tk.Tk()
         cls.root.withdraw()
-        def cmd(tkpath, func):
+        def cmd(tkpath, func_):
             assert isinstance(tkpath, str)
-            assert isinstance(func, type(cmd))
+            assert isinstance(func_, type(cmd))
         cls.root.createcommand = cmd
 
     @classmethod

@@ -101,7 +101,7 @@ class SlicesTestCase(unittest.TestCase):
             pass
 
         dll.my_free.restype = None
-        def errcheck(result, func, args):
+        def errcheck(result, func_, args):
             retval = result.value
             dll.my_free(result)
             return retval

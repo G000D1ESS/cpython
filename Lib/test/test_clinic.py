@@ -1209,7 +1209,7 @@ class ClinicParserTest(_ParserBase):
         )
         block = """
             module foo
-            foo.func
+            foo.func_
                 a: int
                 self: self(type="PyObject *")
         """
@@ -1223,7 +1223,7 @@ class ClinicParserTest(_ParserBase):
         )
         block = """
             module foo
-            foo.func
+            foo.func_
                 self: self(type="PyObject *") = None
         """
         out = self.parse_function_should_fail(block)
@@ -1237,7 +1237,7 @@ class ClinicParserTest(_ParserBase):
         )
         block = """
             module foo
-            foo.func
+            foo.func_
                 self: self(type="PyObject *")
                 a: int
                 cls: defining_class
@@ -1252,7 +1252,7 @@ class ClinicParserTest(_ParserBase):
         )
         block = """
             module foo
-            foo.func
+            foo.func_
                 cls: defining_class(type="PyObject *") = None
         """
         out = self.parse_function_should_fail(block)
@@ -1298,7 +1298,7 @@ class ClinicParserTest(_ParserBase):
     def test_unused_param(self):
         block = self.parse("""
             module foo
-            foo.func
+            foo.func_
                 fn: object
                 k: float
                 i: float(unused=True)
@@ -2095,8 +2095,8 @@ class ClinicFunctionalTest(unittest.TestCase):
     def test_cloned_func_with_converter_exception_message(self):
         for name in "clone_with_conv_f1", "clone_with_conv_f2":
             with self.subTest(name=name):
-                func = getattr(ac_tester, name)
-                self.assertEqual(func(), name)
+                func_ = getattr(ac_tester, name)
+                self.assertEqual(func_(), name)
 
 
 class PermutationTests(unittest.TestCase):

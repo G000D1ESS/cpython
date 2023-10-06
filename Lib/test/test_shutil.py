@@ -60,13 +60,13 @@ def _fake_rename(*args, **kwargs):
     # Pretend the destination path is on a different filesystem.
     raise OSError(getattr(errno, 'EXDEV', 18), "Invalid cross-device link")
 
-def mock_rename(func):
-    @functools.wraps(func)
+def mock_rename(func_):
+    @functools.wraps(func_)
     def wrap(*args, **kwargs):
         try:
             builtin_rename = os.rename
             os.rename = _fake_rename
-            return func(*args, **kwargs)
+            return func_(*args, **kwargs)
         finally:
             os.rename = builtin_rename
     return wrap
@@ -417,29 +417,29 @@ class TestRmTree(BaseTest, unittest.TestCase):
         self.assertEqual(self.errorState, 3,
                          "Expected call to onerror function did not happen.")
 
-    def check_args_to_onerror(self, func, arg, exc):
+    def check_args_to_onerror(self, func_, arg, exc):
         # test_rmtree_errors deliberately runs rmtree
         # on a directory that is chmod 500, which will fail.
         # This function is run when shutil.rmtree fails.
         # 99.9% of the time it initially fails to remove
         # a file in the directory, so the first time through
-        # func is os.remove.
+        # func_ is os.remove.
         # However, some Linux machines running ZFS on
         # FUSE experienced a failure earlier in the process
         # at os.listdir.  The first failure may legally
         # be either.
         if self.errorState < 2:
-            if func is os.unlink:
+            if func_ is os.unlink:
                 self.assertEqual(arg, self.child_file_path)
-            elif func is os.rmdir:
+            elif func_ is os.rmdir:
                 self.assertEqual(arg, self.child_dir_path)
             else:
-                self.assertIs(func, os.listdir)
+                self.assertIs(func_, os.listdir)
                 self.assertIn(arg, [TESTFN, self.child_dir_path])
             self.assertTrue(issubclass(exc[0], OSError))
             self.errorState += 1
         else:
-            self.assertEqual(func, os.rmdir)
+            self.assertEqual(func_, os.rmdir)
             self.assertEqual(arg, TESTFN)
             self.assertTrue(issubclass(exc[0], OSError))
             self.errorState = 3
@@ -475,29 +475,29 @@ class TestRmTree(BaseTest, unittest.TestCase):
         self.assertEqual(self.errorState, 3,
                          "Expected call to onexc function did not happen.")
 
-    def check_args_to_onexc(self, func, arg, exc):
+    def check_args_to_onexc(self, func_, arg, exc):
         # test_rmtree_errors deliberately runs rmtree
         # on a directory that is chmod 500, which will fail.
         # This function is run when shutil.rmtree fails.
         # 99.9% of the time it initially fails to remove
         # a file in the directory, so the first time through
-        # func is os.remove.
+        # func_ is os.remove.
         # However, some Linux machines running ZFS on
         # FUSE experienced a failure earlier in the process
         # at os.listdir.  The first failure may legally
         # be either.
         if self.errorState < 2:
-            if func is os.unlink:
+            if func_ is os.unlink:
                 self.assertEqual(arg, self.child_file_path)
-            elif func is os.rmdir:
+            elif func_ is os.rmdir:
                 self.assertEqual(arg, self.child_dir_path)
             else:
-                self.assertIs(func, os.listdir)
+                self.assertIs(func_, os.listdir)
                 self.assertIn(arg, [TESTFN, self.child_dir_path])
             self.assertTrue(isinstance(exc, OSError))
             self.errorState += 1
         else:
-            self.assertEqual(func, os.rmdir)
+            self.assertEqual(func_, os.rmdir)
             self.assertEqual(arg, TESTFN)
             self.assertTrue(isinstance(exc, OSError))
             self.errorState = 3

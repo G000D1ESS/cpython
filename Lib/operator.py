@@ -245,17 +245,17 @@ class attrgetter:
                 raise TypeError('attribute name must be a string')
             self._attrs = (attr,)
             names = attr.split('.')
-            def func(obj):
+            def func_(obj):
                 for name in names:
                     obj = getattr(obj, name)
                 return obj
-            self._call = func
+            self._call = func_
         else:
             self._attrs = (attr,) + attrs
             getters = tuple(map(attrgetter, self._attrs))
-            def func(obj):
+            def func_(obj):
                 return tuple(getter(obj) for getter in getters)
-            self._call = func
+            self._call = func_
 
     def __call__(self, obj):
         return self._call(obj)
@@ -279,14 +279,14 @@ class itemgetter:
     def __init__(self, item, *items):
         if not items:
             self._items = (item,)
-            def func(obj):
+            def func_(obj):
                 return obj[item]
-            self._call = func
+            self._call = func_
         else:
             self._items = items = (item,) + items
-            def func(obj):
+            def func_(obj):
                 return tuple(obj[i] for i in items)
-            self._call = func
+            self._call = func_
 
     def __call__(self, obj):
         return self._call(obj)
@@ -417,7 +417,7 @@ except ImportError:
 else:
     from _operator import __doc__
 
-# All of these "__func__ = func" assignments have to happen after importing
+# All of these "__func__ = func_" assignments have to happen after importing
 # from _operator to make sure they're set to the right function
 __lt__ = lt
 __le__ = le

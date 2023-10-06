@@ -159,11 +159,11 @@ class CoroutineTests(BaseTest):
             return 'spam'
 
         @types.coroutine
-        def func():
+        def func_():
             return gen()
 
         async def coro():
-            wrapper = func()
+            wrapper = func_()
             self.assertIsInstance(wrapper, types._GeneratorWrapper)
             return await wrapper
 

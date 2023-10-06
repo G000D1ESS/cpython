@@ -763,11 +763,11 @@ class XmlgenTest:
 
     def test_no_close_file(self):
         result = self.ioclass()
-        def func(out):
+        def func_(out):
             gen = XMLGenerator(out)
             gen.startDocument()
             gen.startElement("doc", {})
-        func(result)
+        func_(result)
         self.assertFalse(result.closed)
 
     def test_xmlgen_fragment(self):

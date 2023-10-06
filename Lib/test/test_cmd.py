@@ -27,10 +27,10 @@ class samplecmdclass(cmd.Cmd):
     ('shell', '', 'shell ')
     >>> mycmd.parseline("!command")
     ('shell', 'command', 'shell command')
-    >>> mycmd.parseline("func")
-    ('func', '', 'func')
-    >>> mycmd.parseline("func arg1")
-    ('func', 'arg1', 'func arg1')
+    >>> mycmd.parseline("func_")
+    ('func_', '', 'func_')
+    >>> mycmd.parseline("func_ arg1")
+    ('func_', 'arg1', 'func_ arg1')
 
 
     Test for the function onecmd():

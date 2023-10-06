@@ -353,9 +353,9 @@ class StructureTestCase(unittest.TestCase):
                 # MemoryErrors are OK, we just don't want to segfault
                 pass
 
-    def get_except(self, func, *args):
+    def get_except(self, func_, *args):
         try:
-            func(*args)
+            func_(*args)
         except Exception as detail:
             return detail.__class__, str(detail)
 
@@ -408,10 +408,10 @@ class StructureTestCase(unittest.TestCase):
         s.second = 0xcafebabe
         s.third = 0x0bad1dea
         dll = CDLL(_ctypes_test.__file__)
-        func = dll._testfunc_large_struct_update_value
-        func.argtypes = (Test,)
-        func.restype = None
-        func(s)
+        func_ = dll._testfunc_large_struct_update_value
+        func_.argtypes = (Test,)
+        func_.restype = None
+        func_(s)
         self.assertEqual(s.first, 0xdeadbeef)
         self.assertEqual(s.second, 0xcafebabe)
         self.assertEqual(s.third, 0x0bad1dea)
@@ -438,10 +438,10 @@ class StructureTestCase(unittest.TestCase):
         self.assertGreater(sizeof(s), sizeof(c_void_p))
 
         dll = CDLL(_ctypes_test.__file__)
-        func = dll._testfunc_large_struct_update_value
-        func.argtypes = (Test,)
-        func.restype = None
-        func(s)
+        func_ = dll._testfunc_large_struct_update_value
+        func_.argtypes = (Test,)
+        func_.restype = None
+        func_(s)
         # bpo-37140: Passing the structure by reference must not call
         # its finalizer!
         self.assertEqual(finalizer_calls, [])
@@ -465,10 +465,10 @@ class StructureTestCase(unittest.TestCase):
         s.first = 0xdeadbeef
         s.second = 0xcafebabe
         dll = CDLL(_ctypes_test.__file__)
-        func = dll._testfunc_reg_struct_update_value
-        func.argtypes = (X,)
-        func.restype = None
-        func(s)
+        func_ = dll._testfunc_reg_struct_update_value
+        func_.argtypes = (X,)
+        func_.restype = None
+        func_(s)
         self.assertEqual(s.first, 0xdeadbeef)
         self.assertEqual(s.second, 0xcafebabe)
         got = X.in_dll(dll, "last_tfrsuv_arg")
@@ -505,10 +505,10 @@ class StructureTestCase(unittest.TestCase):
             s.data[i] = i
             expected += i
         dll = CDLL(_ctypes_test.__file__)
-        func = dll._testfunc_array_in_struct1
-        func.restype = c_int
-        func.argtypes = (Test2,)
-        result = func(s)
+        func_ = dll._testfunc_array_in_struct1
+        func_.restype = c_int
+        func_.argtypes = (Test2,)
+        result = func_(s)
         self.assertEqual(result, expected)
         # check the passed-in struct hasn't changed
         for i in range(16):
@@ -518,10 +518,10 @@ class StructureTestCase(unittest.TestCase):
         s.data[0] = 3.14159
         s.data[1] = 2.71828
         expected = 3.14159 + 2.71828
-        func = dll._testfunc_array_in_struct2
-        func.restype = c_double
-        func.argtypes = (Test3,)
-        result = func(s)
+        func_ = dll._testfunc_array_in_struct2
+        func_.restype = c_double
+        func_.argtypes = (Test3,)
+        result = func_(s)
         self.assertEqual(result, expected)
         # check the passed-in struct hasn't changed
         self.assertEqual(s.data[0], 3.14159)
@@ -534,10 +534,10 @@ class StructureTestCase(unittest.TestCase):
         s.more_data[1] = -2.0
 
         expected = 3.14159 + 2.71828 - 5.0
-        func = dll._testfunc_array_in_struct2a
-        func.restype = c_double
-        func.argtypes = (Test3B,)
-        result = func(s)
+        func_ = dll._testfunc_array_in_struct2a
+        func_.restype = c_double
+        func_.argtypes = (Test3B,)
+        result = func_(s)
         self.assertAlmostEqual(result, expected, places=6)
         # check the passed-in struct hasn't changed
         self.assertAlmostEqual(s.data[0], 3.14159, places=6)
@@ -601,37 +601,37 @@ class StructureTestCase(unittest.TestCase):
         test4 = Test4()
         dll = CDLL(_ctypes_test.__file__)
         with self.assertRaises(TypeError) as ctx:
-            func = dll._testfunc_union_by_value1
-            func.restype = c_long
-            func.argtypes = (Test4,)
-            result = func(test4)
+            func_ = dll._testfunc_union_by_value1
+            func_.restype = c_long
+            func_.argtypes = (Test4,)
+            result = func_(test4)
         self.assertEqual(ctx.exception.args[0], 'item 1 in _argtypes_ passes '
                          'a union by value, which is unsupported.')
         test5 = Test5()
         with self.assertRaises(TypeError) as ctx:
-            func = dll._testfunc_union_by_value2
-            func.restype = c_long
-            func.argtypes = (Test5,)
-            result = func(test5)
+            func_ = dll._testfunc_union_by_value2
+            func_.restype = c_long
+            func_.argtypes = (Test5,)
+            result = func_(test5)
         self.assertEqual(ctx.exception.args[0], 'item 1 in _argtypes_ passes '
                          'a union by value, which is unsupported.')
 
         # passing by reference should be OK
         test4.a_long = 12345;
-        func = dll._testfunc_union_by_reference1
-        func.restype = c_long
-        func.argtypes = (POINTER(Test4),)
-        result = func(byref(test4))
+        func_ = dll._testfunc_union_by_reference1
+        func_.restype = c_long
+        func_.argtypes = (POINTER(Test4),)
+        result = func_(byref(test4))
         self.assertEqual(result, 12345)
         self.assertEqual(test4.a_long, 0)
         self.assertEqual(test4.a_struct.an_int, 0)
         self.assertEqual(test4.a_struct.another_int, 0)
         test4.a_struct.an_int = 0x12340000
         test4.a_struct.another_int = 0x5678
-        func = dll._testfunc_union_by_reference2
-        func.restype = c_long
-        func.argtypes = (POINTER(Test4),)
-        result = func(byref(test4))
+        func_ = dll._testfunc_union_by_reference2
+        func_.restype = c_long
+        func_.argtypes = (POINTER(Test4),)
+        result = func_(byref(test4))
         self.assertEqual(result, 0x12345678)
         self.assertEqual(test4.a_long, 0)
         self.assertEqual(test4.a_struct.an_int, 0)
@@ -639,10 +639,10 @@ class StructureTestCase(unittest.TestCase):
         test5.an_int = 0x12000000
         test5.nested.an_int = 0x345600
         test5.another_int = 0x78
-        func = dll._testfunc_union_by_reference3
-        func.restype = c_long
-        func.argtypes = (POINTER(Test5),)
-        result = func(byref(test5))
+        func_ = dll._testfunc_union_by_reference3
+        func_.restype = c_long
+        func_.argtypes = (POINTER(Test5),)
+        result = func_(byref(test5))
         self.assertEqual(result, 0x12345678)
         self.assertEqual(test5.an_int, 0)
         self.assertEqual(test5.nested.an_int, 0)
@@ -671,18 +671,18 @@ class StructureTestCase(unittest.TestCase):
         test6.D = 3
         dll = CDLL(_ctypes_test.__file__)
         with self.assertRaises(TypeError) as ctx:
-            func = dll._testfunc_bitfield_by_value1
-            func.restype = c_long
-            func.argtypes = (Test6,)
-            result = func(test6)
+            func_ = dll._testfunc_bitfield_by_value1
+            func_.restype = c_long
+            func_.argtypes = (Test6,)
+            result = func_(test6)
         self.assertEqual(ctx.exception.args[0], 'item 1 in _argtypes_ passes '
                          'a struct/union with a bitfield by value, which is '
                          'unsupported.')
         # passing by reference should be OK
-        func = dll._testfunc_bitfield_by_reference1
-        func.restype = c_long
-        func.argtypes = (POINTER(Test6),)
-        result = func(byref(test6))
+        func_ = dll._testfunc_bitfield_by_reference1
+        func_.restype = c_long
+        func_.argtypes = (POINTER(Test6),)
+        result = func_(byref(test6))
         self.assertEqual(result, -4)
         self.assertEqual(test6.A, 0)
         self.assertEqual(test6.B, 0)
@@ -701,10 +701,10 @@ class StructureTestCase(unittest.TestCase):
         test7.B = 3
         test7.C = 7
         test7.D = 3
-        func = dll._testfunc_bitfield_by_reference2
-        func.restype = c_long
-        func.argtypes = (POINTER(Test7),)
-        result = func(byref(test7))
+        func_ = dll._testfunc_bitfield_by_reference2
+        func_.restype = c_long
+        func_.argtypes = (POINTER(Test7),)
+        result = func_(byref(test7))
         self.assertEqual(result, 14)
         self.assertEqual(test7.A, 0)
         self.assertEqual(test7.B, 0)
@@ -722,10 +722,10 @@ class StructureTestCase(unittest.TestCase):
 
         test8 = Test8()
         with self.assertRaises(TypeError) as ctx:
-            func = dll._testfunc_bitfield_by_value2
-            func.restype = c_long
-            func.argtypes = (Test8,)
-            result = func(test8)
+            func_ = dll._testfunc_bitfield_by_value2
+            func_.restype = c_long
+            func_.argtypes = (Test8,)
+            result = func_(test8)
         self.assertEqual(ctx.exception.args[0], 'item 1 in _argtypes_ passes '
                          'a union by value, which is unsupported.')
 

@@ -3087,20 +3087,20 @@ class TestValueErrors(unittest.TestCase):
 class TestTracing(unittest.TestCase):
 
     @staticmethod
-    def _trace(func, *args, **kwargs):
+    def _trace(func_, *args, **kwargs):
         actual_linenos = []
 
         def trace(frame, event, arg):
-            if event == "line" and frame.f_code.co_name == func.__name__:
+            if event == "line" and frame.f_code.co_name == func_.__name__:
                 assert arg is None
-                relative_lineno = frame.f_lineno - func.__code__.co_firstlineno
+                relative_lineno = frame.f_lineno - func_.__code__.co_firstlineno
                 actual_linenos.append(relative_lineno)
             return trace
 
         old_trace = sys.gettrace()
         sys.settrace(trace)
         try:
-            func(*args, **kwargs)
+            func_(*args, **kwargs)
         finally:
             sys.settrace(old_trace)
         return actual_linenos

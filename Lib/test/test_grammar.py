@@ -1969,9 +1969,9 @@ class GrammarTests(unittest.TestCase):
         self.assertEqual(test.__name__, 'test')
         self.assertTrue(bool(test.__code__.co_flags & inspect.CO_COROUTINE))
 
-        def decorator(func):
-            setattr(func, '_marked', True)
-            return func
+        def decorator(func_):
+            setattr(func_, '_marked', True)
+            return func_
 
         @decorator
         async def test2():

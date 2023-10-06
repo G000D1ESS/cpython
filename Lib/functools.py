@@ -278,32 +278,32 @@ class partial:
     and keywords.
     """
 
-    __slots__ = "func", "args", "keywords", "__dict__", "__weakref__"
+    __slots__ = "func_", "args", "keywords", "__dict__", "__weakref__"
 
-    def __new__(cls, func, /, *args, **keywords):
-        if not callable(func):
+    def __new__(cls, func_, /, *args, **keywords):
+        if not callable(func_):
             raise TypeError("the first argument must be callable")
 
-        if hasattr(func, "func"):
-            args = func.args + args
-            keywords = {**func.keywords, **keywords}
-            func = func.func
+        if hasattr(func_, "func_"):
+            args = func_.args + args
+            keywords = {**func_.keywords, **keywords}
+            func_ = func_.func_
 
         self = super(partial, cls).__new__(cls)
 
-        self.func = func
+        self.func_ = func_
         self.args = args
         self.keywords = keywords
         return self
 
     def __call__(self, /, *args, **keywords):
         keywords = {**self.keywords, **keywords}
-        return self.func(*self.args, *args, **keywords)
+        return self.func_(*self.args, *args, **keywords)
 
     @recursive_repr()
     def __repr__(self):
         qualname = type(self).__qualname__
-        args = [repr(self.func)]
+        args = [repr(self.func_)]
         args.extend(repr(x) for x in self.args)
         args.extend(f"{k}={v!r}" for (k, v) in self.keywords.items())
         if type(self).__module__ == "functools":
@@ -311,7 +311,7 @@ class partial:
         return f"{qualname}({', '.join(args)})"
 
     def __reduce__(self):
-        return type(self), (self.func,), (self.func, self.args,
+        return type(self), (self.func_,), (self.func_, self.args,
                self.keywords or None, self.__dict__ or None)
 
     def __setstate__(self, state):
@@ -319,8 +319,8 @@ class partial:
             raise TypeError("argument to __setstate__ must be a tuple")
         if len(state) != 4:
             raise TypeError(f"expected 4 items in state, got {len(state)}")
-        func, args, kwds, namespace = state
-        if (not callable(func) or not isinstance(args, tuple) or
+        func_, args, kwds, namespace = state
+        if (not callable(func_) or not isinstance(args, tuple) or
            (kwds is not None and not isinstance(kwds, dict)) or
            (namespace is not None and not isinstance(namespace, dict))):
             raise TypeError("invalid partial state")
@@ -334,7 +334,7 @@ class partial:
             namespace = {}
 
         self.__dict__ = namespace
-        self.func = func
+        self.func_ = func_
         self.args = args
         self.keywords = kwds
 
@@ -352,22 +352,22 @@ class partialmethod(object):
     callables as instance methods.
     """
 
-    def __init__(self, func, /, *args, **keywords):
-        if not callable(func) and not hasattr(func, "__get__"):
+    def __init__(self, func_, /, *args, **keywords):
+        if not callable(func_) and not hasattr(func_, "__get__"):
             raise TypeError("{!r} is not callable or a descriptor"
-                                 .format(func))
+                                 .format(func_))
 
-        # func could be a descriptor like classmethod which isn't callable,
-        # so we can't inherit from partial (it verifies func is callable)
-        if isinstance(func, partialmethod):
+        # func_ could be a descriptor like classmethod which isn't callable,
+        # so we can't inherit from partial (it verifies func_ is callable)
+        if isinstance(func_, partialmethod):
             # flattening is mandatory in order to place cls/self before all
             # other arguments
             # it's also more efficient since only one function will be called
-            self.func = func.func
-            self.args = func.args + args
-            self.keywords = {**func.keywords, **keywords}
+            self.func_ = func_.func_
+            self.args = func_.args + args
+            self.keywords = {**func_.keywords, **keywords}
         else:
-            self.func = func
+            self.func_ = func_
             self.args = args
             self.keywords = keywords
 
@@ -375,27 +375,27 @@ class partialmethod(object):
         args = ", ".join(map(repr, self.args))
         keywords = ", ".join("{}={!r}".format(k, v)
                                  for k, v in self.keywords.items())
-        format_string = "{module}.{cls}({func}, {args}, {keywords})"
+        format_string = "{module}.{cls}({func_}, {args}, {keywords})"
         return format_string.format(module=self.__class__.__module__,
                                     cls=self.__class__.__qualname__,
-                                    func=self.func,
+                                    func_=self.func_,
                                     args=args,
                                     keywords=keywords)
 
     def _make_unbound_method(self):
         def _method(cls_or_self, /, *args, **keywords):
             keywords = {**self.keywords, **keywords}
-            return self.func(cls_or_self, *self.args, *args, **keywords)
+            return self.func_(cls_or_self, *self.args, *args, **keywords)
         _method.__isabstractmethod__ = self.__isabstractmethod__
         _method._partialmethod = self
         return _method
 
     def __get__(self, obj, cls=None):
-        get = getattr(self.func, "__get__", None)
+        get = getattr(self.func_, "__get__", None)
         result = None
         if get is not None:
             new_func = get(obj, cls)
-            if new_func is not self.func:
+            if new_func is not self.func_:
                 # Assume __get__ returning something new indicates the
                 # creation of an appropriate callable
                 result = partial(new_func, *self.args, **self.keywords)
@@ -411,17 +411,17 @@ class partialmethod(object):
 
     @property
     def __isabstractmethod__(self):
-        return getattr(self.func, "__isabstractmethod__", False)
+        return getattr(self.func_, "__isabstractmethod__", False)
 
     __class_getitem__ = classmethod(GenericAlias)
 
 
 # Helper functions
 
-def _unwrap_partial(func):
-    while isinstance(func, partial):
-        func = func.func
-    return func
+def _unwrap_partial(func_):
+    while isinstance(func_, partial):
+        func_ = func_.func_
+    return func_
 
 ################################################################################
 ### LRU Cache function decorator
@@ -797,7 +797,7 @@ def _find_impl(cls, registry):
             match = t
     return registry.get(match)
 
-def singledispatch(func):
+def singledispatch(func_):
     """Single-dispatch generic function decorator.
 
     Transforms a function into a generic function, which can have different
@@ -849,18 +849,18 @@ def singledispatch(func):
         return (_is_union_type(cls) and
                 all(isinstance(arg, type) for arg in get_args(cls)))
 
-    def register(cls, func=None):
-        """generic_func.register(cls, func) -> func
+    def register(cls, func_=None):
+        """generic_func.register(cls, func_) -> func_
 
         Registers a new implementation for the given *cls* on a *generic_func*.
 
         """
         nonlocal cache_token
         if _is_valid_dispatch_type(cls):
-            if func is None:
+            if func_ is None:
                 return lambda f: register(cls, f)
         else:
-            if func is not None:
+            if func_ is not None:
                 raise TypeError(
                     f"Invalid first argument to `register()`. "
                     f"{cls!r} is not a class or union type."
@@ -872,11 +872,11 @@ def singledispatch(func):
                     f"Use either `@register(some_class)` or plain `@register` "
                     f"on an annotated function."
                 )
-            func = cls
+            func_ = cls
 
             # only import typing if annotation parsing is necessary
             from typing import get_type_hints
-            argname, cls = next(iter(get_type_hints(func).items()))
+            argname, cls = next(iter(get_type_hints(func_).items()))
             if not _is_valid_dispatch_type(cls):
                 if _is_union_type(cls):
                     raise TypeError(
@@ -893,13 +893,13 @@ def singledispatch(func):
             from typing import get_args
 
             for arg in get_args(cls):
-                registry[arg] = func
+                registry[arg] = func_
         else:
-            registry[cls] = func
+            registry[cls] = func_
         if cache_token is None and hasattr(cls, '__abstractmethods__'):
             cache_token = get_cache_token()
         dispatch_cache.clear()
-        return func
+        return func_
 
     def wrapper(*args, **kw):
         if not args:
@@ -908,13 +908,13 @@ def singledispatch(func):
 
         return dispatch(args[0].__class__)(*args, **kw)
 
-    funcname = getattr(func, '__name__', 'singledispatch function')
-    registry[object] = func
+    funcname = getattr(func_, '__name__', 'singledispatch function')
+    registry[object] = func_
     wrapper.register = register
     wrapper.dispatch = dispatch
     wrapper.registry = types.MappingProxyType(registry)
     wrapper._clear_cache = dispatch_cache.clear
-    update_wrapper(wrapper, func)
+    update_wrapper(wrapper, func_)
     return wrapper
 
 
@@ -926,19 +926,19 @@ class singledispatchmethod:
     callables as instance methods.
     """
 
-    def __init__(self, func):
-        if not callable(func) and not hasattr(func, "__get__"):
-            raise TypeError(f"{func!r} is not callable or a descriptor")
+    def __init__(self, func_):
+        if not callable(func_) and not hasattr(func_, "__get__"):
+            raise TypeError(f"{func_!r} is not callable or a descriptor")
 
-        self.dispatcher = singledispatch(func)
-        self.func = func
+        self.dispatcher = singledispatch(func_)
+        self.func_ = func_
 
     def register(self, cls, method=None):
-        """generic_method.register(cls, func) -> func
+        """generic_method.register(cls, func_) -> func_
 
         Registers a new implementation for the given *cls* on a *generic_method*.
         """
-        return self.dispatcher.register(cls, func=method)
+        return self.dispatcher.register(cls, func_=method)
 
     def __get__(self, obj, cls=None):
         def _method(*args, **kwargs):
@@ -947,12 +947,12 @@ class singledispatchmethod:
 
         _method.__isabstractmethod__ = self.__isabstractmethod__
         _method.register = self.register
-        update_wrapper(_method, self.func)
+        update_wrapper(_method, self.func_)
         return _method
 
     @property
     def __isabstractmethod__(self):
-        return getattr(self.func, '__isabstractmethod__', False)
+        return getattr(self.func_, '__isabstractmethod__', False)
 
 
 ################################################################################
@@ -962,10 +962,10 @@ class singledispatchmethod:
 _NOT_FOUND = object()
 
 class cached_property:
-    def __init__(self, func):
-        self.func = func
+    def __init__(self, func_):
+        self.func_ = func_
         self.attrname = None
-        self.__doc__ = func.__doc__
+        self.__doc__ = func_.__doc__
 
     def __set_name__(self, owner, name):
         if self.attrname is None:
@@ -992,7 +992,7 @@ class cached_property:
             raise TypeError(msg) from None
         val = cache.get(self.attrname, _NOT_FOUND)
         if val is _NOT_FOUND:
-            val = self.func(instance)
+            val = self.func_(instance)
             try:
                 cache[self.attrname] = val
             except TypeError:

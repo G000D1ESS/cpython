@@ -44,8 +44,8 @@ class TestStructSeq:
         if hasattr(sys, 'getwindowsversion'):
             func_names.append('getwindowsversion')  # WindowsVersionType
         for func_name in func_names:
-            func = getattr(sys, func_name)
-            obj = func()
+            func_ = getattr(sys, func_name)
+            obj = func_()
             self._check_structseq(type(obj))
 
 

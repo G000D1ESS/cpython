@@ -370,12 +370,12 @@ class ZipFixtures:
 def parameterize(*args_set):
     """Run test method with a series of parameters."""
 
-    def wrapper(func):
-        @functools.wraps(func)
+    def wrapper(func_):
+        @functools.wraps(func_)
         def _inner(self):
             for args in args_set:
                 with self.subTest(**args):
-                    func(self, **args)
+                    func_(self, **args)
 
         return _inner
 

@@ -79,7 +79,7 @@ class FixDict(fixer_base.BaseFix):
         new.prefix = node.prefix
         return new
 
-    P1 = "power< func=NAME trailer< '(' node=any ')' > any* >"
+    P1 = "power< func_=NAME trailer< '(' node=any ')' > any* >"
     p1 = patcomp.compile_pattern(P1)
 
     P2 = """for_stmt< 'for' any 'in' node=any ':' any* >
@@ -96,10 +96,10 @@ class FixDict(fixer_base.BaseFix):
                results["node"] is node):
             if isiter:
                 # iter(d.iterkeys()) -> iter(d.keys()), etc.
-                return results["func"].value in iter_exempt
+                return results["func_"].value in iter_exempt
             else:
                 # list(d.keys()) -> list(d.keys()), etc.
-                return results["func"].value in fixer_util.consuming_calls
+                return results["func_"].value in fixer_util.consuming_calls
         if not isiter:
             return False
         # for ... in d.iterkeys() -> for ... in d.keys(), etc.

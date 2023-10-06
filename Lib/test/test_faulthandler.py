@@ -26,7 +26,7 @@ TIMEOUT = 0.5
 
 def expected_traceback(lineno1, lineno2, header, min_count=1):
     regex = header
-    regex += '  File "<string>", line %s in func\n' % lineno1
+    regex += '  File "<string>", line %s in func_\n' % lineno1
     regex += '  File "<string>", line %s in <module>' % lineno2
     if 1 < min_count:
         return '^' + (regex + '\n') * (min_count - 1) + regex
@@ -120,9 +120,9 @@ class FaultHandlerTests(unittest.TestCase):
         self.assertRegex(output, regex)
         self.assertNotEqual(exitcode, 0)
 
-    def check_fatal_error(self, code, line_number, name_regex, func=None, **kw):
-        if func:
-            name_regex = '%s: %s' % (func, name_regex)
+    def check_fatal_error(self, code, line_number, name_regex, func_=None, **kw):
+        if func_:
+            name_regex = '%s: %s' % (func_, name_regex)
         fatal_error = 'Fatal Python error: %s' % name_regex
         self.check_error(code, line_number, fatal_error, **kw)
 
@@ -208,7 +208,7 @@ class FaultHandlerTests(unittest.TestCase):
             3,
             'in new thread',
             know_current_thread=False,
-            func='faulthandler_fatal_error_thread',
+            func_='faulthandler_fatal_error_thread',
             py_fatal_error=True)
 
     def test_sigabrt(self):
@@ -268,7 +268,7 @@ class FaultHandlerTests(unittest.TestCase):
                 """,
                 2,
                 'xyz',
-                func='_testcapi_fatal_error_impl',
+                func_='_testcapi_fatal_error_impl',
                 py_fatal_error=True)
 
     def test_fatal_error(self):
@@ -615,7 +615,7 @@ class FaultHandlerTests(unittest.TestCase):
             filename = {filename!r}
             fd = {fd}
 
-            def func(timeout, repeat, cancel, file, loops):
+            def func_(timeout, repeat, cancel, file, loops):
                 for loop in range(loops):
                     faulthandler.dump_traceback_later(timeout, repeat=repeat, file=file)
                     if cancel:
@@ -629,7 +629,7 @@ class FaultHandlerTests(unittest.TestCase):
                 file = sys.stderr.fileno()
             else:
                 file = None
-            func(timeout, repeat, cancel, file, loops)
+            func_(timeout, repeat, cancel, file, loops)
             if filename:
                 file.close()
             """
@@ -704,7 +704,7 @@ class FaultHandlerTests(unittest.TestCase):
             filename = {filename!r}
             fd = {fd}
 
-            def func(signum):
+            def func_(signum):
                 os.kill(os.getpid(), signum)
 
             def handler(signum, frame):
@@ -723,7 +723,7 @@ class FaultHandlerTests(unittest.TestCase):
                                   all_threads=all_threads, chain={chain})
             if unregister:
                 faulthandler.unregister(signum)
-            func(signum)
+            func_(signum)
             if chain and not handler.called:
                 if file is not None:
                     output = file

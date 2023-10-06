@@ -594,7 +594,7 @@ class Executor(object):
                 ThreadPoolExecutor.
 
         Returns:
-            An iterator equivalent to: map(func, *iterables) but the calls may
+            An iterator equivalent to: map(func_, *iterables) but the calls may
             be evaluated out-of-order.
 
         Raises:

@@ -3981,16 +3981,16 @@ class OSErrorTests(unittest.TestCase):
         if hasattr(os, "readlink"):
             funcs.append((self.filenames, os.readlink,))
 
-        for filenames, func, *func_args in funcs:
+        for filenames, func_, *func_args in funcs:
             for name in filenames:
                 try:
-                    func(name, *func_args)
+                    func_(name, *func_args)
                 except OSError as err:
-                    self.assertIs(err.filename, name, str(func))
+                    self.assertIs(err.filename, name, str(func_))
                 except UnicodeDecodeError:
                     pass
                 else:
-                    self.fail(f"No exception thrown by {func}")
+                    self.fail(f"No exception thrown by {func_}")
 
 class CPUCountTests(unittest.TestCase):
     def test_cpu_count(self):

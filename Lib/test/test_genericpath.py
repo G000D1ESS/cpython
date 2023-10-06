@@ -229,7 +229,7 @@ class GenericTest:
 
         self.assertRaises(TypeError, self.pathmodule.samefile)
 
-    def _test_samefile_on_link_func(self, func):
+    def _test_samefile_on_link_func(self, func_):
         test_fn1 = os_helper.TESTFN
         test_fn2 = os_helper.TESTFN + "2"
         self.addCleanup(os_helper.unlink, test_fn1)
@@ -237,7 +237,7 @@ class GenericTest:
 
         create_file(test_fn1)
 
-        func(test_fn1, test_fn2)
+        func_(test_fn1, test_fn2)
         self.assertTrue(self.pathmodule.samefile(test_fn1, test_fn2))
         os.remove(test_fn2)
 
@@ -271,14 +271,14 @@ class GenericTest:
 
         self.assertRaises(TypeError, self.pathmodule.samestat)
 
-    def _test_samestat_on_link_func(self, func):
+    def _test_samestat_on_link_func(self, func_):
         test_fn1 = os_helper.TESTFN + "1"
         test_fn2 = os_helper.TESTFN + "2"
         self.addCleanup(os_helper.unlink, test_fn1)
         self.addCleanup(os_helper.unlink, test_fn2)
 
         create_file(test_fn1)
-        func(test_fn1, test_fn2)
+        func_(test_fn1, test_fn2)
         self.assertTrue(self.pathmodule.samestat(os.stat(test_fn1),
                                                  os.stat(test_fn2)))
         os.remove(test_fn2)
@@ -321,22 +321,22 @@ class TestGenericTest(GenericTest, unittest.TestCase):
             # os.path.commonprefix doesn't raise ValueError
             if attr == 'commonprefix':
                 continue
-            func = getattr(self.pathmodule, attr)
+            func_ = getattr(self.pathmodule, attr)
             with self.subTest(attr=attr):
                 if attr in ('exists', 'isdir', 'isfile'):
-                    func('/tmp\udfffabcds')
-                    func(b'/tmp\xffabcds')
-                    func('/tmp\x00abcds')
-                    func(b'/tmp\x00abcds')
+                    func_('/tmp\udfffabcds')
+                    func_(b'/tmp\xffabcds')
+                    func_('/tmp\x00abcds')
+                    func_(b'/tmp\x00abcds')
                 else:
                     with self.assertRaises((OSError, UnicodeEncodeError)):
-                        func('/tmp\udfffabcds')
+                        func_('/tmp\udfffabcds')
                     with self.assertRaises((OSError, UnicodeDecodeError)):
-                        func(b'/tmp\xffabcds')
+                        func_(b'/tmp\xffabcds')
                     with self.assertRaisesRegex(ValueError, 'embedded null'):
-                        func('/tmp\x00abcds')
+                        func_('/tmp\x00abcds')
                     with self.assertRaisesRegex(ValueError, 'embedded null'):
-                        func(b'/tmp\x00abcds')
+                        func_(b'/tmp\x00abcds')
 
 # Following TestCase is not supposed to be run from test_genericpath.
 # It is inherited by other test modules (ntpath, posixpath).
@@ -548,8 +548,8 @@ class PathLikeTests(unittest.TestCase):
         self.addCleanup(os_helper.unlink, self.file_name)
         create_file(self.file_name, b"test_genericpath.PathLikeTests")
 
-    def assertPathEqual(self, func):
-        self.assertEqual(func(self.file_path), func(self.file_name))
+    def assertPathEqual(self, func_):
+        self.assertEqual(func_(self.file_path), func_(self.file_name))
 
     def test_path_exists(self):
         self.assertPathEqual(os.path.exists)

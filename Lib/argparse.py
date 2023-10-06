@@ -214,7 +214,7 @@ class HelpFormatter(object):
             if self.parent is not None:
                 self.formatter._indent()
             join = self.formatter._join_parts
-            item_help = join([func(*args) for func, args in self.items])
+            item_help = join([func_(*args) for func_, args in self.items])
             if self.parent is not None:
                 self.formatter._dedent()
 
@@ -232,8 +232,8 @@ class HelpFormatter(object):
             # join the section-initial newline, the heading and the help
             return join(['\n', heading, item_help, '\n'])
 
-    def _add_item(self, func, args):
-        self._current_section.items.append((func, args))
+    def _add_item(self, func_, args):
+        self._current_section.items.append((func_, args))
 
     # ========================
     # Message building methods

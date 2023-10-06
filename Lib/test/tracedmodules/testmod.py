@@ -1,4 +1,4 @@
-def func(x):
+def func_(x):
     b = x + 1
     return b + 2
 

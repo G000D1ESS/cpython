@@ -720,8 +720,8 @@ class CoroutineTest(unittest.TestCase):
                 aw.throw(ZeroDivisionError, ZeroDivisionError(), None)
 
     def test_func_11(self):
-        async def func(): pass
-        coro = func()
+        async def func_(): pass
+        coro = func_()
         # Test that PyCoro_Type and _PyCoroWrapper_Type types were properly
         # initialized
         self.assertIn('__await__', dir(coro))
@@ -1285,12 +1285,12 @@ class CoroutineTest(unittest.TestCase):
             async def __aexit__(self, *exc):
                 pass
 
-        async def func():
+        async def func_():
             async with CM():
                 self.assertEqual((1, ), 1)
 
         with self.assertRaises(AssertionError):
-            run_async(func())
+            run_async(func_())
 
     def test_with_6(self):
         class CM:
@@ -2092,8 +2092,8 @@ class CoroutineTest(unittest.TestCase):
             ([], [[[111, 112], [121, 122]], [[211, 212], [221, 222]]]))
 
     def test_copy(self):
-        async def func(): pass
-        coro = func()
+        async def func_(): pass
+        coro = func_()
         with self.assertRaises(TypeError):
             copy.copy(coro)
 
@@ -2105,8 +2105,8 @@ class CoroutineTest(unittest.TestCase):
             aw.close()
 
     def test_pickle(self):
-        async def func(): pass
-        coro = func()
+        async def func_(): pass
+        coro = func_()
         for proto in range(pickle.HIGHEST_PROTOCOL + 1):
             with self.assertRaises((TypeError, pickle.PicklingError)):
                 pickle.dumps(coro, proto)
@@ -2121,11 +2121,11 @@ class CoroutineTest(unittest.TestCase):
 
     def test_fatal_coro_warning(self):
         # Issue 27811
-        async def func(): pass
+        async def func_(): pass
         with warnings.catch_warnings(), \
              support.catch_unraisable_exception() as cm:
             warnings.filterwarnings("error")
-            coro = func()
+            coro = func_()
             # only store repr() to avoid keeping the coroutine alive
             coro_repr = repr(coro)
             coro = None

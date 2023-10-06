@@ -718,13 +718,13 @@ class ClassPropertiesAndMethods(unittest.TestCase):
         # Special case: the given metaclass isn't a class,
         # so there is no metaclass calculation.
         marker = object()
-        def func(*args, **kwargs):
+        def func_(*args, **kwargs):
             return marker
-        class X(metaclass=func):
+        class X(metaclass=func_):
             pass
-        class Y(object, metaclass=func):
+        class Y(object, metaclass=func_):
             pass
-        class Z(D, metaclass=func):
+        class Z(D, metaclass=func_):
             pass
         self.assertIs(marker, X)
         self.assertIs(marker, Y)
@@ -4959,15 +4959,15 @@ order (MRO) for bases """
         class MyCallable:
             def __call__(self, arg):
                 pass
-        func = MyCallable() # func has no __name__ or __qualname__ attributes
+        func_ = MyCallable() # func_ has no __name__ or __qualname__ attributes
         instance = object()
-        method = types.MethodType(func, instance)
+        method = types.MethodType(func_, instance)
         self.assertRegex(repr(method),
             r"<bound method \? of <object object at .*>>")
-        func.__name__ = "name"
+        func_.__name__ = "name"
         self.assertRegex(repr(method),
             r"<bound method name of <object object at .*>>")
-        func.__qualname__ = "qualname"
+        func_.__qualname__ = "qualname"
         self.assertRegex(repr(method),
             r"<bound method qualname of <object object at .*>>")
 

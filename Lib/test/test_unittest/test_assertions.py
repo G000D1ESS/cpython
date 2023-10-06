@@ -339,11 +339,11 @@ class TestLongMessage(unittest.TestCase):
                              "^Regex matched: (.*) : oops$"])
 
 
-    def assertMessagesCM(self, methodName, args, func, errors):
+    def assertMessagesCM(self, methodName, args, func_, errors):
         """
         Check that the correct error messages are raised while executing:
           with method(*args):
-              func()
+              func_()
         *errors* should be a list of 4 regex that match the error when:
           1) longMessage = False and no msg passed;
           2) longMessage = False and msg passed;
@@ -356,7 +356,7 @@ class TestLongMessage(unittest.TestCase):
             method = getattr(cls, methodName)
             with self.assertRaisesRegex(cls.failureException, err):
                 with method(*args, **kwargs) as cm:
-                    func()
+                    func_()
 
     def testAssertRaises(self):
         self.assertMessagesCM('assertRaises', (TypeError,), lambda: None,

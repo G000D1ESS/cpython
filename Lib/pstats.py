@@ -157,14 +157,14 @@ class Stats:
         return
 
     def get_top_level_stats(self):
-        for func, (cc, nc, tt, ct, callers) in self.stats.items():
+        for func_, (cc, nc, tt, ct, callers) in self.stats.items():
             self.total_calls += nc
             self.prim_calls  += cc
             self.total_tt    += tt
             if ("jprofile", 0, "profiler") in callers:
-                self.top_level.add(func)
-            if len(func_std_string(func)) > self.max_name_len:
-                self.max_name_len = len(func_std_string(func))
+                self.top_level.add(func_)
+            if len(func_std_string(func_)) > self.max_name_len:
+                self.max_name_len = len(func_std_string(func_))
 
     def add(self, *arg_list):
         if not arg_list:
@@ -176,20 +176,20 @@ class Stats:
             self.total_calls += item.total_calls
             self.prim_calls += item.prim_calls
             self.total_tt += item.total_tt
-            for func in item.top_level:
-                self.top_level.add(func)
+            for func_ in item.top_level:
+                self.top_level.add(func_)
 
             if self.max_name_len < item.max_name_len:
                 self.max_name_len = item.max_name_len
 
             self.fcn_list = None
 
-            for func, stat in item.stats.items():
-                if func in self.stats:
-                    old_func_stat = self.stats[func]
+            for func_, stat in item.stats.items():
+                if func_ in self.stats:
+                    old_func_stat = self.stats[func_]
                 else:
                     old_func_stat = (0, 0, 0, 0, {},)
-                self.stats[func] = add_func_stats(old_func_stat, stat)
+                self.stats[func_] = add_func_stats(old_func_stat, stat)
         return self
 
     def dump_stats(self, filename):
@@ -260,9 +260,9 @@ class Stats:
             connector = ", "
 
         stats_list = []
-        for func, (cc, nc, tt, ct, callers) in self.stats.items():
-            stats_list.append((cc, nc, tt, ct) + func +
-                              (func_std_string(func), func))
+        for func_, (cc, nc, tt, ct, callers) in self.stats.items():
+            stats_list.append((cc, nc, tt, ct) + func_ +
+                              (func_std_string(func_), func_))
 
         stats_list.sort(key=cmp_to_key(TupleComp(sort_tuple).compare))
 
@@ -280,8 +280,8 @@ class Stats:
         oldstats = self.stats
         self.stats = newstats = {}
         max_name_len = 0
-        for func, (cc, nc, tt, ct, callers) in oldstats.items():
-            newfunc = func_strip_path(func)
+        for func_, (cc, nc, tt, ct, callers) in oldstats.items():
+            newfunc = func_strip_path(func_)
             if len(func_std_string(newfunc)) > max_name_len:
                 max_name_len = len(func_std_string(newfunc))
             newcallers = {}
@@ -296,8 +296,8 @@ class Stats:
                 newstats[newfunc] = (cc, nc, tt, ct, newcallers)
         old_top = self.top_level
         self.top_level = new_top = set()
-        for func in old_top:
-            new_top.add(func_strip_path(func))
+        for func_ in old_top:
+            new_top.add(func_strip_path(func_))
 
         self.max_name_len = max_name_len
 
@@ -309,13 +309,13 @@ class Stats:
         if self.all_callees:
             return
         self.all_callees = all_callees = {}
-        for func, (cc, nc, tt, ct, callers) in self.stats.items():
-            if not func in all_callees:
-                all_callees[func] = {}
+        for func_, (cc, nc, tt, ct, callers) in self.stats.items():
+            if not func_ in all_callees:
+                all_callees[func_] = {}
             for func2, caller in callers.items():
                 if not func2 in all_callees:
                     all_callees[func2] = {}
-                all_callees[func2][func]  = caller
+                all_callees[func2][func_]  = caller
         return
 
     #******************************************************************
@@ -333,9 +333,9 @@ class Stats:
                 msg += "   <Invalid regular expression %r>\n" % sel
                 return new_list, msg
             new_list = []
-            for func in list:
-                if rex.search(func_std_string(func)):
-                    new_list.append(func)
+            for func_ in list:
+                if rex.search(func_std_string(func_)):
+                    new_list.append(func_)
         else:
             count = len(list)
             if isinstance(sel, float) and 0.0 <= sel < 1.0:
@@ -364,9 +364,9 @@ class Stats:
         func_profiles = {}
         stats_profile = StatsProfile(total_tt, func_profiles)
 
-        for func in func_list:
-            cc, nc, tt, ct, callers = self.stats[func]
-            file_name, line_number, func_name = func
+        for func_ in func_list:
+            cc, nc, tt, ct, callers = self.stats[func_]
+            file_name, line_number, func_name = func_
             ncalls = str(nc) if nc == cc else (str(nc) + '/' + str(cc))
             tottime = float(f8(tt))
             percall_tottime = -1 if nc == 0 else float(f8(tt/nc))
@@ -404,9 +404,9 @@ class Stats:
         print(msg, file=self.stream)
         if count < len(self.stats):
             width = 0
-            for func in stat_list:
-                if  len(func_std_string(func)) > width:
-                    width = len(func_std_string(func))
+            for func_ in stat_list:
+                if  len(func_std_string(func_)) > width:
+                    width = len(func_std_string(func_))
         return width+2, stat_list
 
     def print_stats(self, *amount):
@@ -415,8 +415,8 @@ class Stats:
         if self.files:
             print(file=self.stream)
         indent = ' ' * 8
-        for func in self.top_level:
-            print(indent, func_get_function_name(func), file=self.stream)
+        for func_ in self.top_level:
+            print(indent, func_get_function_name(func_), file=self.stream)
 
         print(indent, self.total_calls, "function calls", end=' ', file=self.stream)
         if self.total_calls != self.prim_calls:
@@ -426,8 +426,8 @@ class Stats:
         width, list = self.get_print_list(amount)
         if list:
             self.print_title()
-            for func in list:
-                self.print_line(func)
+            for func_ in list:
+                self.print_line(func_)
             print(file=self.stream)
             print(file=self.stream)
         return self
@@ -438,11 +438,11 @@ class Stats:
             self.calc_callees()
 
             self.print_call_heading(width, "called...")
-            for func in list:
-                if func in self.all_callees:
-                    self.print_call_line(width, func, self.all_callees[func])
+            for func_ in list:
+                if func_ in self.all_callees:
+                    self.print_call_line(width, func_, self.all_callees[func_])
                 else:
-                    self.print_call_line(width, func, {})
+                    self.print_call_line(width, func_, {})
             print(file=self.stream)
             print(file=self.stream)
         return self
@@ -451,9 +451,9 @@ class Stats:
         width, list = self.get_print_list(amount)
         if list:
             self.print_call_heading(width, "was called by...")
-            for func in list:
-                cc, nc, tt, ct, callers = self.stats[func]
-                self.print_call_line(width, func, callers, "<-")
+            for func_ in list:
+                cc, nc, tt, ct, callers = self.stats[func_]
+                self.print_call_line(width, func_, callers, "<-")
             print(file=self.stream)
             print(file=self.stream)
         return self
@@ -477,9 +477,9 @@ class Stats:
             return
         clist = sorted(call_dict.keys())
         indent = ""
-        for func in clist:
-            name = func_std_string(func)
-            value = call_dict[func]
+        for func_ in clist:
+            name = func_std_string(func_)
+            value = call_dict[func_]
             if isinstance(value, tuple):
                 nc, cc, tt, ct = value
                 if nc != cc:
@@ -490,7 +490,7 @@ class Stats:
                                              f8(tt), f8(ct), name)
                 left_width = name_size + 1
             else:
-                substats = '%s(%r) %s' % (name, value, f8(self.stats[func][3]))
+                substats = '%s(%r) %s' % (name, value, f8(self.stats[func_][3]))
                 left_width = name_size + 3
             print(indent*left_width + substats, file=self.stream)
             indent = " "
@@ -499,8 +499,8 @@ class Stats:
         print('   ncalls  tottime  percall  cumtime  percall', end=' ', file=self.stream)
         print('filename:lineno(function)', file=self.stream)
 
-    def print_line(self, func):  # hack: should print percentages
-        cc, nc, tt, ct, callers = self.stats[func]
+    def print_line(self, func_):  # hack: should print percentages
+        cc, nc, tt, ct, callers = self.stats[func_]
         c = str(nc)
         if nc != cc:
             c = c + '/' + str(cc)
@@ -515,7 +515,7 @@ class Stats:
             print(' '*8, end=' ', file=self.stream)
         else:
             print(f8(ct/cc), end=' ', file=self.stream)
-        print(func_std_string(func), file=self.stream)
+        print(func_std_string(func_), file=self.stream)
 
 class TupleComp:
     """This class provides a generic function for comparing any two tuples.
@@ -546,8 +546,8 @@ def func_strip_path(func_name):
     filename, line, name = func_name
     return os.path.basename(filename), line, name
 
-def func_get_function_name(func):
-    return func[2]
+def func_get_function_name(func_):
+    return func_[2]
 
 def func_std_string(func_name): # match what old profile produced
     if func_name[:2] == ('~', 0):
@@ -576,18 +576,18 @@ def add_func_stats(target, source):
 def add_callers(target, source):
     """Combine two caller lists in a single list."""
     new_callers = {}
-    for func, caller in target.items():
-        new_callers[func] = caller
-    for func, caller in source.items():
-        if func in new_callers:
+    for func_, caller in target.items():
+        new_callers[func_] = caller
+    for func_, caller in source.items():
+        if func_ in new_callers:
             if isinstance(caller, tuple):
                 # format used by cProfile
-                new_callers[func] = tuple(i + j for i, j in zip(caller, new_callers[func]))
+                new_callers[func_] = tuple(i + j for i, j in zip(caller, new_callers[func_]))
             else:
                 # format used by profile
-                new_callers[func] += caller
+                new_callers[func_] += caller
         else:
-            new_callers[func] = caller
+            new_callers[func_] = caller
     return new_callers
 
 def count_calls(callers):

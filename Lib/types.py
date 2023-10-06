@@ -272,30 +272,30 @@ class _GeneratorWrapper:
         return self
     __await__ = __iter__
 
-def coroutine(func):
+def coroutine(func_):
     """Convert regular generator function to a coroutine."""
 
-    if not callable(func):
+    if not callable(func_):
         raise TypeError('types.coroutine() expects a callable')
 
-    if (func.__class__ is FunctionType and
-        getattr(func, '__code__', None).__class__ is CodeType):
+    if (func_.__class__ is FunctionType and
+        getattr(func_, '__code__', None).__class__ is CodeType):
 
-        co_flags = func.__code__.co_flags
+        co_flags = func_.__code__.co_flags
 
-        # Check if 'func' is a coroutine function.
+        # Check if 'func_' is a coroutine function.
         # (0x180 == CO_COROUTINE | CO_ITERABLE_COROUTINE)
         if co_flags & 0x180:
-            return func
+            return func_
 
-        # Check if 'func' is a generator function.
+        # Check if 'func_' is a generator function.
         # (0x20 == CO_GENERATOR)
         if co_flags & 0x20:
             # TODO: Implement this in C.
-            co = func.__code__
+            co = func_.__code__
             # 0x100 == CO_ITERABLE_COROUTINE
-            func.__code__ = co.replace(co_flags=co.co_flags | 0x100)
-            return func
+            func_.__code__ = co.replace(co_flags=co.co_flags | 0x100)
+            return func_
 
     # The following code is primarily to support functions that
     # return generator-like objects (for instance generators
@@ -304,9 +304,9 @@ def coroutine(func):
     # Delay functools and _collections_abc import for speeding up types import.
     import functools
     import _collections_abc
-    @functools.wraps(func)
+    @functools.wraps(func_)
     def wrapped(*args, **kwargs):
-        coro = func(*args, **kwargs)
+        coro = func_(*args, **kwargs)
         if (coro.__class__ is CoroutineType or
             coro.__class__ is GeneratorType and coro.gi_code.co_flags & 0x100):
             # 'coro' is a native coroutine object or an iterable coroutine

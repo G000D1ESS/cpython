@@ -1472,10 +1472,10 @@ class ExceptionTests(unittest.TestCase):
         recursionlimit = sys.getrecursionlimit()
         try:
             set_relative_recursion_limit(10)
-            for func in (recurse_in_except, recurse_after_except, recurse_in_body_and_except):
-                with self.subTest(func=func):
+            for func_ in (recurse_in_except, recurse_after_except, recurse_in_body_and_except):
+                with self.subTest(func_=func_):
                     try:
-                        func()
+                        func_()
                     except RecursionError:
                         pass
                     else:

@@ -11,18 +11,18 @@ class RebindBuiltinsTests(unittest.TestCase):
 
     """Test all the ways that we can change/shadow globals/builtins."""
 
-    def configure_func(self, func, *args):
+    def configure_func(self, func_, *args):
         """Perform TestCase-specific configuration on a function before testing.
 
         By default, this does nothing. Example usage: spinning a function so
         that a JIT will optimize it. Subclasses should override this as needed.
 
         Args:
-            func: function to configure.
-            *args: any arguments that should be passed to func, if calling it.
+            func_: function to configure.
+            *args: any arguments that should be passed to func_, if calling it.
 
         Returns:
-            Nothing. Work will be performed on func in-place.
+            Nothing. Work will be performed on func_ in-place.
         """
         pass
 
@@ -182,12 +182,12 @@ class TestTracing(unittest.TestCase):
             # BINARY_OP[_ADD_INT] immediately follows the call to C.__del__
             0 + C(0).x
 
-        for func in (f, g, h):
-            with self.subTest(func.__name__):
+        for func_ in (f, g, h):
+            with self.subTest(func_.__name__):
                 for _ in range(58):
-                    func()
+                    func_()
                 turn_on_trace = True
-                func()
+                func_()
                 sys.settrace(None)
                 turn_on_trace = False
 

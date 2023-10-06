@@ -107,11 +107,11 @@ class SelectorEventLoopSignalTests(test_utils.TestCase):
         coro_func = simple_coroutine
         coro_obj = coro_func()
         self.addCleanup(coro_obj.close)
-        for func in (coro_func, coro_obj):
+        for func_ in (coro_func, coro_obj):
             self.assertRaisesRegex(
                 TypeError, 'coroutines cannot be used with add_signal_handler',
                 self.loop.add_signal_handler,
-                signal.SIGINT, func)
+                signal.SIGINT, func_)
 
     @mock.patch('asyncio.unix_events.signal')
     def test_add_signal_handler(self, m_signal):
@@ -1193,7 +1193,7 @@ class ChildWatcherTestsMixin:
         self.m_add_signal_handler.assert_called_once_with(
             signal.SIGCHLD, self.watcher._sig_chld)
 
-    def waitpid_mocks(func):
+    def waitpid_mocks(func_):
         def wrapped_func(self):
             def patch(target, wrapper):
                 return mock.patch(target, wraps=wrapper,
@@ -1201,7 +1201,7 @@ class ChildWatcherTestsMixin:
 
             with patch('asyncio.unix_events.waitstatus_to_exitcode', self.waitstatus_to_exitcode), \
                  patch('os.waitpid', self.waitpid) as m_waitpid:
-                func(self, m_waitpid)
+                func_(self, m_waitpid)
         return wrapped_func
 
     @waitpid_mocks
@@ -1936,12 +1936,12 @@ class TestFork(unittest.IsolatedAsyncioTestCase):
             os.kill(process.pid, signal.SIGTERM)
             process.join(timeout=support.SHORT_TIMEOUT)
 
-            async def func():
+            async def func_():
                 await asyncio.sleep(0.1)
                 return 42
 
             # Test parent's loop is still functional
-            self.assertEqual(await asyncio.create_task(func()), 42)
+            self.assertEqual(await asyncio.create_task(func_()), 42)
 
         asyncio.run(main())
 

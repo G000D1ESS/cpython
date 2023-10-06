@@ -14,12 +14,12 @@ class GeneralTest(unittest.TestCase):
     def tearDown(self):
         atexit._clear()
 
-    def assert_raises_unraisable(self, exc_type, func, *args):
+    def assert_raises_unraisable(self, exc_type, func_, *args):
         with support.catch_unraisable_exception() as cm:
-            atexit.register(func, *args)
+            atexit.register(func_, *args)
             atexit._run_exitfuncs()
 
-            self.assertEqual(cm.unraisable.object, func)
+            self.assertEqual(cm.unraisable.object, func_)
             self.assertEqual(cm.unraisable.exc_type, exc_type)
             self.assertEqual(type(cm.unraisable.exc_value), exc_type)
 
@@ -46,11 +46,11 @@ class GeneralTest(unittest.TestCase):
                           ('func1', (1, 2), {})])
 
     def test_badargs(self):
-        def func():
+        def func_():
             pass
 
-        # func() has no parameter, but it's called with 2 parameters
-        self.assert_raises_unraisable(TypeError, func, 1 ,2)
+        # func_() has no parameter, but it's called with 2 parameters
+        self.assert_raises_unraisable(TypeError, func_, 1 ,2)
 
     def test_raise(self):
         def raise_type_error():
@@ -118,18 +118,18 @@ class GeneralTest(unittest.TestCase):
 
     def test_atexit_with_unregistered_function(self):
         # See bpo-46025 for more info
-        def func():
-            atexit.unregister(func)
+        def func_():
+            atexit.unregister(func_)
             1/0
-        atexit.register(func)
+        atexit.register(func_)
         try:
             with support.catch_unraisable_exception() as cm:
                 atexit._run_exitfuncs()
-                self.assertEqual(cm.unraisable.object, func)
+                self.assertEqual(cm.unraisable.object, func_)
                 self.assertEqual(cm.unraisable.exc_type, ZeroDivisionError)
                 self.assertEqual(type(cm.unraisable.exc_value), ZeroDivisionError)
         finally:
-            atexit.unregister(func)
+            atexit.unregister(func_)
 
 
 if __name__ == "__main__":

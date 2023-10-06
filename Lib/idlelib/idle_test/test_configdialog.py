@@ -1513,8 +1513,8 @@ class VarTraceTest(unittest.TestCase):
 
     def test_add(self):
         tr = self.tracers
-        func = Func()
-        cb = tr.make_callback = mock.Mock(return_value=func)
+        func_ = Func()
+        cb = tr.make_callback = mock.Mock(return_value=func_)
 
         iv = tr.add(self.iv, self.var_changed_increment)
         self.assertIs(iv, self.iv)
@@ -1529,7 +1529,7 @@ class VarTraceTest(unittest.TestCase):
 
         expected = [(iv, self.var_changed_increment),
                     (bv, self.var_changed_boolean),
-                    (sv, func)]
+                    (sv, func_)]
         self.assertEqual(tr.traced, [])
         self.assertEqual(tr.untraced, expected)
 

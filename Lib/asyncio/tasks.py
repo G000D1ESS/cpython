@@ -490,12 +490,12 @@ async def wait_for(fut, timeout):
     # async def test_waitfor():
     #     func_started = False
     #
-    #     async def func():
+    #     async def func_():
     #         nonlocal func_started
     #         func_started = True
     #
     #     try:
-    #         await asyncio.wait_for(func(), 0)
+    #         await asyncio.wait_for(func_(), 0)
     #     except asyncio.TimeoutError:
     #         assert not func_started
     #     else:

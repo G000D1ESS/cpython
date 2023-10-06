@@ -1,11 +1,11 @@
 # line 1
 def wrap(foo=None):
-    def wrapper(func):
-        return func
+    def wrapper(func_):
+        return func_
     return wrapper
 
 # line 7
-def replace(func):
+def replace(func_):
     def insteadfunc():
         print('hello')
     return insteadfunc
@@ -50,8 +50,8 @@ a = [None,
      None]
 
 # line 52
-def setfunc(func):
-    globals()["anonymous"] = func
+def setfunc(func_):
+    globals()["anonymous"] = func_
 setfunc(lambda x, y: x*y)
 
 # line 57
@@ -120,8 +120,8 @@ class ClassWithMethod:
 
 from functools import wraps
 
-def decorator(func):
-    @wraps(func)
+def decorator(func_):
+    @wraps(func_)
     def fake():
         return 42
     return fake

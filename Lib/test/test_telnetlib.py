@@ -232,14 +232,14 @@ class ReadTests(ExpectAndReadTestCase):
         """
         want = b'x' * 100
         telnet = test_telnet([want])
-        func = getattr(telnet, func_name)
+        func_ = getattr(telnet, func_name)
         telnet.sock.block = True
-        self.assertEqual(b'', func())
+        self.assertEqual(b'', func_())
         telnet.sock.block = False
         data = b''
         while True:
             try:
-                data += func()
+                data += func_()
             except EOFError:
                 break
         self.assertEqual(data, want)

@@ -65,7 +65,7 @@ class ProactorMultithreading(test_utils.TestCase):
         async def coro():
             await asyncio.sleep(0)
 
-        def func():
+        def func_():
             nonlocal finished
             loop = asyncio.new_event_loop()
             loop.run_until_complete(coro())
@@ -73,7 +73,7 @@ class ProactorMultithreading(test_utils.TestCase):
             loop.close()
             finished = True
 
-        thread = threading.Thread(target=func)
+        thread = threading.Thread(target=func_)
         thread.start()
         thread.join()
         self.assertTrue(finished)

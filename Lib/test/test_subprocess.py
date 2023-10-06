@@ -3164,7 +3164,7 @@ class POSIXProcessTestCase(BaseTestCase):
             # Use a preexec function and enable the garbage collector
             # to force fork_exec() to re-enable the garbage collector
             # on error.
-            func = lambda: None
+            func_ = lambda: None
             gc.enable()
 
             for args, exe_list, cwd, env_list in (
@@ -3181,7 +3181,7 @@ class POSIXProcessTestCase(BaseTestCase):
                         1, 2, 3, 4,
                         True, True, 0,
                         False, [], 0, -1,
-                        func, False)
+                        func_, False)
                 # Attempt to prevent
                 # "TypeError: fork_exec() takes exactly N arguments (M given)"
                 # from passing the test.  More refactoring to have us start

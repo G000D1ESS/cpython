@@ -24,29 +24,29 @@ class ToThreadTests(unittest.IsolatedAsyncioTestCase):
             await asyncio.to_thread(raise_runtime)
 
     async def test_to_thread_once(self):
-        func = mock.Mock()
+        func_ = mock.Mock()
 
-        await asyncio.to_thread(func)
-        func.assert_called_once()
+        await asyncio.to_thread(func_)
+        func_.assert_called_once()
 
     async def test_to_thread_concurrent(self):
-        func = mock.Mock()
+        func_ = mock.Mock()
 
         futs = []
         for _ in range(10):
-            fut = asyncio.to_thread(func)
+            fut = asyncio.to_thread(func_)
             futs.append(fut)
         await asyncio.gather(*futs)
 
-        self.assertEqual(func.call_count, 10)
+        self.assertEqual(func_.call_count, 10)
 
     async def test_to_thread_args_kwargs(self):
         # Unlike run_in_executor(), to_thread() should directly accept kwargs.
-        func = mock.Mock()
+        func_ = mock.Mock()
 
-        await asyncio.to_thread(func, 'test', something=True)
+        await asyncio.to_thread(func_, 'test', something=True)
 
-        func.assert_called_once_with('test', something=True)
+        func_.assert_called_once_with('test', something=True)
 
     async def test_to_thread_contextvars(self):
         test_ctx = ContextVar('test_ctx')

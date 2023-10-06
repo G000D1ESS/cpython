@@ -112,14 +112,14 @@ class FinalizationTest(unittest.TestCase):
 class GeneratorTest(unittest.TestCase):
 
     def test_name(self):
-        def func():
+        def func_():
             yield 1
 
         # check generator names
-        gen = func()
-        self.assertEqual(gen.__name__, "func")
+        gen = func_()
+        self.assertEqual(gen.__name__, "func_")
         self.assertEqual(gen.__qualname__,
-                         "GeneratorTest.test_name.<locals>.func")
+                         "GeneratorTest.test_name.<locals>.func_")
 
         # modify generator names
         gen.__name__ = "name"
@@ -134,9 +134,9 @@ class GeneratorTest(unittest.TestCase):
         self.assertRaises(TypeError, delattr, gen, '__qualname__')
 
         # modify names of the function creating the generator
-        func.__qualname__ = "func_qualname"
-        func.__name__ = "func_name"
-        gen = func()
+        func_.__qualname__ = "func_qualname"
+        func_.__name__ = "func_name"
+        gen = func_()
         self.assertEqual(gen.__name__, "func_name")
         self.assertEqual(gen.__qualname__, "func_qualname")
 

@@ -46,7 +46,7 @@ class WeakMethod(ref):
     def __new__(cls, meth, callback=None):
         try:
             obj = meth.__self__
-            func = meth.__func__
+            func_ = meth.__func__
         except AttributeError:
             raise TypeError("argument should be a bound method, not {}"
                             .format(type(meth))) from None
@@ -59,7 +59,7 @@ class WeakMethod(ref):
                 if callback is not None:
                     callback(self)
         self = ref.__new__(cls, obj, _cb)
-        self._func_ref = ref(func, _cb)
+        self._func_ref = ref(func_, _cb)
         self._meth_type = type(meth)
         self._alive = True
         self_wr = ref(self)
@@ -67,10 +67,10 @@ class WeakMethod(ref):
 
     def __call__(self):
         obj = super().__call__()
-        func = self._func_ref()
-        if obj is None or func is None:
+        func_ = self._func_ref()
+        if obj is None or func_ is None:
             return None
-        return self._meth_type(func, obj)
+        return self._meth_type(func_, obj)
 
     def __eq__(self, other):
         if isinstance(other, WeakMethod):
@@ -540,9 +540,9 @@ class WeakKeyDictionary(_collections_abc.MutableMapping):
 class finalize:
     """Class for finalization of weakrefable objects
 
-    finalize(obj, func, *args, **kwargs) returns a callable finalizer
+    finalize(obj, func_, *args, **kwargs) returns a callable finalizer
     object which will be called when obj is garbage collected. The
-    first time the finalizer is called it evaluates func(*arg, **kwargs)
+    first time the finalizer is called it evaluates func_(*arg, **kwargs)
     and returns the result. After this the finalizer is dead, and
     calling it just returns None.
 
@@ -563,9 +563,9 @@ class finalize:
     _registered_with_atexit = False
 
     class _Info:
-        __slots__ = ("weakref", "func", "args", "kwargs", "atexit", "index")
+        __slots__ = ("weakref", "func_", "args", "kwargs", "atexit", "index")
 
-    def __init__(self, obj, func, /, *args, **kwargs):
+    def __init__(self, obj, func_, /, *args, **kwargs):
         if not self._registered_with_atexit:
             # We may register the exit function more than once because
             # of a thread race, but that is harmless
@@ -574,7 +574,7 @@ class finalize:
             finalize._registered_with_atexit = True
         info = self._Info()
         info.weakref = ref(obj, self)
-        info.func = func
+        info.func_ = func_
         info.args = args
         info.kwargs = kwargs or None
         info.atexit = True
@@ -583,27 +583,27 @@ class finalize:
         finalize._dirty = True
 
     def __call__(self, _=None):
-        """If alive then mark as dead and return func(*args, **kwargs);
+        """If alive then mark as dead and return func_(*args, **kwargs);
         otherwise return None"""
         info = self._registry.pop(self, None)
         if info and not self._shutdown:
-            return info.func(*info.args, **(info.kwargs or {}))
+            return info.func_(*info.args, **(info.kwargs or {}))
 
     def detach(self):
-        """If alive then mark as dead and return (obj, func, args, kwargs);
+        """If alive then mark as dead and return (obj, func_, args, kwargs);
         otherwise return None"""
         info = self._registry.get(self)
         obj = info and info.weakref()
         if obj is not None and self._registry.pop(self, None):
-            return (obj, info.func, info.args, info.kwargs or {})
+            return (obj, info.func_, info.args, info.kwargs or {})
 
     def peek(self):
-        """If alive then return (obj, func, args, kwargs);
+        """If alive then return (obj, func_, args, kwargs);
         otherwise return None"""
         info = self._registry.get(self)
         obj = info and info.weakref()
         if obj is not None:
-            return (obj, info.func, info.args, info.kwargs or {})
+            return (obj, info.func_, info.args, info.kwargs or {})
 
     @property
     def alive(self):

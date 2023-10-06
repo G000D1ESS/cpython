@@ -902,28 +902,28 @@ class DisTests(DisTestBase):
 
     maxDiff = None
 
-    def get_disassembly(self, func, lasti=-1, wrapper=True, **kwargs):
+    def get_disassembly(self, func_, lasti=-1, wrapper=True, **kwargs):
         # We want to test the default printing behaviour, not the file arg
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
             if wrapper:
-                dis.dis(func, **kwargs)
+                dis.dis(func_, **kwargs)
             else:
-                dis.disassemble(func, lasti, **kwargs)
+                dis.disassemble(func_, lasti, **kwargs)
         return output.getvalue()
 
-    def get_disassemble_as_string(self, func, lasti=-1):
-        return self.get_disassembly(func, lasti, False)
+    def get_disassemble_as_string(self, func_, lasti=-1):
+        return self.get_disassembly(func_, lasti, False)
 
-    def do_disassembly_test(self, func, expected, with_offsets=False):
+    def do_disassembly_test(self, func_, expected, with_offsets=False):
         self.maxDiff = None
-        got = self.get_disassembly(func, depth=0)
+        got = self.get_disassembly(func_, depth=0)
         self.do_disassembly_compare(got, expected, with_offsets)
         # Add checks for dis.disco
-        if hasattr(func, '__code__'):
+        if hasattr(func_, '__code__'):
             got_disco = io.StringIO()
             with contextlib.redirect_stdout(got_disco):
-                dis.disco(func.__code__)
+                dis.disco(func_.__code__)
             self.do_disassembly_compare(got_disco.getvalue(), expected,
                                         with_offsets)
 
@@ -991,35 +991,35 @@ class DisTests(DisTestBase):
                       self.get_disassembly("try: pass\nexcept* Exception: x"))
 
     def test_big_linenos(self):
-        def func(count):
+        def func_(count):
             namespace = {}
-            func = "def foo():\n " + "".join(["\n "] * count + ["spam\n"])
-            exec(func, namespace)
+            func_ = "def foo():\n " + "".join(["\n "] * count + ["spam\n"])
+            exec(func_, namespace)
             return namespace['foo']
 
         # Test all small ranges
         for i in range(1, 300):
             expected = _BIG_LINENO_FORMAT % (i + 2)
-            self.do_disassembly_test(func(i), expected)
+            self.do_disassembly_test(func_(i), expected)
 
         # Test some larger ranges too
         for i in range(300, 1000, 10):
             expected = _BIG_LINENO_FORMAT % (i + 2)
-            self.do_disassembly_test(func(i), expected)
+            self.do_disassembly_test(func_(i), expected)
 
         for i in range(1000, 5000, 10):
             expected = _BIG_LINENO_FORMAT2 % (i + 2)
-            self.do_disassembly_test(func(i), expected)
+            self.do_disassembly_test(func_(i), expected)
 
         from test import dis_module
         self.do_disassembly_test(dis_module, dis_module_expected_results)
 
     def test_big_offsets(self):
         self.maxDiff = None
-        def func(count):
+        def func_(count):
             namespace = {}
-            func = "def foo(x):\n " + ";".join(["x = x + 1"] * count) + "\n return x"
-            exec(func, namespace)
+            func_ = "def foo(x):\n " + ";".join(["x = x + 1"] * count) + "\n return x"
+            exec(func_, namespace)
             return namespace['foo']
 
         def expected(count, w):
@@ -1043,9 +1043,9 @@ class DisTests(DisTestBase):
             return ''.join(s)
 
         for i in range(1, 5):
-            self.do_disassembly_test(func(i), expected(i, 4), True)
-        self.do_disassembly_test(func(999), expected(999, 4), True)
-        self.do_disassembly_test(func(1000), expected(1000, 5), True)
+            self.do_disassembly_test(func_(i), expected(i, 4), True)
+        self.do_disassembly_test(func_(999), expected(999, 4), True)
+        self.do_disassembly_test(func_(1000), expected(1000, 5), True)
 
     def test_disassemble_str(self):
         self.do_disassembly_test(expr_str, dis_expr_str)
@@ -1314,12 +1314,12 @@ class DisTests(DisTestBase):
 class DisWithFileTests(DisTests):
 
     # Run the tests again, using the file arg instead of print
-    def get_disassembly(self, func, lasti=-1, wrapper=True, **kwargs):
+    def get_disassembly(self, func_, lasti=-1, wrapper=True, **kwargs):
         output = io.StringIO()
         if wrapper:
-            dis.dis(func, file=output, **kwargs)
+            dis.dis(func_, file=output, **kwargs)
         else:
-            dis.disassemble(func, lasti, file=output, **kwargs)
+            dis.disassemble(func_, lasti, file=output, **kwargs)
         return output.getvalue()
 
 
@@ -2015,10 +2015,10 @@ class TestFinderMethods(unittest.TestCase):
         self.assertEqual(sorted(labels), sorted(jumps))
 
     def test_findlinestarts(self):
-        def func():
+        def func_():
             pass
 
-        code = func.__code__
+        code = func_.__code__
         offsets = [linestart[0] for linestart in dis.findlinestarts(code)]
         self.assertEqual(offsets, [0, 2])
 

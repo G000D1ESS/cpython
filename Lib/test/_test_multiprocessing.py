@@ -232,14 +232,14 @@ class TestInternalDecorators(unittest.TestCase):
 
 class TimingWrapper(object):
 
-    def __init__(self, func):
-        self.func = func
+    def __init__(self, func_):
+        self.func_ = func_
         self.elapsed = None
 
     def __call__(self, *args, **kwds):
         t = time.monotonic()
         try:
-            return self.func(*args, **kwds)
+            return self.func_(*args, **kwds)
         finally:
             self.elapsed = time.monotonic() - t
 
@@ -255,9 +255,9 @@ class BaseTestCase(object):
         if CHECK_TIMINGS:
             self.assertAlmostEqual(a, b, 1)
 
-    def assertReturnsIfImplemented(self, value, func, *args):
+    def assertReturnsIfImplemented(self, value, func_, *args):
         try:
-            res = func(*args)
+            res = func_(*args)
         except NotImplementedError:
             pass
         else:
@@ -1426,16 +1426,16 @@ class _TestCondition(BaseTestCase):
         woken.release()
         cond.release()
 
-    def assertReachesEventually(self, func, value):
+    def assertReachesEventually(self, func_, value):
         for i in range(10):
             try:
-                if func() == value:
+                if func_() == value:
                     break
             except NotImplementedError:
                 break
             time.sleep(DELTA)
         time.sleep(DELTA)
-        self.assertReturnsIfImplemented(value, func)
+        self.assertReturnsIfImplemented(value, func_)
 
     def check_invariant(self, cond):
         # this is only supposed to succeed when there are no sleepers

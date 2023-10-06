@@ -86,9 +86,9 @@ def method_cache(method, cache_wrapper=None):
 
 
 # From jaraco.functools 3.3
-def pass_none(func):
+def pass_none(func_):
     """
-    Wrap func so it's not called if its first param is None
+    Wrap func_ so it's not called if its first param is None
 
     >>> print_text = pass_none(print)
     >>> print_text('text')
@@ -96,9 +96,9 @@ def pass_none(func):
     >>> print_text(None)
     """
 
-    @functools.wraps(func)
+    @functools.wraps(func_)
     def wrapper(param, *args, **kwargs):
         if param is not None:
-            return func(param, *args, **kwargs)
+            return func_(param, *args, **kwargs)
 
     return wrapper

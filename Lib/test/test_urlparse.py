@@ -862,18 +862,18 @@ class UrlParseTestCase(unittest.TestCase):
 
     def test_default_scheme(self):
         # Exercise the scheme parameter of urlparse() and urlsplit()
-        for func in (urllib.parse.urlparse, urllib.parse.urlsplit):
-            with self.subTest(function=func):
-                result = func("http://example.net/", "ftp")
+        for func_ in (urllib.parse.urlparse, urllib.parse.urlsplit):
+            with self.subTest(function=func_):
+                result = func_("http://example.net/", "ftp")
                 self.assertEqual(result.scheme, "http")
-                result = func(b"http://example.net/", b"ftp")
+                result = func_(b"http://example.net/", b"ftp")
                 self.assertEqual(result.scheme, b"http")
-                self.assertEqual(func("path", "ftp").scheme, "ftp")
-                self.assertEqual(func("path", scheme="ftp").scheme, "ftp")
-                self.assertEqual(func(b"path", scheme=b"ftp").scheme, b"ftp")
-                self.assertEqual(func("path").scheme, "")
-                self.assertEqual(func(b"path").scheme, b"")
-                self.assertEqual(func(b"path", "").scheme, b"")
+                self.assertEqual(func_("path", "ftp").scheme, "ftp")
+                self.assertEqual(func_("path", scheme="ftp").scheme, "ftp")
+                self.assertEqual(func_(b"path", scheme=b"ftp").scheme, b"ftp")
+                self.assertEqual(func_("path").scheme, "")
+                self.assertEqual(func_(b"path").scheme, b"")
+                self.assertEqual(func_(b"path", "").scheme, b"")
 
     def test_parse_fragments(self):
         # Exercise the allow_fragments parameter of urlparse() and urlsplit()
@@ -890,23 +890,23 @@ class UrlParseTestCase(unittest.TestCase):
             ("//abc#@frag:80", "path", "@frag:80"),
         )
         for url, attr, expected_frag in tests:
-            for func in (urllib.parse.urlparse, urllib.parse.urlsplit):
-                if attr == "params" and func is urllib.parse.urlsplit:
+            for func_ in (urllib.parse.urlparse, urllib.parse.urlsplit):
+                if attr == "params" and func_ is urllib.parse.urlsplit:
                     attr = "path"
-                with self.subTest(url=url, function=func):
-                    result = func(url, allow_fragments=False)
+                with self.subTest(url=url, function=func_):
+                    result = func_(url, allow_fragments=False)
                     self.assertEqual(result.fragment, "")
                     self.assertTrue(
                             getattr(result, attr).endswith("#" + expected_frag))
-                    self.assertEqual(func(url, "", False).fragment, "")
+                    self.assertEqual(func_(url, "", False).fragment, "")
 
-                    result = func(url, allow_fragments=True)
+                    result = func_(url, allow_fragments=True)
                     self.assertEqual(result.fragment, expected_frag)
                     self.assertFalse(
                             getattr(result, attr).endswith(expected_frag))
-                    self.assertEqual(func(url, "", True).fragment,
+                    self.assertEqual(func_(url, "", True).fragment,
                                      expected_frag)
-                    self.assertEqual(func(url).fragment, expected_frag)
+                    self.assertEqual(func_(url).fragment, expected_frag)
 
     def test_mixed_types_rejected(self):
         # Several functions that process either strings or ASCII encoded bytes

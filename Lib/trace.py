@@ -454,12 +454,12 @@ class Trace:
                 sys.settrace(None)
                 threading.settrace(None)
 
-    def runfunc(self, func, /, *args, **kw):
+    def runfunc(self, func_, /, *args, **kw):
         result = None
         if not self.donothing:
             sys.settrace(self.globaltrace)
         try:
-            result = func(*args, **kw)
+            result = func_(*args, **kw)
         finally:
             if not self.donothing:
                 sys.settrace(None)
@@ -484,7 +484,7 @@ class Trace:
             # all functions which refer to this code object
             funcs = [f for f in gc.get_referrers(code)
                          if inspect.isfunction(f)]
-            # require len(func) == 1 to avoid ambiguity caused by calls to
+            # require len(func_) == 1 to avoid ambiguity caused by calls to
             # new.function(): "In the face of ambiguity, refuse the
             # temptation to guess."
             if len(funcs) == 1:
