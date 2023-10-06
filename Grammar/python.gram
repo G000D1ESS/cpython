@@ -124,7 +124,7 @@ simple_stmt[stmt_ty] (memo):
     | &'nonlocal' nonlocal_stmt
 
 compound_stmt[stmt_ty]:
-    | &('def' | '@' | ASYNC) function_def
+    | &('def' | 'func' | '@' | ASYNC) function_def
     | &'if' if_stmt
     | &('class' | '@') class_def
     | &('with' | ASYNC) with_stmt
@@ -270,6 +270,19 @@ function_def_raw[stmt_ty]:
                         (params) ? params : CHECK(arguments_ty, _PyPegen_empty_arguments(p)),
                         b, NULL, a, NEW_TYPE_COMMENT(p, tc), t, EXTRA) }
     | ASYNC 'def' n=NAME t=[type_params] &&'(' params=[params] ')' a=['->' z=expression { z }] &&':' tc=[func_type_comment] b=block {
+        CHECK_VERSION(
+            stmt_ty,
+            5,
+            "Async functions are",
+            _PyAST_AsyncFunctionDef(n->v.Name.id,
+                            (params) ? params : CHECK(arguments_ty, _PyPegen_empty_arguments(p)),
+                            b, NULL, a, NEW_TYPE_COMMENT(p, tc), t, EXTRA)
+        ) }
+    | 'func' n=NAME t=[type_params] &&'(' params=[params] ')' a=['->' z=expression { z }] &&':' tc=[func_type_comment] b=block {
+        _PyAST_FunctionDef(n->v.Name.id,
+                        (params) ? params : CHECK(arguments_ty, _PyPegen_empty_arguments(p)),
+                        b, NULL, a, NEW_TYPE_COMMENT(p, tc), t, EXTRA) }
+    | ASYNC 'func' n=NAME t=[type_params] &&'(' params=[params] ')' a=['->' z=expression { z }] &&':' tc=[func_type_comment] b=block {
         CHECK_VERSION(
             stmt_ty,
             5,
