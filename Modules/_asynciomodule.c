@@ -1855,7 +1855,6 @@ static int task_eager_start(asyncio_state *state, TaskObj *task);
 static int
 TaskStepMethWrapper_clear(TaskStepMethWrapper *o)
 {
-    Py_CLEAR(o->sw_task);
     Py_CLEAR(o->sw_arg);
     return 0;
 }
@@ -1938,7 +1937,8 @@ TaskStepMethWrapper_new(TaskObj *task, PyObject *arg)
         return NULL;
     }
 
-    o->sw_task = (TaskObj*)Py_NewRef(task);
+    // Don't increase Task refcount
+    o->sw_task = (TaskObj*) task;
     o->sw_arg = Py_XNewRef(arg);
 
     PyObject_GC_Track(o);
